@@ -1,3 +1,4 @@
+import { makeSecretCipher } from './crypto';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { makeVaultHandler } from './handler';
@@ -9,14 +10,35 @@ const config: VaultServerConfig = {
   supabaseUrl: 'https://backend.example',
   publicKey: 'public-key',
   serviceKey: 'server-key',
-  openBaoUrl: 'https://openbao.example',
-  roleId: 'role',
-  secretId: 'secret-id',
+  keyring: JSON.stringify({ active: 'k1', keys: { k1: Buffer.alloc(32, 7).toString('base64') } }),
   frontendOrigin: 'https://workstel.pages.dev',
   enabled: true,
 };
 const plaintext = 'Fictional secret — not a real credential';
-const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64');
+const context = hotel + ':' + account + ':' + owner;
+const encrypted = makeSecretCipher(config.keyring).then((c) => c.encrypt(plaintext, context));
+test('AES-GCM rejects tampering, wrong scope and missing keys; nonces differ and rotation retains old reads', async () => {
+  const cipher = await makeSecretCipher(config.keyring);
+  const first = await cipher.encrypt(plaintext, context);
+  const second = await cipher.encrypt(plaintext, context);
+  assert.notEqual(first, second);
+  const parts = first.split(':');
+  const payload = Buffer.from(parts[4], 'base64');
+  payload[15] ^= 1;
+  parts[4] = payload.toString('base64');
+  await assert.rejects(() => cipher.decrypt(parts.join(':'), context));
+  await assert.rejects(() => cipher.decrypt(first, context + ':other-account'));
+  const ring = JSON.parse(config.keyring);
+  ring.active = 'k2';
+  ring.keys.k2 = Buffer.alloc(32, 9).toString('base64');
+  const rotated = await makeSecretCipher(JSON.stringify(ring));
+  assert.deepEqual(await rotated.decrypt(first, context), { password: plaintext });
+  assert.match(await rotated.encrypt(plaintext, context), /^workstel:aesgcm:v1:k2:/);
+  delete ring.keys.k1;
+  const retired = await makeSecretCipher(JSON.stringify(ring));
+  await assert.rejects(() => retired.decrypt(first, context));
+  await assert.rejects(() => makeSecretCipher('{"active":"k1","keys":{"k1":"YWJj"}}'));
+});
 function token(overrides: Record<string, unknown> = {}) {
   return (
     'header.' +
@@ -48,8 +70,7 @@ function fixture(
     } else if (path.endsWith('/workstel_session'))
       data = { data: [{ hotelId: hotel }], meta: { vaultPolicy: 'private-v1' } };
     else if (path.endsWith('/vault_secret_service_status'))
-      data = { data: { schema: 'transit-v1' } };
-    else if (path.endsWith('/sys/health')) data = { initialized: true, sealed: false };
+      data = { data: { schema: 'aesgcm-v1' } };
     else if (path.endsWith('/vault_secret_prepare'))
       data = options.prepareFailure
         ? { error: options.prepareFailure }
@@ -60,15 +81,9 @@ function fixture(
               ownerId: owner,
               accountVersion: 1,
               secretVersion: 1,
-              ciphertext: 'vault:v1:YWJj',
+              ciphertext: await encrypted,
             },
           };
-    else if (path.endsWith('/approle/login'))
-      data = { auth: { client_token: 'scoped-test-token' } };
-    else if (path.endsWith('/encrypt/workstel-passwords'))
-      data = { data: { ciphertext: 'vault:v1:YWJj' } };
-    else if (path.endsWith('/decrypt/workstel-passwords'))
-      data = { data: { plaintext: encode({ password: plaintext }) } };
     else if (path.endsWith('/vault_secret_commit'))
       data = { data: { version: 2, accountVersion: 2 } };
     else if (path.endsWith('/vault_secret_finish_reveal')) {
@@ -77,7 +92,6 @@ function fixture(
         : { data: { authorized: true } };
       if (options.finishFailure === 'AUDIT_FAILURE') status = 500;
     } else if (path.endsWith('/vault_secret_failed')) data = { data: { recorded: true } };
-    if (path.endsWith('/revoke-self')) return new Response(null, { status: 204 });
     return new Response(JSON.stringify(data), {
       status,
       headers: { 'Content-Type': 'application/json' },
@@ -110,7 +124,7 @@ test('disabled service and foreign origins fail closed before any upstream call'
     403,
   );
 });
-test('Auth must validate identity before decoded claims or KMS are used', async () => {
+test('Auth must validate identity before decoded claims are used', async () => {
   const f = fixture({ authStatus: 401 });
   const result = await f.handler(request('reveal'));
   assert.equal(result.status, 401);
@@ -119,7 +133,7 @@ test('Auth must validate identity before decoded claims or KMS are used', async 
   assert.equal((await spoof.handler(request('reveal', {}, token({ sub: account })))).status, 401);
   assert.equal(spoof.calls.length, 1);
 });
-test('refresh timestamps do not replace original authentication and expired step-up never reaches KMS', async () => {
+test('refresh timestamps do not replace original authentication and expired step-up never reaches secret release', async () => {
   const f = fixture({ prepareFailure: 'REAUTH_REQUIRED' });
   const old = Math.floor(Date.now() / 1000) - 3600;
   const result = await f.handler(
@@ -145,7 +159,7 @@ test('plaintext is released only after final authorization and durable audit; fa
     const text = await result.text();
     assert.ok(result.status >= 400);
     assert.ok(!text.includes(plaintext));
-    assert.ok(f.calls.some((c) => c.url.includes('/decrypt/')));
+    assert.ok(f.calls.some((c) => c.url.endsWith('/vault_secret_finish_reveal')));
     assert.ok(f.calls.some((c) => c.url.endsWith('/vault_secret_failed')));
   }
   const f = fixture();
@@ -153,11 +167,6 @@ test('plaintext is released only after final authorization and durable audit; fa
   assert.equal(result.status, 200);
   assert.equal((await result.json()).data.password, plaintext);
   assert.match(result.headers.get('cache-control') ?? '', /no-store/);
-  const paths = f.calls.map((c) => c.url);
-  assert.ok(
-    paths.findIndex((p) => p.includes('/decrypt/')) <
-      paths.findIndex((p) => p.endsWith('/vault_secret_finish_reveal')),
-  );
   const references = f.calls
     .filter((c) => c.url.includes('/rest/v1/rpc/vault_secret_'))
     .map((c) => c.body.p_correlation_id);
@@ -174,21 +183,22 @@ test('write sends ciphertext to PostgreSQL and binds encryption to owner/hotel/a
     }),
   );
   assert.equal(result.status, 200);
-  const encrypted = f.calls.find((c) => c.url.includes('/encrypt/'))!;
-  assert.equal(
-    Buffer.from(String(encrypted.body.associated_data), 'base64').toString(),
-    'workstel:v1:' + hotel + ':' + account + ':' + owner,
-  );
   const sql = f.calls.find((c) => c.url.endsWith('/vault_secret_commit'))!;
   assert.equal(sql.body.p_actor, owner);
   assert.ok(!JSON.stringify(sql.body).includes(plaintext));
-  assert.equal(sql.body.p_ciphertext, 'vault:v1:YWJj');
+  const cipher = await makeSecretCipher(config.keyring);
+  assert.deepEqual(await cipher.decrypt(String(sql.body.p_ciphertext), context), {
+    password: plaintext,
+  });
+  await assert.rejects(() =>
+    cipher.decrypt(String(sql.body.p_ciphertext), context + ':wrong-owner'),
+  );
   assert.ok(f.calls.every((c) => c.init.redirect === 'error'));
 });
 test('inspection cannot return ciphertext and actor/scope fields cannot be forged in client inputs', async () => {
   const f = fixture();
   const inspected = await f.handler(request('inspect'));
-  assert.ok(!(await inspected.text()).includes('vault:v1:'));
+  assert.ok(!(await inspected.text()).includes('workstel:aesgcm:'));
   const forged = fixture();
   assert.equal(
     (await forged.handler(request('reveal', { accountId: account, p_actor: account }))).status,
@@ -197,11 +207,12 @@ test('inspection cannot return ciphertext and actor/scope fields cannot be forge
   assert.ok(!forged.calls.some((c) => c.url.endsWith('/vault_secret_prepare')));
 });
 
-test('status validates scoped KMS credentials and accepts body-free token revocation', async () => {
+test('status validates the local encryption key and secret schema', async () => {
   const f = fixture();
   const result = await f.handler(request('status', {}));
   assert.equal(result.status, 200);
   assert.equal((await result.json()).data.available, true);
-  assert.ok(f.calls.some((c) => c.url.endsWith('/approle/login')));
-  assert.ok(f.calls.some((c) => c.url.endsWith('/revoke-self')));
+  assert.ok(f.calls.every((c) => c.url.startsWith(config.supabaseUrl)));
+  const broken = makeVaultHandler({ ...config, keyring: '{}' });
+  assert.equal((await broken(request('status', {}))).status, 503);
 });

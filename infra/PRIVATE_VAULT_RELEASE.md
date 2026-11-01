@@ -11,4 +11,4 @@ The migration takes a restricted local backup, validates that the archive can be
 
 The verifier requests the admin password interactively without printing it and signs out its own session. It creates fictional account metadata and retains it archived for audit evidence. Share only PASS/FAIL summaries, never passwords, environment files or backups.
 
-This release commissions metadata privacy and explicit read-only sharing. It does not activate encrypted password storage/reveal. A separately commissioned key manager and secret service, recovery tests and operational controls remain necessary before real passwords are accepted.
+This release commissions metadata privacy and explicit read-only sharing. It does not activate encrypted password storage/reveal. The later local AES-GCM secret-service release and remaining recovery work are documented in docs/VAULT_OPERATIONS.md.

@@ -3,7 +3,11 @@ services:
     env_file:
       - path: /opt/workstel/.env.workstel-vault
         required: true
-    environment:
-      DENO_CERT: /etc/workstel/openbao-ca.crt
+    entrypoint: ['/bin/sh', '/etc/workstel/start-vault.sh']
+    secrets:
+      - workstel_vault_keyring
     volumes:
-      - /opt/workstel-openbao/tls/ca.crt:/etc/workstel/openbao-ca.crt:ro
+      - /opt/workstel/start-vault.sh:/etc/workstel/start-vault.sh:ro
+secrets:
+  workstel_vault_keyring:
+    file: /opt/workstel/keys/vault-keyring.json

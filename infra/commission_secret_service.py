@@ -21,8 +21,9 @@ def update_flag(contents,enabled):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--email',required=True)
+    parser.add_argument('--operator',action='store_true',help='Commission using a fictional scoped test identity created by the server administrator.')
     args=parser.parse_args()
-    if not sys.stdin.isatty():raise CommissionError('Use an interactive administrator terminal.')
+    if not args.operator and not sys.stdin.isatty():raise CommissionError('Use an interactive administrator terminal.')
     release=Path(__file__).resolve().parent.parent
     target=Path('/opt/workstel/.env.workstel-vault')
     if target.is_symlink():raise CommissionError('The application environment is a symlink; review it manually.')
@@ -47,7 +48,7 @@ def main():
             state=subprocess.run(['docker','inspect','workstel-edge-functions','--format','{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}'],capture_output=True,text=True)
             if state.returncode==0 and state.stdout.strip() in ('healthy','running'):break
             time.sleep(2)
-        result=subprocess.run([sys.executable,str(release/'infra/verify_secret_service.py'),'--email',args.email])
+        result=subprocess.run([sys.executable,str(release/'infra/verify_secret_service.py'),'--email',args.email]+(['--operator'] if args.operator else []))
         if result.returncode:raise CommissionError('Encrypted commissioning did not pass.')
         success=True
         print('Encrypted service commissioning passed. Secret operations remain enabled.')

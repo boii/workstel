@@ -18,6 +18,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
       '202611010002_audit_visibility',
       '202611010003_private_vault',
       '202611010004_secret_boundary',
+      '202611010005_local_encryption',
     ])
       await db.exec(await readFile('supabase/migrations/' + name + '.sql', 'utf8'));
     await db.query('insert into auth.users values ($1,$2),($3,$4)', [
@@ -108,7 +109,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
           1,
           0,
           requestId,
-          'vault:v1:YWJj',
+          'workstel:aesgcm:v1:k1:YWJj',
           now(),
         ]);
         assert.equal(committed.data!.version, 1);
@@ -118,7 +119,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
           2,
           1,
           requestId,
-          'vault:v1:ZGVm',
+          'workstel:aesgcm:v1:k1:ZGVm',
           now(),
         ]);
         assert.equal(repeated.data!.version, 1);
@@ -130,7 +131,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
               1,
               0,
               crypto.randomUUID(),
-              'vault:v1:ZGVm',
+              'workstel:aesgcm:v1:k1:ZGVm',
               now(),
             ])
           ).error,
@@ -140,7 +141,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
         const secret = await db.query<{ ciphertext: string; version: number }>(
           'select ciphertext,version from workstel_private.vault_secrets',
         );
-        assert.equal(secret.rows[0].ciphertext, 'vault:v1:YWJj');
+        assert.equal(secret.rows[0].ciphertext, 'workstel:aesgcm:v1:k1:YWJj');
         assert.equal(secret.rows[0].version, 1);
         await role('service_role');
       },
@@ -156,7 +157,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
           'ACCESS_DENIED',
         );
         const prepared = await rpc('vault_secret_prepare', [recipient, account, 'reveal', now()]);
-        assert.equal(prepared.data!.ciphertext, 'vault:v1:YWJj');
+        assert.equal(prepared.data!.ciphertext, 'workstel:aesgcm:v1:k1:YWJj');
         await role('authenticated');
         await rpc('vault_set_share', [hotel, account, 'recipient@example.com', 3, 'revoke']);
         await role('service_role');
@@ -189,7 +190,7 @@ test('secret RPC boundary isolates ciphertext and enforces durable release check
             4,
             1,
             crypto.randomUUID(),
-            'vault:v1:ZGVm',
+            'workstel:aesgcm:v1:k1:ZGVm',
             now(),
           ]),
         /Audit unavailable/,

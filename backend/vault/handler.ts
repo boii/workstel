@@ -1,11 +1,10 @@
+import { makeSecretCipher } from './crypto.ts';
 /** Server-only Vault orchestration. No keys, plaintext or tokens are logged. */
 export interface VaultServerConfig {
   supabaseUrl: string;
   publicKey: string;
   serviceKey: string;
-  openBaoUrl: string;
-  roleId: string;
-  secretId: string;
+  keyring: string;
   frontendOrigin: string;
   enabled: boolean;
 }
@@ -18,17 +17,15 @@ class SafeError extends Error {
     super(code);
   }
 }
-function base64(value: string) {
-  return btoa(String.fromCharCode(...new TextEncoder().encode(value)));
-}
-function unbase64(value: string) {
-  return new TextDecoder('utf-8', { fatal: true }).decode(
-    Uint8Array.from(atob(value), (c) => c.charCodeAt(0)),
-  );
-}
 function claims(token: string): Record<string, unknown> {
   try {
-    return JSON.parse(unbase64(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return JSON.parse(
+      new TextDecoder('utf-8', { fatal: true }).decode(
+        Uint8Array.from(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')), (c) =>
+          c.charCodeAt(0),
+        ),
+      ),
+    );
   } catch {
     throw new SafeError('UNAUTHENTICATED', 401);
   }
@@ -36,20 +33,17 @@ function claims(token: string): Record<string, unknown> {
 function configured(c: VaultServerConfig) {
   try {
     const supabase = new URL(c.supabaseUrl),
-      bao = new URL(c.openBaoUrl),
       frontend = new URL(c.frontendOrigin);
     return (
       c.enabled &&
       !!c.publicKey &&
       !!c.serviceKey &&
-      !!c.roleId &&
-      !!c.secretId &&
-      [supabase, bao, frontend].every(
+      !!c.keyring &&
+      [supabase, frontend].every(
         (u) => !u.username && !u.password && u.pathname === '/' && !u.search && !u.hash,
       ) &&
       (supabase.protocol === 'https:' ||
         (supabase.protocol === 'http:' && ['api-gw', 'kong'].includes(supabase.hostname))) &&
-      bao.protocol === 'https:' &&
       frontend.protocol === 'https:'
     );
   } catch {
@@ -94,6 +88,7 @@ async function readJson(request: Request) {
   }
 }
 export function makeVaultHandler(config: VaultServerConfig, fetcher: typeof fetch = fetch) {
+  const cipher = makeSecretCipher(config.keyring).catch(() => null);
   return async function handle(request: Request): Promise<Response> {
     const reference = crypto.randomUUID();
     let recordFailure: (() => Promise<unknown>) | undefined;
@@ -123,7 +118,8 @@ export function makeVaultHandler(config: VaultServerConfig, fetcher: typeof fetc
           },
         });
       if (request.method !== 'POST') throw new SafeError('METHOD_NOT_ALLOWED', 405);
-      if (!configured(config)) throw new SafeError('SERVICE_UNAVAILABLE');
+      const encryption = await cipher;
+      if (!configured(config) || !encryption) throw new SafeError('SERVICE_UNAVAILABLE');
       const operation = new URL(request.url).pathname.split('/').filter(Boolean).at(-1);
       if (!['status', 'inspect', 'write', 'reveal'].includes(operation ?? ''))
         throw new SafeError('NOT_FOUND', 404);
@@ -252,22 +248,8 @@ export function makeVaultHandler(config: VaultServerConfig, fetcher: typeof fetc
         });
         if (!session.data?.length || session.meta?.vaultPolicy !== 'private-v1')
           throw new SafeError('ACCESS_DENIED', 403);
-        const health = await json(config.openBaoUrl + '/v1/sys/health', {});
-        if (health.sealed !== false || health.initialized !== true)
-          throw new SafeError('SERVICE_UNAVAILABLE');
         const schema = await rpc('vault_secret_service_status', {});
-        if (schema.data?.schema !== 'transit-v1') throw new SafeError('SERVICE_UNAVAILABLE');
-        const login = await json(config.openBaoUrl + '/v1/auth/approle/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role_id: config.roleId, secret_id: config.secretId }),
-        });
-        if (typeof login.auth?.client_token !== 'string')
-          throw new SafeError('SERVICE_UNAVAILABLE');
-        await json(config.openBaoUrl + '/v1/auth/token/revoke-self', {
-          method: 'POST',
-          headers: { 'X-Vault-Token': login.auth.client_token },
-        });
+        if (schema.data?.schema !== 'aesgcm-v1') throw new SafeError('SERVICE_UNAVAILABLE');
         return response(200, { data: { available: true }, meta: { reference } });
       }
       const input = await readJson(request);
@@ -331,94 +313,43 @@ export function makeVaultHandler(config: VaultServerConfig, fetcher: typeof fetc
         });
       recordFailure = () =>
         rpc('vault_secret_failed', { p_actor: actor, p_account_id: input.accountId });
-      const login = await json(config.openBaoUrl + '/v1/auth/approle/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role_id: config.roleId, secret_id: config.secretId }),
-      });
-      const baoToken = login.auth?.client_token;
-      if (typeof baoToken !== 'string' || !baoToken.length)
-        throw new SafeError('SERVICE_UNAVAILABLE');
-      const associated_data = base64(
-        'workstel:v1:' + data.hotelId + ':' + data.id + ':' + data.ownerId,
-      );
-      const baoHeaders = { 'Content-Type': 'application/json', 'X-Vault-Token': baoToken };
-      try {
-        if (operation === 'write') {
-          const encrypted = await json(
-            config.openBaoUrl + '/v1/transit/encrypt/workstel-passwords',
-            {
-              method: 'POST',
-              headers: baoHeaders,
-              body: JSON.stringify({
-                plaintext: base64(JSON.stringify({ password: input.password })),
-                associated_data,
-              }),
-            },
-          );
-          if (
-            typeof encrypted.data?.ciphertext !== 'string' ||
-            !/^vault:v\d+:[A-Za-z0-9+/=]+$/.test(encrypted.data.ciphertext)
-          )
-            throw new SafeError('SERVICE_UNAVAILABLE');
-          const committed = await rpc('vault_secret_commit', {
-            p_actor: actor,
-            p_account_id: input.accountId,
-            p_account_version: data.accountVersion,
-            p_expected_version: input.expectedVersion,
-            p_request_id: input.requestId,
-            p_ciphertext: encrypted.data.ciphertext,
-            p_auth_time: authTime,
-          });
-          return response(200, { data: committed.data, meta: { reference } });
-        }
-        if (typeof data.ciphertext !== 'string' || !data.ciphertext.startsWith('vault:'))
-          throw new SafeError('SECRET_UNAVAILABLE', 404);
-        const decrypted = await json(config.openBaoUrl + '/v1/transit/decrypt/workstel-passwords', {
-          method: 'POST',
-          headers: baoHeaders,
-          body: JSON.stringify({ ciphertext: data.ciphertext, associated_data }),
-        });
-        let secret: unknown;
-        try {
-          secret = JSON.parse(unbase64(decrypted.data.plaintext));
-        } catch {
-          throw new SafeError('SERVICE_UNAVAILABLE');
-        }
-        if (
-          !secret ||
-          typeof secret !== 'object' ||
-          !('password' in secret) ||
-          typeof secret.password !== 'string' ||
-          !secret.password.length ||
-          new TextEncoder().encode(secret.password).length > 4096
-        )
-          throw new SafeError('SERVICE_UNAVAILABLE');
-        // Recheck ownership/sharing, versions and durable audit after decryption, before release.
-        await rpc('vault_secret_finish_reveal', {
+      const context = data.hotelId + ':' + data.id + ':' + data.ownerId;
+      if (operation === 'write') {
+        const ciphertext = await encryption.encrypt(input.password as string, context);
+        const committed = await rpc('vault_secret_commit', {
           p_actor: actor,
           p_account_id: input.accountId,
           p_account_version: data.accountVersion,
-          p_secret_version: data.secretVersion,
+          p_expected_version: input.expectedVersion,
+          p_request_id: input.requestId,
+          p_ciphertext: ciphertext,
           p_auth_time: authTime,
         });
-        return response(200, {
-          data: { password: secret.password, expiresIn: 30 },
-          meta: { reference },
-        });
-      } finally {
-        // Best effort token revocation. TTL bounds any token remaining after network failure.
-        try {
-          await fetcher(config.openBaoUrl + '/v1/auth/token/revoke-self', {
-            method: 'POST',
-            headers: baoHeaders,
-            redirect: 'error',
-            signal: AbortSignal.timeout(3000),
-          });
-        } catch {
-          /* Never log token values. */
-        }
+        return response(200, { data: committed.data, meta: { reference } });
       }
+      if (typeof data.ciphertext !== 'string') throw new SafeError('SECRET_UNAVAILABLE', 404);
+      const secret = await encryption.decrypt(data.ciphertext, context);
+      if (
+        !secret ||
+        typeof secret !== 'object' ||
+        !('password' in secret) ||
+        typeof secret.password !== 'string' ||
+        !secret.password.length ||
+        new TextEncoder().encode(secret.password).length > 4096
+      )
+        throw new SafeError('SERVICE_UNAVAILABLE');
+      // Recheck ownership/sharing, versions and durable audit after decryption, before release.
+      await rpc('vault_secret_finish_reveal', {
+        p_actor: actor,
+        p_account_id: input.accountId,
+        p_account_version: data.accountVersion,
+        p_secret_version: data.secretVersion,
+        p_auth_time: authTime,
+      });
+      return response(200, {
+        data: { password: secret.password, expiresIn: 30 },
+        meta: { reference },
+      });
     } catch (error) {
       try {
         await recordFailure?.();

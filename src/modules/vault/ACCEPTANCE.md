@@ -24,7 +24,7 @@ Status: private metadata implementation tested locally; actual-server metadata c
 
 - [x] Privacy/audit migrations installed; operator reported all 16 actual-server verifier checks passed.
 - [x] verify_production.py passed on the actual server; operator confirmed Vault/audit entry points. Full multi-user dialog and 390px production acceptance still needs verification.
-- Commission the implemented OpenBao encryption service and gated UI on the actual server. Local orchestration/SQL tests cover token validation, recent authentication, read-only sharing, revocation races, idempotency, rate limits, ciphertext isolation and audit failure. Actual KMS/HTTPS/runtime and recovery acceptance remain separate.
+- Commission the local AES-GCM encryption service and gated UI on the actual server. Local orchestration/SQL tests cover token validation, recent authentication, read-only sharing, revocation races, idempotency, rate limits, ciphertext isolation and audit failure. Actual HTTPS/runtime/key recovery and recovery acceptance remain separate.
 - Configure and verify Google OAuth if required for rollout.
 - Complete off-server backup/restore, audit retention/archival, alerting and restart recovery exercises.
 

@@ -14,6 +14,6 @@ Migrations 202611010002 and 202611010003 must be installed before the frontend e
 
 Implemented metadata fields: name, username, HTTPS website, department and notes. Do not enter passwords or recovery codes in these fields. Encrypted password storage/reveal/copy are implemented behind an authenticated availability gate and remain disabled until the separately managed encryption service is commissioned and tested.
 
-Staff use Workstel; they do not operate the key manager. The proposed OpenBao integration is an administrator responsibility, not a staff workflow.
+Staff use Workstel. Backend AES-256-GCM uses a protected server keyring with automatic startup. Key backup and rotation remain administrator responsibilities; see docs/VAULT_OPERATIONS.md.
 
 See docs/DEPLOYMENT.md and docs/VAULT_BACKEND_DESIGN.md for setup and outstanding release requirements.
