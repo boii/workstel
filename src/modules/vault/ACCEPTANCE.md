@@ -65,3 +65,22 @@ reveal feedback, failed/successful reauthentication, shared-account read-only
 menus, loaded access filtering, and search-button/Enter submission with no-result
 feedback. These checks exercised actual UI components with fictional API/Auth
 fixtures, not production accounts.
+
+## Compact audit log — 2 November 2026
+
+Replaced expanded per-event blocks with 48px desktop summaries and 64px mobile
+summaries. Full actor/resource/reference/event IDs remain available in native
+keyboard-accessible disclosure sections. The mobile dialog is full-screen;
+header, scope controls and refresh remain outside the scrolling activity body.
+Result labels remain readable without relying on colored status dots.
+
+Added local search and result filtering over the latest 100 loaded events.
+Counts explicitly describe loaded events. Department scope still comes from the
+existing server RPC and audit capability; loading the audit log remains audited.
+Timestamps include seconds and explicitly use Asia/Jakarta.
+
+Verified desktop and 390 × 844 mobile layouts using 40 fictional events: no
+horizontal overflow, disclosure expansion with Enter, complete IDs in details,
+combined search/result filters, reset, empty log, no matches, and load failure
+with retry control. English and Indonesian copy was inspected. No real audit
+records or server authorization changes were used for these visual checks.

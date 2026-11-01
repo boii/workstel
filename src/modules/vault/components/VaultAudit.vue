@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useDisplay } from 'vuetify';
 import { vaultRpc, parseAudit } from '../live-api';
 import type { AuditEvent } from '../live-api';
 import type { StaffAssignment } from '../../../auth/useAuth';
@@ -8,6 +9,24 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{ hotelId: string; assignments: StaffAssignment[] }>();
 const messages = useVaultMessages();
+const { width } = useDisplay();
+const mobile = computed(() => width.value <= 680);
+const search = ref(''),
+  outcome = ref<'all' | 'success' | 'denied'>('all');
+const filtered = computed(() =>
+  events.value.filter(
+    (event) =>
+      (outcome.value === 'all' || event.outcome === outcome.value) &&
+      [
+        event.action,
+        event.actor_id,
+        event.actor_database_role,
+        event.resource_id,
+        event.correlation_id,
+        departmentName(event.department_id),
+      ].some((value) => value?.toLowerCase().includes(search.value.trim().toLowerCase())),
+  ),
+);
 const events = ref<AuditEvent[]>([]),
   loading = ref(false),
   failed = ref(false),
@@ -46,9 +65,11 @@ function departmentName(id: string | null) {
   );
 }
 function date(value: string) {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium', timeStyle: 'short' }).format(
-    new Date(value),
-  );
+  return new Intl.DateTimeFormat(locale.value, {
+    dateStyle: 'medium',
+    timeStyle: 'medium',
+    timeZone: 'Asia/Jakarta',
+  }).format(new Date(value));
 }
 onMounted(() => {
   void load();
@@ -61,37 +82,78 @@ onUnmounted(() => {
 <template>
   <v-dialog
     v-model="open"
-    max-width="820"
+    max-width="960"
+    :fullscreen="mobile"
     scrollable
+    class="vault-audit-modal"
+    :aria-label="messages.auditTitle"
   >
-    <v-card class="vault-dialog">
-      <div class="vault-dialog-heading">
-        <h2>{{ messages.auditTitle }}</h2>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          :aria-label="messages.close"
-          @click="open = false"
-        />
-      </div>
-      <p class="vault-field-hint">{{ messages.auditHint }}</p>
-      <v-card-text class="pa-0">
-        <div class="vault-audit-toolbar">
+    <v-card class="vault-dialog vault-audit-dialog">
+      <header class="vault-audit-header">
+        <div class="vault-dialog-heading">
+          <div>
+            <h2>{{ messages.auditTitle }}</h2>
+            <p
+              class="vault-audit-count"
+              aria-live="polite"
+            >
+              {{ filtered.length }} / {{ events.length }} {{ messages.auditEvents }}
+            </p>
+          </div>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            :aria-label="messages.close"
+            @click="open = false"
+          />
+        </div>
+        <p class="vault-audit-hint">{{ messages.auditHint }}</p>
+        <div class="vault-audit-controls">
+          <v-text-field
+            v-model="search"
+            class="vault-audit-search"
+            :label="messages.auditSearch"
+            prepend-inner-icon="mdi-magnify"
+            hide-details
+            density="compact"
+            clearable
+            @update:model-value="search = $event ?? ''"
+          />
           <v-select
             v-model="department"
             :label="messages.department"
             :items="departments"
+            hide-details
+            density="compact"
             clearable
             @update:model-value="load"
           />
+          <v-select
+            v-model="outcome"
+            :label="messages.auditOutcome"
+            :items="[
+              { value: 'all', title: messages.auditAllOutcomes },
+              { value: 'success', title: messages.success },
+              { value: 'denied', title: messages.denied },
+            ]"
+            hide-details
+            density="compact"
+          />
           <v-btn
+            icon="mdi-refresh"
             variant="text"
             color="primary"
             :loading="loading"
+            :aria-label="messages.refresh"
+            :title="messages.refresh"
             @click="load"
-            >{{ messages.refresh }}</v-btn
-          >
+          />
         </div>
+      </header>
+      <v-card-text
+        class="vault-audit-body"
+        :aria-busy="loading"
+      >
         <v-skeleton-loader
           v-if="loading"
           type="list-item-two-line@3"
@@ -108,37 +170,76 @@ onUnmounted(() => {
             >{{ messages.retry }}</v-btn
           ></v-alert
         >
-        <p
-          v-else-if="!events.length"
-          class="vault-field-hint"
+        <div
+          v-else-if="!filtered.length"
+          class="vault-audit-empty"
         >
-          {{ messages.auditEmpty }}
-        </p>
+          <v-icon
+            icon="mdi-history"
+            size="28"
+          />
+          <p>{{ events.length ? messages.auditNoResults : messages.auditEmpty }}</p>
+          <v-btn
+            v-if="search || outcome !== 'all'"
+            variant="text"
+            @click="
+              search = '';
+              outcome = 'all';
+            "
+            >{{ messages.reset }}</v-btn
+          >
+        </div>
         <ol
           v-else
           class="vault-audit-list"
         >
           <li
-            v-for="event in events"
+            v-for="event in filtered"
             :key="event.id"
           >
-            <div class="vault-audit-heading">
-              <strong>{{ event.action }}</strong
-              ><v-chip
-                size="small"
-                :color="event.outcome === 'success' ? 'success' : 'error'"
-                >{{ event.outcome === 'success' ? messages.success : messages.denied }}</v-chip
-              >
-            </div>
-            <p>{{ departmentName(event.department_id) }} · {{ date(event.occurred_at) }}</p>
-            <dl class="vault-details">
-              <dt>{{ messages.actor }}</dt>
-              <dd>{{ event.actor_id ?? event.actor_database_role }}</dd>
-              <dt v-if="event.resource_id">{{ messages.resource }}</dt>
-              <dd v-if="event.resource_id">{{ event.resource_id }}</dd>
-              <dt>{{ messages.correlation }}</dt>
-              <dd>{{ event.correlation_id }}</dd>
-            </dl>
+            <details class="vault-audit-event">
+              <summary :title="messages.auditDetails">
+                <strong class="vault-audit-action">{{ event.action }}</strong>
+                <time
+                  class="vault-audit-time"
+                  :datetime="event.occurred_at"
+                  >{{ date(event.occurred_at) }}</time
+                >
+                <span class="vault-audit-scope">{{ departmentName(event.department_id) }}</span>
+                <span
+                  class="vault-audit-actor"
+                  :title="event.actor_id ?? event.actor_database_role"
+                  >{{
+                    event.actor_id ? event.actor_id.slice(0, 8) + '…' : event.actor_database_role
+                  }}</span
+                >
+                <span
+                  class="vault-audit-outcome"
+                  :class="'vault-audit-outcome--' + event.outcome"
+                  ><span aria-hidden="true">●</span
+                  >{{ event.outcome === 'success' ? messages.success : messages.denied }}</span
+                >
+                <v-icon
+                  class="vault-audit-chevron"
+                  icon="mdi-chevron-down"
+                  size="18"
+                />
+              </summary>
+              <dl class="vault-audit-details">
+                <dt>{{ messages.auditWhen }}</dt>
+                <dd>{{ date(event.occurred_at) }}</dd>
+                <dt>{{ messages.actor }}</dt>
+                <dd>{{ event.actor_id ?? event.actor_database_role }}</dd>
+                <dt>{{ messages.department }}</dt>
+                <dd>{{ departmentName(event.department_id) }}</dd>
+                <dt v-if="event.resource_id">{{ messages.resource }}</dt>
+                <dd v-if="event.resource_id">{{ event.resource_id }}</dd>
+                <dt>{{ messages.correlation }}</dt>
+                <dd>{{ event.correlation_id }}</dd>
+                <dt>{{ messages.auditEvent }}</dt>
+                <dd>{{ event.id }}</dd>
+              </dl>
+            </details>
           </li>
         </ol>
       </v-card-text>
@@ -146,25 +247,193 @@ onUnmounted(() => {
   </v-dialog>
 </template>
 <style scoped>
+.vault-dialog.vault-audit-dialog {
+  padding: 0;
+  overflow: hidden;
+}
+.vault-audit-header {
+  padding: 16px 20px 14px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--workstel-border);
+}
+.vault-audit-header h2 {
+  font-size: 20px;
+}
+.vault-audit-count {
+  font-size: 11px;
+  color: var(--workstel-text-secondary);
+  margin-top: 2px;
+}
+.vault-audit-hint {
+  font-size: 11px;
+  color: var(--workstel-text-secondary);
+  margin: 6px 0 12px;
+  line-height: 1.5;
+}
+.vault-audit-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr) 40px;
+  gap: 8px;
+  align-items: center;
+}
+.vault-audit-controls > * {
+  min-width: 0;
+}
+.vault-audit-body {
+  padding: 0 !important;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
 .vault-audit-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
-.vault-audit-list li {
-  padding: 18px 0;
-  border-top: 1px solid #e8edf0;
+.vault-audit-list li + li {
+  border-top: 1px solid var(--workstel-border);
+}
+.vault-audit-event summary {
+  box-sizing: border-box;
+  line-height: 1.5;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 150px minmax(60px, 0.5fr) 95px 80px 18px;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+.vault-audit-event summary::-webkit-details-marker {
+  display: none;
+}
+.vault-audit-event summary:hover {
+  background: rgba(var(--v-theme-primary), 0.035);
+}
+.vault-audit-event summary:focus-visible {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: -2px;
+}
+.vault-audit-action {
+  font-size: 12px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
-.vault-audit-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
+.vault-audit-time,
+.vault-audit-scope,
+.vault-audit-actor {
+  color: var(--workstel-text-secondary);
+  font-size: 11px;
+  overflow-wrap: anywhere;
 }
-.vault-audit-list p {
+.vault-audit-time {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 10px;
+}
+.vault-audit-actor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vault-audit-outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--workstel-text-secondary);
+}
+.vault-audit-outcome > span {
+  font-size: 7px;
+}
+.vault-audit-outcome--success > span {
+  color: rgb(var(--v-theme-success));
+}
+.vault-audit-outcome--denied > span {
+  color: rgb(var(--v-theme-error));
+}
+.vault-audit-chevron {
+  color: var(--workstel-text-secondary);
+}
+.vault-audit-event[open] .vault-audit-chevron {
+  transform: rotate(180deg);
+}
+.vault-audit-details {
+  display: grid;
+  grid-template-columns: 155px minmax(0, 1fr);
+  gap: 7px 12px;
+  padding: 12px 20px 16px;
+  background: rgba(var(--v-theme-primary), 0.025);
+  border-top: 1px solid var(--workstel-border);
+  font-size: 11px;
+}
+.vault-audit-details dt {
+  color: var(--workstel-text-secondary);
+}
+.vault-audit-details dd {
+  margin: 0;
+  font-family: 'Noto Sans', sans-serif;
+  overflow-wrap: anywhere;
+}
+.vault-audit-empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--workstel-text-secondary);
   font-size: 12px;
-  color: #73818b;
+}
+.vault-audit-empty p {
   margin: 8px 0;
+}
+@media (max-width: 680px) {
+  .vault-audit-header {
+    padding: 12px 16px;
+  }
+  .vault-audit-header .v-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .vault-audit-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+  }
+  .vault-audit-search {
+    grid-column: 1/-1;
+  }
+  .vault-audit-controls :deep(.v-field__input) {
+    min-height: 44px;
+  }
+  .vault-audit-event summary {
+    grid-template-columns: minmax(0, 1fr) auto 18px;
+    gap: 4px 10px;
+    padding: 10px 16px;
+    min-height: 64px;
+  }
+  .vault-audit-action {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .vault-audit-outcome {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .vault-audit-time {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .vault-audit-scope {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+  }
+  .vault-audit-chevron {
+    grid-column: 3;
+    grid-row: 1/3;
+  }
+  .vault-audit-actor {
+    display: none;
+  }
+  .vault-audit-details {
+    grid-template-columns: 115px minmax(0, 1fr);
+    padding: 12px 16px;
+    gap: 8px;
+  }
 }
 </style>
