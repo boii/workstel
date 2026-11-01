@@ -1,0 +1,240 @@
+.vault-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  color: #64808e;
+  margin-bottom: 18px;
+  padding: 4px 0;
+}
+.vault-notice {
+  font-size: 12px !important;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.vault-toolbar {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.6fr) minmax(170px, 1fr) minmax(140px, 0.7fr);
+  gap: 12px;
+}
+.vault-list-summary {
+  font-size: 11px;
+  color: #7d8b95;
+  margin-top: 15px;
+}
+.vault-desktop {
+  overflow: hidden;
+}
+.vault-desktop th {
+  font-size: 11px !important;
+  color: #7c8991 !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
+}
+.vault-desktop td {
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+  font-size: 12px;
+}
+.vault-account-name {
+  font: inherit;
+  font-weight: 600;
+  color: #306c87;
+  display: block;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  overflow-wrap: anywhere;
+  padding: 0;
+}
+.vault-account-website {
+  font-size: 10px;
+  color: #909ca3;
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.vault-secret-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #89959c;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.vault-date {
+  font-size: 10px !important;
+  color: #80909a;
+  white-space: nowrap;
+}
+.vault-mobile {
+  display: none;
+}
+.vault-dialog {
+  padding: 26px;
+}
+.vault-dialog h2 {
+  font-size: 22px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.vault-dialog-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.vault-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.vault-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.vault-field-hint {
+  font-size: 11px;
+  color: #82919a;
+  line-height: 1.7;
+  margin: 8px 0;
+}
+.vault-detail-subtitle {
+  font-size: 12px;
+  color: #86939c;
+  margin: 8px 0 24px;
+}
+.vault-details {
+  font-size: 13px;
+}
+.vault-details dt {
+  font-size: 11px;
+  color: #87959e;
+  margin-top: 16px;
+}
+.vault-details dd {
+  margin: 7px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.vault-password-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.vault-history-title {
+  font-size: 14px;
+  font-weight: 600;
+  border-top: 1px solid #e8edf0;
+  padding-top: 18px;
+  margin-top: 23px;
+}
+.vault-history {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.vault-history li {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 1.7;
+  padding: 8px 0;
+}
+.vault-history small {
+  font-size: 10px;
+  color: #8b98a0;
+}
+.vault-confirm-hint {
+  font-size: 13px;
+  color: #7c8993;
+  line-height: 1.7;
+  margin-top: 15px;
+}
+.vault-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 900px) {
+  .vault-desktop {
+    display: none;
+  }
+  .vault-mobile {
+    display: grid;
+    gap: 12px;
+  }
+  .vault-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+  .vault-toolbar > .v-input:first-child {
+    grid-column: 1/-1;
+  }
+  .vault-mobile-card {
+    padding: 16px;
+  }
+  .vault-mobile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .vault-mobile-heading > .vault-account-name {
+    font-size: 14px;
+  }
+  .vault-mobile-card > p {
+    font-size: 12px;
+    color: #748591;
+    overflow-wrap: anywhere;
+  }
+  .vault-mobile-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 10px;
+    color: #8b98a1;
+  }
+}
+@media (max-width: 680px) {
+  .vault-dialog {
+    padding: 22px;
+  }
+  .vault-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .vault-toolbar {
+    gap: 10px;
+  }
+  .vault-history li {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .vault-dialog-actions .v-btn {
+    min-height: 44px;
+  }
+  .vault-mobile-heading .v-btn {
+    height: 44px;
+    width: 44px;
+  }
+}
+
+@media (max-width: 680px) {
+  .vault-dialog .v-btn {
+    min-height: 44px;
+  }
+  .vault-dialog .v-btn--icon {
+    min-width: 44px;
+  }
+}

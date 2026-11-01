@@ -1,7 +1,7 @@
 # Workstel module standard
 
 Status: mandatory for all new modules. Approved visual reference: DESIGN_REFERENCE.md.
-The current application is a prototype. SSO, server authorization, storage, event delivery and production module routing are not implemented.
+The production shell uses Supabase authentication, membership authorization and Vault metadata RPCs. Real password operations, other modules and cross-module event delivery remain unavailable. See DEPLOYMENT.md for verified commissioning evidence; source implementation alone does not prove production acceptance.
 
 ## Create a module
 
@@ -92,3 +92,21 @@ modules:check validates registry identity, permission/event naming, publisher av
 These checks do not prove secure authorization, correct translations, accessibility or business correctness.
 Complete ACCEPTANCE.md, add focused domain/API/event tests and record UI verification before release.
 Generated prototype modules must remain clearly identified as demo until production requirements are satisfied.
+
+## Module availability
+
+Manifest availability is coming-soon by default. Only explicitly marked preview/available modules can open. Coming-soon modules must show a localized Coming soon label and be disabled in dashboard cards, favorites and the module switcher. Preview status does not mean production readiness.
+Password Vault is the first metadata preview; read docs/VAULT_BACKEND_DESIGN.md before implementing real secret operations.
+
+## Approved API and audit policy — 1 November 2026
+
+Use authenticated internal APIs for Workstel. No public or anonymous operational API is planned. Add external integrations only for a defined business need with separately scoped service identities.
+Production audit is mandatory, not optional. Record successful and denied access to sensitive resources, metadata mutations, archive/restore, secret writes/reveals, exports, and access-policy changes.
+Each audit event must include actor identity, hotel/department scope, resource reference, action, outcome, server timestamp, and correlation ID. Never record secret values, tokens, or credentials.
+Persist audit records on the server with append-only protections and restricted read access. Audit readers must have explicit scope and their access must itself be logged. Define retention, backup, and monitoring policies before production.
+Secret release must fail closed if durable auditing is unavailable. Other security-critical changes require transactional audit recording or a durable outbox before acknowledging success.
+The demo Vault activity display is held in memory. Production uses server audit records; the audit reader requires scoped audit permission and records its own access.
+
+## Private-by-default Vault policy — 1 November 2026
+
+The user selected private accounts by default with explicit owner sharing. This replaces inherited department visibility for Vault account records. Recipients get read-only access to specifically shared accounts, cannot reshare, and must remain enabled at the same hotel. Only owners may edit/archive/share, subject to staff capabilities. Server permission checks are mandatory; UI hiding is not enforcement. Audit capability must not confer account or secret read access. Database/server operators remain trusted administrators; application privacy is not end-to-end encryption against them.

@@ -1,5 +1,7 @@
+import vaultModule from './vault/manifest';
 import { defineModule } from '../core/module';
 export const modules = [
+  vaultModule,
   defineModule({
     id: 'bin-card',
     version: '1.0.0',
@@ -31,17 +33,6 @@ export const modules = [
     color: 'peach',
     permissions: ['sales-crm:read', 'sales-crm:write'],
     publishes: ['sales-crm.deal-won.v1'],
-    subscribes: [],
-  }),
-  defineModule({
-    id: 'vault',
-    version: '1.0.0',
-    title: 'Password Vault',
-    description: 'Manage department account access.',
-    category: 'Administration',
-    color: 'yellow',
-    permissions: ['vault:read', 'vault:reveal'],
-    publishes: ['vault.access-requested.v1'],
     subscribes: [],
   }),
   defineModule({

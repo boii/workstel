@@ -1,0 +1,19 @@
+# Password Vault
+
+The production implementation uses authenticated Supabase RPCs for account metadata and durable audit. The development demo uses in-memory sample records only.
+
+## Access model
+
+Accounts are private to their original creator by default. Hotel/department administrative permissions do not grant account metadata access. Owners can explicitly grant read-only access to active staff at the same hotel by exact email, and revoke it. Recipients cannot edit, archive or reshare. Writes and access changes have optimistic version checks and transactional audit.
+
+Private here describes application authorization, not end-to-end encryption against the server operator. Database operators remain trusted administrators. Never promise that a server administrator has no technical access.
+
+Migrations 202611010002 and 202611010003 must be installed before the frontend enables the live Vault. Existing account rows become private to created_by; shares start empty. The session RPC advertises private-v1 only after the privacy functions are installed. Do not remove this compatibility gate to bypass a migration failure.
+
+## Boundaries
+
+Implemented metadata fields: name, username, HTTPS website, department and notes. Do not enter passwords or recovery codes in these fields. Encrypted password storage/reveal/copy are implemented behind an authenticated availability gate and remain disabled until the separately managed encryption service is commissioned and tested.
+
+Staff use Workstel; they do not operate the key manager. The proposed OpenBao integration is an administrator responsibility, not a staff workflow.
+
+See docs/DEPLOYMENT.md and docs/VAULT_BACKEND_DESIGN.md for setup and outstanding release requirements.

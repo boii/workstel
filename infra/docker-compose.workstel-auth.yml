@@ -1,0 +1,9 @@
+# Apply alongside both existing Compose files; do not replace them.
+services:
+  auth:
+    environment:
+      API_EXTERNAL_URL: https://workstel.gabot.my.id/auth/v1
+      GOTRUE_SITE_URL: https://workstel.pages.dev
+      GOTRUE_URI_ALLOW_LIST: https://workstel.pages.dev/
+      GOTRUE_DISABLE_SIGNUP: 'true'
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true'

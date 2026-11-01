@@ -1,4 +1,5 @@
 export interface ModuleManifest {
+  availability?: 'coming-soon' | 'preview' | 'available';
   id: string;
   version: `${number}.${number}.${number}`;
   title: string;
@@ -58,6 +59,7 @@ export function defineModule(manifest: ModuleManifest): ModuleManifest {
   if (manifest.icon && !manifest.icon.startsWith('mdi-')) throw Error('Module icons must use MDI.');
   return Object.freeze({
     ...manifest,
+    availability: manifest.availability ?? 'coming-soon',
     permissions: Object.freeze([...manifest.permissions]),
     publishes: Object.freeze([...manifest.publishes]),
     subscribes: Object.freeze([...manifest.subscribes]),
@@ -75,4 +77,8 @@ export function validateModules(manifests: readonly ModuleManifest[]): void {
     for (const event of manifest.subscribes) {
       if (!published.has(event)) throw Error('No registered publisher for ' + event);
     }
+}
+
+export function isModuleEnabled(module: ModuleManifest): boolean {
+  return module.availability === 'preview' || module.availability === 'available';
 }

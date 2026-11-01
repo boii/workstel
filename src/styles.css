@@ -698,3 +698,29 @@ footer small {
     display: none;
   }
 }
+.module-coming-soon .module-open {
+  cursor: default;
+}
+.module-coming-soon .module-icon {
+  color: #9ca8af;
+}
+.module-coming-soon .module-open h2 {
+  color: #7f8a91;
+}
+.module-coming-soon .module-open p {
+  color: #9aa4aa;
+}
+.coming-soon-label {
+  display: inline-block;
+  margin-top: 7px;
+  border: 1px solid #e1e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: #8a959c;
+  font-size: 9px;
+  font-weight: 500;
+  background: #f7f9fa;
+}
+.module-coming-soon:has(.module-open:hover) {
+  background: white;
+}

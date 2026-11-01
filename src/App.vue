@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
 import { useLocale } from 'vuetify';
@@ -12,47 +12,74 @@ watch(
   { immediate: true },
 );
 import { modules } from './modules/registry';
+import { isModuleEnabled } from './core/module';
+import { defineAsyncComponent } from 'vue';
+import './modules/vault/styles.css';
+const VaultPage = defineAsyncComponent(() => import('./modules/vault/pages/ModuleListPage.vue'));
+const VaultLivePage = defineAsyncComponent(() => import('./modules/vault/pages/VaultLivePage.vue'));
 import type { ModuleManifest } from './core/module';
+import { runtime } from './config/runtime';
+import { useAuth } from './auth/useAuth';
+import PasswordSignIn from './auth/PasswordSignIn.vue';
+const auth = useAuth();
+onMounted(() => {
+  void auth.start();
+});
+watch(auth.authenticated, (value) => {
+  if (!runtime.demo) {
+    session.value = value;
+    if (!value) {
+      view.value = 'Dashboard';
+      creating.value = false;
+      notice.value = false;
+      query.value = '';
+    }
+  }
+});
+
 const session = ref(false),
   ssoNotice = ref(false),
   view = ref('Dashboard'),
   query = ref(''),
   category = ref('All modules'),
-  favorites = ref(['bin-card', 'vehicle']),
-  selected = ref<ModuleManifest | null>(null),
+  favorites = ref(['vault']),
   notice = ref(false),
   creating = ref(false),
   title = ref(''),
   error = ref('');
-const tasks = ref([
-  {
-    id: 1,
-    titleKey: 'taskVehicle' as MessageKey | null,
-    title: 'Inspect Toyota Hiace',
-    module: 'Vehicle Checklist',
-    dept: 'Front Office',
-    time: '09.00',
-    done: false,
-  },
-  {
-    id: 2,
-    titleKey: 'taskSales' as MessageKey | null,
-    title: 'Follow up on corporate proposal',
-    module: 'Sales CRM',
-    dept: 'Sales & Marketing',
-    time: '11.30',
-    done: false,
-  },
-  {
-    id: 3,
-    titleKey: 'taskPool' as MessageKey | null,
-    title: 'Check the swimming pool area',
-    module: 'Daily Checklist',
-    dept: 'Engineering',
-    time: '14.00',
-    done: false,
-  },
-]);
+const tasks = ref(
+  runtime.demo
+    ? [
+        {
+          id: 1,
+          titleKey: 'taskVehicle' as MessageKey | null,
+          title: 'Inspect Toyota Hiace',
+          module: 'Vehicle Checklist',
+          dept: 'Front Office',
+          time: '09.00',
+          done: false,
+        },
+        {
+          id: 2,
+          titleKey: 'taskSales' as MessageKey | null,
+          title: 'Follow up on corporate proposal',
+          module: 'Sales CRM',
+          dept: 'Sales & Marketing',
+          time: '11.30',
+          done: false,
+        },
+        {
+          id: 3,
+          titleKey: 'taskPool' as MessageKey | null,
+          title: 'Check the swimming pool area',
+          module: 'Daily Checklist',
+          dept: 'Engineering',
+          time: '14.00',
+          done: false,
+        },
+      ]
+    : [],
+);
 const icons: Record<string, string> = {
   'bin-card': 'mdi-package-variant-closed',
   vehicle: 'mdi-car-outline',
@@ -71,9 +98,19 @@ const visible = computed(() =>
 );
 const remaining = computed(() => tasks.value.filter((t) => !t.done).length);
 function nav(v: string) {
+  if (!runtime.demo && v === 'My tasks') return;
   view.value = v;
   query.value = '';
   category.value = 'All modules';
+}
+function openModule(module: ModuleManifest) {
+  if (!canOpenModule(module)) return;
+  if (module.id === 'vault') nav('Password Vault');
+}
+function canOpenModule(module: ModuleManifest) {
+  return (
+    isModuleEnabled(module) && (runtime.demo || module.id !== 'vault' || auth.vaultReady.value)
+  );
 }
 function toggleFavorite(id: string) {
   favorites.value = favorites.value.includes(id)
@@ -100,8 +137,10 @@ function addTask() {
   nav('My tasks');
 }
 function logout() {
+  if (!runtime.demo) void auth.signOut();
   session.value = false;
-  selected.value = null;
+  view.value = 'Dashboard';
+
   creating.value = false;
   notice.value = false;
 }
@@ -148,15 +187,18 @@ function logout() {
           </div>
           <div class="eyebrow">{{ t('hotelUpper') }}</div>
           <h1>{{ t('loginTitle') }}</h1>
-          <p>{{ t('loginDescription') }}</p>
+          <p>{{ runtime.demo ? t('loginDescription') : t('productionLogin') }}</p>
           <v-btn
+            v-if="runtime.demo || auth.googleEnabled.value"
             color="primary"
             block
             height="44"
             prepend-icon="mdi-shield-account-outline"
             class="sso-button"
-            @click="ssoNotice = true"
-            >{{ t('sso') }}</v-btn
+            :loading="auth.busy.value"
+            :disabled="!runtime.demo && !runtime.configured"
+            @click="runtime.demo ? (ssoNotice = true) : auth.google()"
+            >{{ runtime.demo ? t('sso') : t('googleSignIn') }}</v-btn
           ><v-alert
             v-if="ssoNotice"
             type="info"
@@ -172,7 +214,23 @@ function logout() {
             />
             {{ t('authorized') }}
           </div>
-          <div class="demo-access">
+          <v-alert
+            v-if="!runtime.demo && (auth.failure.value || !runtime.configured)"
+            type="info"
+            variant="tonal"
+            density="compact"
+            class="mt-4"
+            >{{ t(auth.failure.value || 'authUnavailable') }}</v-alert
+          ><PasswordSignIn
+            v-if="!runtime.demo"
+            :busy="auth.busy.value"
+            :disabled="!runtime.configured || !auth.emailEnabled.value"
+            @sign-in="auth.signIn"
+          />
+          <div
+            v-if="runtime.demo"
+            class="demo-access"
+          >
             <span>{{ t('preview') }}</span
             ><v-btn
               variant="text"
@@ -200,7 +258,9 @@ function logout() {
             @click="nav('Dashboard')"
           >
             <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span></button
-          ><span class="hotel-name">{{ t('hotel') }}</span>
+          ><span class="hotel-name">{{
+            runtime.demo ? t('hotel') : auth.assignments.value[0]?.hotelName || t('hotel')
+          }}</span>
           <nav
             class="top-nav"
             :aria-label="t('navigation')"
@@ -209,11 +269,13 @@ function logout() {
               v-for="item in ['Dashboard', 'My tasks', 'Favorites']"
               :key="item"
               :class="{ active: view === item }"
+              :disabled="!runtime.demo && item === 'My tasks'"
+              :title="!runtime.demo && item === 'My tasks' ? t('comingSoon') : undefined"
               @click="nav(item)"
             >
               {{ translate(item)
               }}<span
-                v-if="item === 'My tasks'"
+                v-if="runtime.demo && item === 'My tasks'"
                 class="task-count"
                 >{{ remaining }}</span
               >
@@ -256,14 +318,22 @@ function logout() {
                   :key="m.id"
                   :prepend-icon="m.icon || icons[m.id] || 'mdi-view-module-outline'"
                   :title="translate(m.title)"
-                  @click="selected = m" /></v-list></v-menu
+                  :disabled="!canOpenModule(m)"
+                  :subtitle="
+                    !canOpenModule(m)
+                      ? t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon')
+                      : undefined
+                  "
+                  @click="openModule(m)" /></v-list></v-menu
             ><v-btn
               icon="mdi-help-circle-outline"
               variant="text"
               :aria-label="t('help')"
               class="help-button"
               @click="nav('Help')"
-            /><v-menu v-model="notice"
+            /><v-menu
+              v-if="runtime.demo"
+              v-model="notice"
               ><template #activator="{ props }"
                 ><v-btn
                   v-bind="props"
@@ -285,15 +355,19 @@ function logout() {
                   ><v-avatar
                     size="32"
                     color="#E8EDF0"
-                    ><span class="avatar-label">AD</span></v-avatar
+                    ><span class="avatar-label">{{
+                      runtime.demo ? 'AD' : auth.email.value.slice(0, 2).toUpperCase()
+                    }}</span></v-avatar
                   ></v-btn
                 ></template
               ><v-list
                 density="compact"
                 min-width="230"
                 ><v-list-item
-                  :title="t('demoAdmin')"
-                  subtitle="Hotel Administrator" /><v-divider /><v-list-item
+                  :title="runtime.demo ? t('demoAdmin') : auth.email.value"
+                  :subtitle="
+                    runtime.demo ? 'Hotel Administrator' : t('authorized')
+                  " /><v-divider /><v-list-item
                   prepend-icon="mdi-cog-outline"
                   :title="t('accountSettings')"
                   @click="nav('Settings')" /><v-list-item
@@ -304,7 +378,10 @@ function logout() {
           </div></div></v-app-bar
       ><v-main
         ><div class="workspace-content">
-          <div class="page-heading">
+          <div
+            v-if="view !== 'Password Vault'"
+            class="page-heading"
+          >
             <h1>
               <v-icon
                 :icon="
@@ -317,7 +394,7 @@ function logout() {
                 size="28"
               />{{ translate(view) }}
             </h1>
-            <span class="demo-label">{{ t('demoMode') }}</span
+            <span class="demo-label">{{ runtime.demo ? t('demoMode') : t('productionMode') }}</span
             ><v-btn
               v-if="view === 'My tasks'"
               color="primary"
@@ -329,8 +406,17 @@ function logout() {
               >{{ t('createTask') }}</v-btn
             >
           </div>
+          <VaultPage
+            v-if="runtime.demo && view === 'Password Vault'"
+            @back="nav('Dashboard')"
+          />
+          <VaultLivePage
+            v-else-if="view === 'Password Vault'"
+            :assignments="auth.assignments.value"
+            @back="nav('Dashboard')"
+          />
           <section
-            v-if="['Dashboard', 'Favorites'].includes(view)"
+            v-else-if="['Dashboard', 'Favorites'].includes(view)"
             :aria-label="t('moduleList')"
           >
             <div class="module-toolbar">
@@ -363,9 +449,11 @@ function logout() {
                 v-for="m in visible"
                 :key="m.id"
                 class="module-card"
+                :class="{ 'module-coming-soon': !canOpenModule(m) }"
                 ><button
                   class="module-open"
-                  @click="selected = m"
+                  :disabled="!canOpenModule(m)"
+                  @click="openModule(m)"
                 >
                   <span
                     class="module-icon"
@@ -375,7 +463,12 @@ function logout() {
                       size="30" /></span
                   ><span
                     ><h2>{{ translate(m.title) }}</h2>
-                    <p>{{ translate(m.description) }}</p></span
+                    <p>{{ translate(m.description) }}</p>
+                    <span
+                      v-if="!canOpenModule(m)"
+                      class="coming-soon-label"
+                      >{{ t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon') }}</span
+                    ></span
                   ></button
                 ><v-btn
                   :icon="favorites.includes(m.id) ? 'mdi-star' : 'mdi-star-outline'"
@@ -383,6 +476,7 @@ function logout() {
                   variant="text"
                   size="small"
                   class="favorite-button"
+                  :disabled="!canOpenModule(m)"
                   :aria-label="t('favorites') + ' ' + translate(m.title)"
                   :aria-pressed="favorites.includes(m.id)"
                   @click="toggleFavorite(m.id)"
@@ -437,8 +531,20 @@ function logout() {
             v-else
             class="info-panel"
             ><h2>{{ translate(view) }}</h2>
-            <p v-if="view === 'Settings'">{{ t('settingsPending') }}</p>
-            <p v-else>{{ t('sharedStandards') }}</p>
+            <template v-if="view === 'Settings' && !runtime.demo"
+              ><p>{{ auth.email.value }}</p>
+              <p>{{ t('sessionPolicy') }}</p>
+              <h3 class="mt-6">{{ t('workspaceAccess') }}</h3>
+              <v-list
+                ><v-list-item
+                  v-for="assignment in auth.assignments.value"
+                  :key="assignment.departmentId"
+                  :title="assignment.departmentName"
+                  :subtitle="assignment.hotelName" /><v-list-item
+                  :title="t('accessChanges')" /></v-list
+            ></template>
+            <p v-else-if="view === 'Settings'">{{ t('settingsPending') }}</p>
+            <p v-else>{{ runtime.demo ? t('sharedStandards') : t('productionHelp') }}</p>
             <v-btn
               variant="text"
               color="primary"
@@ -449,59 +555,12 @@ function logout() {
           >
           <footer>
             <span>Workstel<span class="brand-dot">.</span></span
-            ><small>{{ t('portal') }} · Prototype v0.1</small>
+            ><small>{{ t('portal') }}</small>
           </footer>
         </div></v-main
       ></template
     >
-    <v-dialog
-      :model-value="!!selected"
-      @update:model-value="!$event && (selected = null)"
-      ><v-card
-        v-if="selected"
-        class="detail-panel"
-        ><v-btn
-          icon="mdi-close"
-          variant="text"
-          class="close-button"
-          :aria-label="t('close')"
-          @click="selected = null"
-        /><v-icon
-          :icon="selected.icon || icons[selected.id] || 'mdi-view-module-outline'"
-          size="38"
-          color="primary"
-        /><span class="eyebrow">{{ translate(selected.category) }}</span>
-        <h2>{{ translate(selected.title) }}</h2>
-        <p>{{ translate(selected.description) }}</p>
-        <v-alert
-          variant="tonal"
-          type="info"
-          density="compact"
-          >{{ t('modulePending') }}</v-alert
-        >
-        <dl>
-          <dt>{{ t('idVersion') }}</dt>
-          <dd>{{ selected.id }} · {{ selected.version }}</dd>
-          <dt>{{ t('permissions') }}</dt>
-          <dd>{{ selected.permissions.join(', ') }}</dd>
-          <dt>{{ t('publishedEvents') }}</dt>
-          <dd>{{ selected.publishes.join(', ') || t('none') }}</dd>
-          <dt>{{ t('subscribedEvents') }}</dt>
-          <dd>{{ selected.subscribes.join(', ') || t('none') }}</dd>
-        </dl>
-        <p
-          v-if="selected.id === 'vault'"
-          class="vault-note"
-        >
-          {{ t('vaultNotice') }}
-        </p>
-        <v-btn
-          color="primary"
-          @click="selected = null"
-          >{{ t('back') }}</v-btn
-        ></v-card
-      ></v-dialog
-    >
+
     <v-dialog v-model="creating"
       ><v-card class="detail-panel"
         ><v-btn

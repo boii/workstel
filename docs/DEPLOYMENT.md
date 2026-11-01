@@ -1,0 +1,153 @@
+# Production deployment: Cloudflare Pages + self-hosted Supabase
+
+Architecture approved 1 November 2026. Frontend starts on a pages.dev address. Supabase runs on the hotel's local server.
+Staff sign in through Google (personal or Workspace accounts) or approved email/password accounts.
+Email/password is implemented; a distinct username login needs a server-side directory and rate-limited lookup and is not implemented.
+
+## Current readiness
+
+Implemented in source: production/demo separation, Google PKCE and email/password adapters, server membership gate, metadata RPCs, database scope checks, transactionally recorded metadata audit, frontend production configuration gate and Pages response headers.
+Commissioned with operator evidence: hotel Supabase instance, trusted HTTPS hostname, first administrator with four department grants, Pages deployment and successful email/password dashboard sign-in. Not commissioned: Google OAuth client, off-server audit archive, automated backup/restore, alerting or Vault secret encryption/reveal. Metadata write lifecycle on the actual server still requires the interactive verification script below.
+The encrypted secret service is implemented in source but not yet commissioned on the hotel server. It stays disabled until actual KMS/runtime/HTTPS verification passes. Metadata accepts only name, username, website and notes. Do not store passwords in notes.
+
+## Network prerequisite
+
+pages.dev serves the web bundle; browser requests go directly to Supabase on the hotel network.
+Each staff browser must resolve and reach a trusted HTTPS Supabase hostname. A LAN address or self-signed certificate alone is insufficient for this deployment.
+Google callback registration must use the approved API hostname; Auth redirects back to the exact pages.dev frontend origin.
+External staff need an approved network access path to the hotel server. Do not expose PostgreSQL or Supabase Studio publicly.
+Configure CORS for the exact frontend origin. It does not replace authentication/authorization.
+Local-network access permissions and DNS/certificate behavior must be tested in the actual supported browsers.
+
+## Hotel server
+
+1. Obtain the production hostname and trusted certificate, OS/Docker details, storage capacity and backup destination.
+2. Install a pinned official Supabase Docker release following https://supabase.com/docs/guides/self-hosting/docker. The CLI development stack is not a production deployment.
+3. Generate unique database/JWT/admin secrets on the server; keep them out of this repository and VITE variables.
+4. Merge infra/supabase.env.example with that release's upstream environment template. Configure reverse proxy HTTPS, SMTP and the Auth Google provider in the selected release's format.
+5. Disable public email/password sign-up. Provision staff accounts through the admin API; assign access explicitly. Google identity creation does not grant workspace permissions.
+6. Configure Google consent to permit the intended personal and Workspace accounts; a Workspace domain hint is not an authorization policy.
+7. Apply reviewed SQL migrations to a backup-protected staging database first, then production with an authorized operator. Do not run the schema creation migration twice; use the server's migration history.
+8. Provision the hotel, departments and staff_access rows using a restricted operator connection; there is no client endpoint to grant oneself access.
+9. Configure gateway/Auth logs to record failed authentication requests without request bodies, passwords, bearer tokens or cookies.
+10. Test backup/restore, TLS renewal and restart behavior before enabling staff.
+
+## Frontend build
+
+Set only public values in the Cloudflare Pages build environment:
+
+- VITE_ENABLE_DEMO=false
+- VITE_SUPABASE_URL=https://YOUR_TRUSTED_SUPABASE_HOST
+- VITE_SUPABASE_ANON_KEY=the public anon/publishable key
+
+Never use a service-role/secret key. The build gate rejects known secret key formats.
+Build command: npm run build:production. Output directory: dist. Node.js: 24.
+Builds use only bundled fonts/icons; no external font service is needed.
+The production build generates a CSP allowing API connections to the configured Supabase origin only.
+Configure the exact live pages.dev URL as SITE_URL and allowed redirect. Do not authorize arbitrary preview subdomains for production OAuth.
+Do not configure a 404.html: Cloudflare Pages' normal SPA handling serves application routes.
+
+## Sessions
+
+Access/refresh tokens are held in memory, not localStorage/sessionStorage. Only a short-lived OAuth PKCE verifier is stored in sessionStorage for the redirect and removed after exchange.
+Reloading the page requires another sign-in. This is an intentional initial session policy, not a guarantee of server-side revocation.
+Sign-out clears local state and requests local Supabase session revocation. Server token lifetime and incident revocation procedures must be configured and tested.
+Workspace access requires enabled staff_access assignments in the database; successful Google login alone never grants access.
+
+## Metadata database boundary
+
+Browser roles cannot directly select/write hotels, departments, vault_accounts or private audit/membership tables.
+Only the explicit authenticated RPCs are exposed. Every RPC checks actor-scoped permissions; account updates check both original and destination department.
+The private permission helper uses a fixed empty search_path and explicit schema names.
+Metadata writes and their audit event commit together; audit insertion failure rolls back the write.
+Denied authorization attempts reaching the RPC are logged without secret content. Requests rejected by the gateway require gateway/Auth audit collection.
+Audit update/delete/truncate triggers protect normal SQL usage. Database superusers can change schema/triggers; off-server restricted archives are required before claiming tamper resistance against server administrators.
+
+## Production acceptance
+
+- Run npm run check.
+- Run the migration and policy tests against the actual pinned Supabase/PostgreSQL deployment.
+- Test Google personal, Google Workspace, email/password, unassigned staff, disabled membership and expired sessions.
+- Verify denied hotel/department access, concurrency conflicts and simulated audit failure.
+- Test desktop and 390px mobile against the real HTTPS endpoint; verify no demo bypass.
+- Verify backup restore to a separate environment, storage recovery, restart recovery and audit retention.
+- Commission a separate key-management system and secret-write/reveal audit path before using real Vault passwords.
+
+## Production implementation update
+
+The first migration now implements staff membership, metadata RPC scope checks, transactional metadata audit, membership-change audit and a scoped audit-read RPC. Audit reads are logged. Policies are tested using embedded PostgreSQL (PGlite); repeat integration tests on the actual pinned self-hosted Supabase stack before release.
+The production frontend uses authenticated metadata RPCs and bounded pagination, not the in-memory preview store. Password writes and reveals are still deliberately unavailable. Provision named operator database accounts for administrative membership changes so the database-role audit field identifies the operator.
+
+## Deployment addresses — 1 November 2026
+
+Backend candidate confirmed by user: https://workstel.gabot.my.id. The root redirects to Cloudflare Access; /auth/v1/health and /rest/v1/ return 401 without API credentials. This proves HTTPS reachability, not authenticated API correctness or CORS readiness.
+Preferred frontend: https://workstel.pages.dev, subject to Cloudflare project-name reservation. A missing DNS record is not proof that the project name is available.
+For the current self-hosted Auth configuration, API_EXTERNAL_URL includes /auth/v1; the Google callback remains https://workstel.gabot.my.id/auth/v1/callback. Confirm the mounted Compose/Auth configuration before changing existing server settings.
+Cloudflare API/CLI access must be reauthenticated before project reservation or deployment. Never place Cloudflare service tokens in the frontend to pass an Access policy. Keep Studio/admin protection intact while validating staff API routes.
+
+## Cloudflare Pages project reserved
+
+The Cloudflare Pages project workstel was successfully created on 1 November 2026 with production branch main. The assigned production address is https://workstel.pages.dev/ after its first deployment.
+Project creation used Direct Upload (Wrangler); no GitHub integration or deployment has been configured yet. Creating a Direct Upload project does not automatically connect it to GitHub.
+No application deployment was performed at this step. Configure the frontend public anon/publishable key and validate authenticated Supabase/CORS/OAuth before the first release. The local .env.production.local file is git-ignored.
+
+## Backend connectivity check — 1 November 2026
+
+The configured public key passed local client-key validation without being printed. Auth health and settings responded HTTP 200; REST preflight allowed the pages.dev origin and apikey/authorization/content-type headers.
+The server currently reports Google disabled, email enabled and public signup enabled. The workstel_session RPC returned PGRST202 (missing from the schema cache), so the Workstel migration has not been verified as installed. No frontend deployment was performed while these prerequisites remained unresolved.
+Use npm run check:connectivity to repeat the non-secret diagnostics. infra/apply-first-migration.sh checks for existing Workstel tables, makes a restricted local database backup and validates its archive listing before applying the transaction and notifying PostgREST. It does not replace off-server backups or a restore drill.
+infra/check-auth-config.sh outputs only allowlisted non-secret settings; do not print or share complete container environments.
+
+## Auth commissioning overlay
+
+The server reported API_EXTERNAL_URL correctly ending in /auth/v1, but SITE_URL still pointed to the backend, no redirect allowlist, public signup enabled and Google not configured. Use infra/docker-compose.workstel-auth.yml as a third Compose file alongside the existing base/local files to set the pages.dev redirect and disable signup. Recreate only the auth service without pulling new images or dependencies. Keep the third file in every subsequent Compose operation so updates do not revert this policy.
+An anonymous call to workstel_session now returns 42501 (permission denied), replacing the prior missing-function result. This indicates the RPC is installed and blocked to anonymous callers; it does not prove staff provisioning or authenticated runtime behavior.
+Google remains disabled until its client credentials are configured server-side. Do not publish them in the frontend or chat.
+
+## First metadata administrator
+
+Use infra/bootstrap_admin.py on the hotel server, with the explicit approved email passed as --email. Password entry is interactive and hidden; never put a password in command arguments or chat.
+The script uses the local Auth admin endpoint and reads the server-only service key from the server .env without printing it. Existing accounts keep their password and confirmation state.
+For a new hotel it asks for the hotel name; for multiple hotels it requires an explicit --hotel-id. The selected administrator receives read/write/archive/audit capabilities for departments within that hotel, with grants and a bootstrap event recorded in the database.
+An Auth account may be created before a later database transaction fails; rerun after correcting the database issue. It will reuse the account, not delete it or reset its password. This operation does not enable real secret storage/reveal.
+Local script tests: python -m unittest discover -s infra -p 'test_*.py'.
+
+## First Pages deployment — 1 November 2026
+
+The operator reported successful provisioning of the first metadata administrator for The Alana Hotel & Convention Center Solo, with four department grants. The operator ran the provisioning script from /opt/hotel-portal; the running Supabase Compose project remains /opt/workstel as confirmed by its container labels.
+
+Local npm run check and npm run build:production passed. Connectivity checks confirmed Auth health 200, email enabled, public signup disabled, Google disabled, permitted browser CORS, and anonymous RPC denial (42501).
+
+Wrangler deployed the current working tree through Direct Upload to https://workstel.pages.dev/ (deployment https://99ffa03f.workstel.pages.dev/). The production URL returned HTTP 200 with the expected Workstel HTML and backend-scoped Content-Security-Policy. This deployment was not a GitHub commit or push. Authenticated browser sign-in and actual-server metadata/audit acceptance remain to be performed by the operator. Real secret storage and reveal remain disabled.
+
+## Private Vault release — implementation pending server commissioning
+
+The operator selected private-by-default accounts with explicit sharing. Privacy migration 202611010003 backfills each existing record's owner from created_by, starts with no shares, and restricts writes/sharing to the owner plus existing staff capabilities. Recipients receive read-only access and must remain enabled at the same hotel. Administrative department permissions do not grant access to another user's metadata. This is server-enforced application privacy, not end-to-end encryption against database/server operators.
+
+The frontend enables live Vault only when workstel_session advertises meta.vaultPolicy=private-v1. Older servers leave the card temporarily unavailable. Apply the migration before publishing this frontend to avoid unnecessary downtime.
+
+infra/apply-private-migration.sh validates prerequisites, makes a restricted local custom-format database backup and checks its archive listing, then applies migrations 202611010002 and 202611010003 in a single transaction. The helper skips an already recorded privacy release; it does not remove volumes, reset passwords or delete account/audit records. Archive inspection is not a restore drill.
+
+infra/verify_production.py prompts locally for the operator password without displaying it and reads only the public key from the server .env. It tests login, private policy readiness, explicit membership, anonymous/direct-table denial, unknown hotel/department denial, fictional metadata CRUD, optimistic concurrency, archive/restore and durable audit. It leaves a clearly named fictional record archived as evidence and signs out its test session. Interrupted tests may leave the fictional record active; review and archive it, never delete unrelated records. It does not certify real secret storage, sharing between real staff accounts, browser connectivity, Google login or backup recovery.
+
+The frontend hides Google sign-in when disabled, hides sample notifications, provides an access summary and scoped server audit reader, limits form departments to writable assignments, validates server records, cancels obsolete list requests and clears workspace navigation when the session ends.
+
+## Local validation of the private release
+
+npm run check passed with the private ownership/sharing database tests and response parser tests. The production configuration gate and Pages header preparation passed. Seven Python helper tests passed; the release shell scripts passed bash syntax validation.
+
+The production build login was inspected at desktop and 390 x 844. Mobile document width and scroll width were both 390px. With Google disabled on the actual backend, the Google action was absent. A single fictional invalid login was rejected with a safe message and the password field cleared. The full private Vault/sharing/audit UI on the actual hotel backend remains unverified until the migrations are installed and the operator signs in again.
+
+Server update package: .local-release/workstel-private-vault-20261101.tar.gz (ignored local artifact), with a companion SHA256 file. It contains only reviewed migration scripts, the interactive verifier and release instructions. No frontend, environment file or credentials are included. The new frontend has not been deployed pending the server update.
+
+## Operator-confirmed private release
+
+The operator ran verify_production.py on the actual hotel server and reported all 16 checks passed, including private-v1 readiness, login, membership, anonymous/direct-table denial, unknown hotel/department denial, metadata lifecycle, optimistic conflicts and durable mutation audit. Its fictional account remains archived and its test session was signed out.
+
+The private frontend was published to https://workstel.pages.dev/ (deployment https://9e9be46e.workstel.pages.dev/) and returned HTTP 200 with noindex/nofollow/noarchive. The operator confirmed Vault opens and Audit log is visible after sign-in. This confirms the page/actions are present; it does not substitute for testing every dialog with multiple real staff accounts.
+
+The encrypted service is implemented in backend/vault with a service-only SQL boundary (202611010004), least-privilege OpenBao AppRole setup, recent-authentication/rate/version checks, durable fail-closed reveal auditing and gated UI. Orchestration tests use fake upstreams and SQL tests use embedded PostgreSQL; actual OpenBao startup, TLS, real encrypt/decrypt and public HTTPS acceptance are still pending operator commissioning. See OPENBAO_OPERATIONS.md. Real password operations remain disabled until that process passes.
+
+The operator explicitly deferred off-VM backup implementation. Track it as an operational limitation, retain local migration backups and preserve recovery shares separately. Do not claim off-server recovery or high availability is verified.
+
+Latest private frontend deployment: https://b6f87319.workstel.pages.dev/; production URL https://workstel.pages.dev returned HTTP 200 and the expected current asset. The password UI remains availability-gated pending server commissioning. Local production dependency audit reported zero vulnerabilities. The encrypted-service package .local-release/workstel-secret-service-20261101.tar.gz contains server source, SQL migration, isolated KMS templates, installation/commissioning helpers and operator instructions; no credentials or frontend environment are included.

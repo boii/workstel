@@ -1,0 +1,9 @@
+services:
+  functions:
+    env_file:
+      - path: /opt/workstel/.env.workstel-vault
+        required: true
+    environment:
+      DENO_CERT: /etc/workstel/openbao-ca.crt
+    volumes:
+      - /opt/workstel-openbao/tls/ca.crt:/etc/workstel/openbao-ca.crt:ro

@@ -1,0 +1,36 @@
+services:
+  openbao:
+    image: ${WORKSTEL_OPENBAO_IMAGE:?Pin the official OpenBao image before starting}
+    container_name: workstel-openbao
+    restart: unless-stopped
+    user: '1000:1000'
+    command: ['server', '-config=/openbao/config/openbao.hcl']
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    mem_limit: 512m
+    memswap_limit: 512m
+    pids_limit: 128
+    tmpfs: ['/tmp:rw,noexec,nosuid,size=16m']
+    environment:
+      BAO_ADDR: https://127.0.0.1:8200
+      BAO_CACERT: /openbao/tls/ca.crt
+      HOME: /tmp
+    ports: ['127.0.0.1:8200:8200']
+    volumes:
+      - /opt/workstel-openbao/config:/openbao/config:ro
+      - /opt/workstel-openbao/tls:/openbao/tls:ro
+      - /opt/workstel-openbao/data:/openbao/data
+      - /opt/workstel-openbao/logs:/openbao/logs
+    networks:
+      hotel:
+        aliases: [workstel-openbao]
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+networks:
+  hotel:
+    external: true
+    name: ${WORKSTEL_SUPABASE_NETWORK:?Set the existing Supabase Docker network}

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "npm run modules:check && vue-tsc --noEmit && vite build",
+    "build": "npm run modules:check && vue-tsc --noEmit && tsc -p tsconfig.server.json --noEmit && vite build",
     "modules:check": "tsx scripts/check-modules.ts",
     "module:new": "node scripts/new-module.mjs",
     "modules:test": "node --test scripts/new-module.test.mjs",
@@ -13,9 +13,13 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
     "check": "npm run format:check && npm run lint && npm test && npm run build",
-    "test": "npm run modules:test && tsx --test src/core/module.test.ts"
+    "test": "npm run modules:test && tsx --test src/core/module.test.ts src/config/runtime.test.ts src/modules/vault/validation.test.ts src/modules/vault/live-api.test.ts supabase/tests/vault.test.ts supabase/tests/private-vault.test.ts supabase/tests/secret-boundary.test.ts backend/vault/handler.test.ts",
+    "build:production": "tsx scripts/check-production.ts && npm run build && tsx scripts/prepare-pages.ts",
+    "preview": "vite preview --host 127.0.0.1",
+    "check:connectivity": "tsx scripts/check-connectivity.ts"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.14",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.6",
     "@vitejs/plugin-vue": "^6.0.10",
@@ -34,6 +38,7 @@
     "@fontsource/noto-sans": "^5.3.0",
     "@fontsource/quicksand": "^5.3.0",
     "@mdi/font": "^7.4.47",
+    "@supabase/supabase-js": "^2.118.0",
     "vue": "^3.5.44",
     "vuetify": "^4.3.1"
   }
