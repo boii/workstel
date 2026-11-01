@@ -131,6 +131,19 @@ test('refresh preserves the original deadline and expired cookies cannot restore
   assert.equal(calls, 2);
   assert.ok(expired.headers.get('set-cookie')?.includes('Max-Age=0'));
 });
+test('upstream redirects are rejected without following or exposing credentials', async () => {
+  let calls = 0;
+  const handler = makeSessionHandler(config, async (_url, init) => {
+    calls++;
+    assert.equal(init?.redirect, 'manual');
+    return new Response(null, { status: 302, headers: { Location: 'https://untrusted.invalid/' } });
+  });
+  const result = await handler(request());
+  assert.equal(result.status, 503);
+  assert.equal(calls, 1);
+  assert.equal(result.headers.get('set-cookie'), null);
+  assert.ok(!(await result.text()).includes('fictional-password'));
+});
 test('SDK login, new-client restoration, token refresh and logout work through the cookie bridge', async () => {
   let cookie = '',
     count = 0;

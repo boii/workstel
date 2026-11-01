@@ -108,9 +108,11 @@ export function makeSessionHandler(
             ...(authorization ? { Authorization: authorization } : {}),
           },
           body: body === undefined ? undefined : JSON.stringify(body),
-          redirect: 'error',
+          // Workers supports manual/follow only; reject redirects without forwarding credentials.
+          redirect: 'manual',
           signal: AbortSignal.timeout(15000),
         });
+        if (result.status >= 300 && result.status < 400) throw Error('UpstreamRedirect');
         if (!result.ok) console.warn('Session Auth upstream status', result.status);
         return result;
       }
