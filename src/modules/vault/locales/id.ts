@@ -21,7 +21,7 @@ export default {
   signInPassword: 'Password login Workstel Anda',
   passwordMismatch: 'Password harus sama dan maksimal 4 KB.',
   encryptedHint:
-    'Password dienkripsi terpisah dari detail akun. Hanya Anda dan penerima yang diberi akses secara eksplisit yang boleh melihatnya.',
+    'Password dienkripsi terpisah. Hanya pemilik dan penerima yang diberi akses secara eksplisit yang boleh melihatnya.',
   passwordSaved: 'Password terenkripsi disimpan.',
   reauthenticate: 'Verifikasi identitas sebelum tindakan ini.',
   reauthenticateHint:
@@ -46,7 +46,7 @@ export default {
   shareTitle: 'Kelola akses berbagi',
   share: 'Bagikan akun',
   shareHint:
-    'Hanya Anda yang dapat mengakses akun ini sampai dibagikan. Penerima mendapat akses baca dan harus memiliki akun Workstel aktif di hotel ini. Akses dapat dicabut kapan saja. Maksimal 50 penerima.',
+    'Pribadi secara default. Bagikan akses baca saja kepada maksimal 50 staf aktif di hotel ini. Akses dapat dicabut kapan saja.',
   shareError:
     'Akses berbagi tidak dapat diubah. Periksa email dan izin, lalu muat ulang dan coba lagi.',
   privateOnly: 'Pribadi — hanya Anda yang memiliki akses.',

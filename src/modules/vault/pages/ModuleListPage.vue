@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import VaultDialog from '../components/VaultDialog.vue';
+import VaultAccountList from '../components/VaultAccountList.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import { locale } from '../../../i18n';
 import { useVault } from '../composables/useVault';
@@ -69,6 +71,7 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 function openForm(entry: VaultEntry | null = null) {
+  detailId.value = null;
   editing.value = entry;
   formOpen.value = true;
 }
@@ -79,10 +82,12 @@ function saveEntry(input: VaultEntryInput, id?: string) {
 function archiveEntry() {
   if (!archiveId.value) return;
   setStatus(archiveId.value, 'archived');
+  detailId.value = null;
   archiveId.value = null;
   feedback.value = 'archiveDone';
 }
 function restoreEntry(id: string) {
+  detailId.value = null;
   setStatus(id, 'active');
   feedback.value = 'restoreDone';
 }
@@ -93,7 +98,7 @@ function resetFilters() {
 }
 </script>
 <template>
-  <div class="vault-module">
+  <div class="vault-module vault-compact-page">
     <button
       class="vault-breadcrumb"
       @click="emit('back')"
@@ -104,7 +109,7 @@ function resetFilters() {
       />{{ messages.back }}</button
     ><ModulePage
       :title="messages.title"
-      :description="messages.description"
+      :description="filtered.length + ' ' + messages.records"
       :empty="!filtered.length"
       :empty-title="entries.length ? messages.noResults : messages.emptyTitle"
       :empty-description="entries.length ? messages.noResultsHint : messages.emptyDescription"
@@ -114,6 +119,8 @@ function resetFilters() {
         ><v-btn
           color="primary"
           prepend-icon="mdi-plus"
+          :aria-label="messages.add"
+          :title="messages.add"
           @click="openForm()"
           >{{ messages.add }}</v-btn
         ></template
@@ -150,8 +157,7 @@ function resetFilters() {
             hide-details
           />
         </div>
-        <div class="vault-list-summary">{{ filtered.length }} {{ messages.records }}</div></template
-      >
+      </template>
       <template #empty-action
         ><v-btn
           variant="text"
@@ -160,105 +166,32 @@ function resetFilters() {
           >{{ messages.reset }}</v-btn
         ></template
       >
-      <v-card class="vault-desktop"
-        ><v-table density="compact"
-          ><thead>
-            <tr>
-              <th>{{ messages.name }}</th>
-              <th>{{ messages.username }}</th>
-              <th>{{ messages.department }}</th>
-              <th>{{ messages.secretStatus }}</th>
-              <th>{{ messages.updated }}</th>
-              <th>
-                <span class="vault-sr-only">{{ messages.actions }}</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="entry in filtered"
-              :key="entry.id"
-            >
-              <td>
-                <button
-                  class="vault-account-name"
-                  @click="detailId = entry.id"
-                >
-                  {{ entry.name }}</button
-                ><span class="vault-account-website">{{ entry.website }}</span>
-              </td>
-              <td>{{ entry.username }}</td>
-              <td>{{ messages[departmentKeys[entry.departmentId]] }}</td>
-              <td>
-                <span class="vault-secret-state"
-                  ><v-icon
-                    icon="mdi-lock-outline"
-                    size="14"
-                  />{{ messages.unavailable }}</span
-                >
-              </td>
-              <td class="vault-date">{{ formatDate(entry.updatedAt) }}</td>
-              <td>
-                <v-btn
-                  icon="mdi-chevron-right"
-                  variant="text"
-                  :aria-label="messages.details + ' ' + entry.name"
-                  @click="detailId = entry.id"
-                />
-              </td>
-            </tr></tbody></v-table
-      ></v-card>
-      <div class="vault-mobile">
-        <v-card
-          v-for="entry in filtered"
-          :key="entry.id"
-          class="vault-mobile-card"
-          ><div class="vault-mobile-heading">
-            <button
-              class="vault-account-name"
-              @click="detailId = entry.id"
-            >
-              {{ entry.name }}</button
-            ><v-btn
-              icon="mdi-chevron-right"
-              variant="text"
-              :aria-label="messages.details + ' ' + entry.name"
-              @click="detailId = entry.id"
-            />
-          </div>
-          <p>{{ entry.username }}</p>
-          <div class="vault-mobile-footer">
-            <span>{{ messages[departmentKeys[entry.departmentId]] }}</span
-            ><span class="vault-secret-state"
-              ><v-icon
-                icon="mdi-lock-outline"
-                size="14"
-              />{{ messages.unavailable }}</span
-            >
-          </div></v-card
-        >
-      </div>
+      <VaultAccountList
+        :entries="filtered.map((entry) => ({ ...entry, isOwner: true }))"
+        :secret-available="false"
+        :sharing-available="false"
+        :busy="false"
+        :reset-key="0"
+        :can-edit="() => true"
+        :can-archive="() => true"
+        @detail="detailId = $event.id"
+        @edit="openForm($event)"
+        @archive="archiveId = $event.id"
+        @restore="restoreEntry($event.id)"
+      />
     </ModulePage>
     <VaultEntryForm
       v-model="formOpen"
       :entry="editing"
       @save="saveEntry"
     />
-    <v-dialog
+    <VaultDialog
       v-model="detailOpen"
-      max-width="620"
-      ><v-card
-        v-if="detail"
-        class="vault-dialog"
-        ><div class="vault-dialog-heading">
-          <h2>{{ detail.name }}</h2>
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            :aria-label="messages.close"
-            @click="detailId = null"
-          />
-        </div>
+      :title="detail?.name ?? messages.details"
+      :subtitle="messages.details"
+      drawer
+    >
+      <template v-if="detail">
         <p class="vault-detail-subtitle">
           {{ messages[departmentKeys[detail.departmentId]] }} ·
           {{ detail.status === 'active' ? messages.active : messages.archived }}
@@ -270,7 +203,7 @@ function resetFilters() {
           <dd>{{ detail.website || '—' }}</dd>
           <dt>{{ messages.password }}</dt>
           <dd class="vault-password-line">
-            <span>••••••••••••</span
+            <span>••••••••</span
             ><v-btn
               variant="text"
               prepend-icon="mdi-eye-off-outline"
@@ -300,45 +233,41 @@ function resetFilters() {
             ><small>{{ formatDate(item.occurredAt) }}</small>
           </li>
         </ul>
-        <div class="vault-dialog-actions">
-          <v-btn
-            v-if="detail.status === 'active'"
-            variant="text"
-            @click="archiveId = detail.id"
-            >{{ messages.archive }}</v-btn
-          ><v-btn
-            v-else
-            variant="text"
-            @click="restoreEntry(detail.id)"
-            >{{ messages.restore }}</v-btn
-          ><v-btn
-            color="primary"
-            prepend-icon="mdi-pencil-outline"
-            @click="openForm(detail)"
-            >{{ messages.edit }}</v-btn
-          >
-        </div></v-card
-      ></v-dialog
-    >
-    <v-dialog
+      </template>
+      <template
+        v-if="detail"
+        #actions
+      >
+        <v-btn
+          variant="text"
+          @click="detail.status === 'active' ? (archiveId = detail.id) : restoreEntry(detail.id)"
+          >{{ detail.status === 'active' ? messages.archive : messages.restore }}</v-btn
+        >
+        <v-btn
+          color="primary"
+          @click="openForm(detail)"
+          >{{ messages.edit }}</v-btn
+        >
+      </template>
+    </VaultDialog>
+    <VaultDialog
       v-model="archiveOpen"
-      max-width="440"
-      ><v-card class="vault-dialog"
-        ><h2>{{ messages.archiveTitle }}</h2>
-        <p class="vault-confirm-hint">{{ messages.archiveHint }}</p>
-        <div class="vault-dialog-actions">
-          <v-btn
-            variant="text"
-            @click="archiveId = null"
-            >{{ messages.cancel }}</v-btn
-          ><v-btn
-            color="primary"
-            @click="archiveEntry"
-            >{{ messages.archive }}</v-btn
-          >
-        </div></v-card
-      ></v-dialog
+      :title="messages.archiveTitle"
+      :width="440"
     >
+      <p class="vault-field-hint vault-panel-intro">{{ messages.archiveHint }}</p>
+      <template #actions
+        ><v-btn
+          variant="text"
+          @click="archiveId = null"
+          >{{ messages.cancel }}</v-btn
+        ><v-btn
+          color="primary"
+          @click="archiveEntry"
+          >{{ messages.archive }}</v-btn
+        ></template
+      >
+    </VaultDialog>
     <v-snackbar
       :model-value="!!feedback"
       @update:model-value="!$event && (feedback = null)"

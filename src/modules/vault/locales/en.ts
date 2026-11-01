@@ -19,7 +19,7 @@ export default {
   signInPassword: 'Your Workstel sign-in password',
   passwordMismatch: 'Passwords must match and be no more than 4 KB.',
   encryptedHint:
-    'This password is encrypted separately from the account details. Only you and explicitly authorized recipients may reveal it.',
+    'Passwords are encrypted separately. Only the owner and explicitly shared recipients can reveal them.',
   passwordSaved: 'Encrypted password saved.',
   reauthenticate: 'Verify your identity before this action.',
   reauthenticateHint:
@@ -44,7 +44,7 @@ export default {
   shareTitle: 'Manage sharing',
   share: 'Share account',
   shareHint:
-    'Only you can access this account until you share it. Recipients get read-only access and must have an active Workstel account at this hotel. You can revoke access at any time. Up to 50 recipients.',
+    'Private by default. Share read-only access with up to 50 active staff at this hotel. Access can be removed at any time.',
   shareError:
     'Sharing could not be changed. Check the email and permissions, then refresh and try again.',
   privateOnly: 'Private — only you have access.',

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { useDisplay } from 'vuetify';
+import VaultDialog from './VaultDialog.vue';
 import { vaultRpc, parseAudit } from '../live-api';
 import type { AuditEvent } from '../live-api';
 import type { StaffAssignment } from '../../../auth/useAuth';
@@ -9,8 +9,6 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{ hotelId: string; assignments: StaffAssignment[] }>();
 const messages = useVaultMessages();
-const { width } = useDisplay();
-const mobile = computed(() => width.value <= 680);
 const search = ref(''),
   outcome = ref<'all' | 'success' | 'denied'>('all');
 const filtered = computed(() =>
@@ -80,194 +78,157 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <v-dialog
+  <VaultDialog
     v-model="open"
-    max-width="960"
-    :fullscreen="mobile"
-    scrollable
-    class="vault-audit-modal"
-    :aria-label="messages.auditTitle"
+    :title="messages.auditTitle"
+    :subtitle="filtered.length + ' / ' + events.length + ' ' + messages.auditEvents"
+    :width="960"
+    fullscreen-on-mobile
   >
-    <v-card class="vault-dialog vault-audit-dialog">
-      <header class="vault-audit-header">
-        <div class="vault-dialog-heading">
-          <div>
-            <h2>{{ messages.auditTitle }}</h2>
-            <p
-              class="vault-audit-count"
-              aria-live="polite"
-            >
-              {{ filtered.length }} / {{ events.length }} {{ messages.auditEvents }}
-            </p>
-          </div>
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            :aria-label="messages.close"
-            @click="open = false"
-          />
-        </div>
-        <p class="vault-audit-hint">{{ messages.auditHint }}</p>
-        <div class="vault-audit-controls">
-          <v-text-field
-            v-model="search"
-            class="vault-audit-search"
-            :label="messages.auditSearch"
-            prepend-inner-icon="mdi-magnify"
-            hide-details
-            density="compact"
-            clearable
-            @update:model-value="search = $event ?? ''"
-          />
-          <v-select
-            v-model="department"
-            :label="messages.department"
-            :items="departments"
-            hide-details
-            density="compact"
-            clearable
-            @update:model-value="load"
-          />
-          <v-select
-            v-model="outcome"
-            :label="messages.auditOutcome"
-            :items="[
-              { value: 'all', title: messages.auditAllOutcomes },
-              { value: 'success', title: messages.success },
-              { value: 'denied', title: messages.denied },
-            ]"
-            hide-details
-            density="compact"
-          />
-          <v-btn
-            icon="mdi-refresh"
-            variant="text"
-            color="primary"
-            :loading="loading"
-            :aria-label="messages.refresh"
-            :title="messages.refresh"
-            @click="load"
-          />
-        </div>
-      </header>
-      <v-card-text
-        class="vault-audit-body"
-        :aria-busy="loading"
-      >
-        <v-skeleton-loader
-          v-if="loading"
-          type="list-item-two-line@3"
+    <template #toolbar>
+      <p class="vault-audit-hint">{{ messages.auditHint }}</p>
+      <div class="vault-audit-controls">
+        <v-text-field
+          v-model="search"
+          class="vault-audit-search"
+          :label="messages.auditSearch"
+          prepend-inner-icon="mdi-magnify"
+          hide-details
+          density="compact"
+          clearable
+          @update:model-value="search = $event ?? ''"
         />
-        <v-alert
-          v-else-if="failed"
-          type="error"
-          variant="tonal"
-          role="alert"
-          >{{ messages.loadError
-          }}<v-btn
-            variant="text"
-            @click="load"
-            >{{ messages.retry }}</v-btn
-          ></v-alert
+        <v-select
+          v-model="department"
+          :label="messages.department"
+          :items="departments"
+          hide-details
+          density="compact"
+          clearable
+          @update:model-value="load"
+        />
+        <v-select
+          v-model="outcome"
+          :label="messages.auditOutcome"
+          :items="[
+            { value: 'all', title: messages.auditAllOutcomes },
+            { value: 'success', title: messages.success },
+            { value: 'denied', title: messages.denied },
+          ]"
+          hide-details
+          density="compact"
+        />
+        <v-btn
+          icon="mdi-refresh"
+          variant="text"
+          color="primary"
+          :loading="loading"
+          :aria-label="messages.refresh"
+          :title="messages.refresh"
+          @click="load"
+        />
+      </div>
+    </template>
+    <div
+      class="vault-audit-body"
+      :aria-busy="loading"
+    >
+      <v-skeleton-loader
+        v-if="loading"
+        type="list-item-two-line@3"
+      />
+      <v-alert
+        v-else-if="failed"
+        type="error"
+        variant="tonal"
+        role="alert"
+        >{{ messages.loadError
+        }}<v-btn
+          variant="text"
+          @click="load"
+          >{{ messages.retry }}</v-btn
+        ></v-alert
+      >
+      <div
+        v-else-if="!filtered.length"
+        class="vault-audit-empty"
+      >
+        <v-icon
+          icon="mdi-history"
+          size="28"
+        />
+        <p>{{ events.length ? messages.auditNoResults : messages.auditEmpty }}</p>
+        <v-btn
+          v-if="search || outcome !== 'all'"
+          variant="text"
+          @click="
+            search = '';
+            outcome = 'all';
+          "
+          >{{ messages.reset }}</v-btn
         >
-        <div
-          v-else-if="!filtered.length"
-          class="vault-audit-empty"
+      </div>
+      <ol
+        v-else
+        class="vault-audit-list"
+      >
+        <li
+          v-for="event in filtered"
+          :key="event.id"
         >
-          <v-icon
-            icon="mdi-history"
-            size="28"
-          />
-          <p>{{ events.length ? messages.auditNoResults : messages.auditEmpty }}</p>
-          <v-btn
-            v-if="search || outcome !== 'all'"
-            variant="text"
-            @click="
-              search = '';
-              outcome = 'all';
-            "
-            >{{ messages.reset }}</v-btn
-          >
-        </div>
-        <ol
-          v-else
-          class="vault-audit-list"
-        >
-          <li
-            v-for="event in filtered"
-            :key="event.id"
-          >
-            <details class="vault-audit-event">
-              <summary :title="messages.auditDetails">
-                <strong class="vault-audit-action">{{ event.action }}</strong>
-                <time
-                  class="vault-audit-time"
-                  :datetime="event.occurred_at"
-                  >{{ date(event.occurred_at) }}</time
-                >
-                <span class="vault-audit-scope">{{ departmentName(event.department_id) }}</span>
-                <span
-                  class="vault-audit-actor"
-                  :title="event.actor_id ?? event.actor_database_role"
-                  >{{
-                    event.actor_id ? event.actor_id.slice(0, 8) + '…' : event.actor_database_role
-                  }}</span
-                >
-                <span
-                  class="vault-audit-outcome"
-                  :class="'vault-audit-outcome--' + event.outcome"
-                  ><span aria-hidden="true">●</span
-                  >{{ event.outcome === 'success' ? messages.success : messages.denied }}</span
-                >
-                <v-icon
-                  class="vault-audit-chevron"
-                  icon="mdi-chevron-down"
-                  size="18"
-                />
-              </summary>
-              <dl class="vault-audit-details">
-                <dt>{{ messages.auditWhen }}</dt>
-                <dd>{{ date(event.occurred_at) }}</dd>
-                <dt>{{ messages.actor }}</dt>
-                <dd>{{ event.actor_id ?? event.actor_database_role }}</dd>
-                <dt>{{ messages.department }}</dt>
-                <dd>{{ departmentName(event.department_id) }}</dd>
-                <dt v-if="event.resource_id">{{ messages.resource }}</dt>
-                <dd v-if="event.resource_id">{{ event.resource_id }}</dd>
-                <dt>{{ messages.correlation }}</dt>
-                <dd>{{ event.correlation_id }}</dd>
-                <dt>{{ messages.auditEvent }}</dt>
-                <dd>{{ event.id }}</dd>
-              </dl>
-            </details>
-          </li>
-        </ol>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+          <details class="vault-audit-event">
+            <summary :title="messages.auditDetails">
+              <strong class="vault-audit-action">{{ event.action }}</strong>
+              <time
+                class="vault-audit-time"
+                :datetime="event.occurred_at"
+                >{{ date(event.occurred_at) }}</time
+              >
+              <span class="vault-audit-scope">{{ departmentName(event.department_id) }}</span>
+              <span
+                class="vault-audit-actor"
+                :title="event.actor_id ?? event.actor_database_role"
+                >{{
+                  event.actor_id ? event.actor_id.slice(0, 8) + '…' : event.actor_database_role
+                }}</span
+              >
+              <span
+                class="vault-audit-outcome"
+                :class="'vault-audit-outcome--' + event.outcome"
+                ><span aria-hidden="true">●</span
+                >{{ event.outcome === 'success' ? messages.success : messages.denied }}</span
+              >
+              <v-icon
+                class="vault-audit-chevron"
+                icon="mdi-chevron-down"
+                size="18"
+              />
+            </summary>
+            <dl class="vault-audit-details">
+              <dt>{{ messages.auditWhen }}</dt>
+              <dd>{{ date(event.occurred_at) }}</dd>
+              <dt>{{ messages.actor }}</dt>
+              <dd>{{ event.actor_id ?? event.actor_database_role }}</dd>
+              <dt>{{ messages.department }}</dt>
+              <dd>{{ departmentName(event.department_id) }}</dd>
+              <dt v-if="event.resource_id">{{ messages.resource }}</dt>
+              <dd v-if="event.resource_id">{{ event.resource_id }}</dd>
+              <dt>{{ messages.correlation }}</dt>
+              <dd>{{ event.correlation_id }}</dd>
+              <dt>{{ messages.auditEvent }}</dt>
+              <dd>{{ event.id }}</dd>
+            </dl>
+          </details>
+        </li>
+      </ol>
+    </div>
+  </VaultDialog>
 </template>
 <style scoped>
-.vault-dialog.vault-audit-dialog {
-  padding: 0;
-  overflow: hidden;
-}
-.vault-audit-header {
-  padding: 16px 20px 14px;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--workstel-border);
-}
-.vault-audit-header h2 {
-  font-size: 20px;
-}
-.vault-audit-count {
-  font-size: 11px;
-  color: var(--workstel-text-secondary);
-  margin-top: 2px;
-}
 .vault-audit-hint {
   font-size: 11px;
   color: var(--workstel-text-secondary);
-  margin: 6px 0 12px;
+  margin: 0 0 12px;
   line-height: 1.5;
 }
 .vault-audit-controls {
@@ -384,13 +345,6 @@ onUnmounted(() => {
   margin: 8px 0;
 }
 @media (max-width: 680px) {
-  .vault-audit-header {
-    padding: 12px 16px;
-  }
-  .vault-audit-header .v-btn {
-    min-width: 44px;
-    min-height: 44px;
-  }
   .vault-audit-controls {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
   }

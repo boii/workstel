@@ -84,3 +84,29 @@ horizontal overflow, disclosure expansion with Enter, complete IDs in details,
 combined search/result filters, reset, empty log, no matches, and load failure
 with retry control. English and Indonesian copy was inspected. No real audit
 records or server authorization changes were used for these visual checks.
+
+## Consistent Vault surfaces — 2 November 2026
+
+All account forms, detail drawers, password write/reveal/identity dialogs,
+sharing, archive confirmations and Audit log now use the shared `VaultDialog`
+shell. Titles, gutters, close controls, body scrolling and action footers follow
+one layout contract. Forms use one standard desktop width; detail/confirmation
+and audit widths remain appropriate to their content. Mobile actions retain
+44px touch targets. Removed CSS rules belonging to replaced layouts.
+
+The account form replaces the disabled password placeholder with compact
+password-service guidance. Detail drawers place secondary actions in an overflow
+menu. Sharing and secret controls keep their existing RPCs, capability gates,
+version checks, recent-authentication flow and plaintext clearing behavior.
+English/Indonesian policy hints were shortened without translating records.
+The demo uses the same list/dialog components, keeps passwords disabled and
+does not offer unsupported sharing actions.
+
+Browser verification used fictional local API/Auth fixtures: add/edit field
+population, invalid form focus, valid metadata submission, sharing submission,
+password write, identity verification followed by inline reveal, standalone
+reveal and mobile footer fit, archive confirmation, Audit log scrolling,
+Indonesian copy and the development preview. At 390 × 640 the account form body
+scrolls while Save/Cancel remain visible; at 390 × 844 the audit/detail views
+fill the viewport without horizontal overflow. Desktop layouts were inspected.
+No real staff records, passwords or access grants were used for these checks.

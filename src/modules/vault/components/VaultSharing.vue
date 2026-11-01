@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import VaultDialog from './VaultDialog.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { vaultRpc } from '../live-api';
 import type { VaultEntry } from '../types';
@@ -83,87 +84,94 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <v-dialog
+  <VaultDialog
     v-model="open"
-    max-width="600"
-    :persistent="busy"
+    :title="messages.shareTitle"
+    :subtitle="entry.name"
+    :busy="busy"
   >
-    <v-card class="vault-dialog">
-      <div class="vault-dialog-heading">
-        <h2>{{ messages.shareTitle }}</h2>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          :aria-label="messages.close"
-          :disabled="busy"
-          @click="open = false"
-        />
-      </div>
-      <p class="vault-confirm-hint">{{ entry.name }}</p>
-      <p class="vault-field-hint">{{ messages.shareHint }}</p>
-      <v-alert
-        v-if="failure"
-        type="error"
-        variant="tonal"
-        role="alert"
-        >{{ failure
-        }}<v-btn
-          variant="text"
-          :disabled="busy"
-          @click="load"
-          >{{ messages.refresh }}</v-btn
-        ></v-alert
+    <p class="vault-field-hint vault-panel-intro">{{ messages.shareHint }}</p>
+    <v-alert
+      v-if="failure"
+      type="error"
+      variant="tonal"
+      density="compact"
+      role="alert"
+      >{{ failure
+      }}<v-btn
+        variant="text"
+        :disabled="busy"
+        @click="load"
+        >{{ messages.refresh }}</v-btn
+      ></v-alert
+    >
+    <v-skeleton-loader
+      v-if="loading"
+      type="list-item-two-line"
+    />
+    <template v-else>
+      <v-form
+        id="vault-share-form"
+        class="vault-panel-share-form"
+        @submit.prevent="change(email, 'grant')"
       >
-      <v-skeleton-loader
-        v-if="loading"
-        type="list-item-two-line"
-      />
-      <template v-else>
-        <p
-          v-if="!shares.length"
-          class="vault-field-hint"
+        <v-text-field
+          v-model="email"
+          type="email"
+          :label="messages.recipientEmail"
+          autocomplete="off"
+          required
+          maxlength="254"
+          :disabled="busy || shares.length >= 50"
+          hide-details="auto"
+          density="compact"
+        />
+      </v-form>
+      <p
+        v-if="!shares.length"
+        class="vault-field-hint"
+      >
+        {{ messages.privateOnly }}
+      </p>
+      <v-list
+        v-else
+        class="vault-panel-share-list"
+        density="compact"
+      >
+        <v-list-item
+          v-for="share in shares"
+          :key="share.email"
+          :title="share.email"
+          :subtitle="messages.readOnly"
         >
-          {{ messages.privateOnly }}
-        </p>
-        <v-list
-          v-else
-          class="vault-share-list"
-          ><v-list-item
-            v-for="share in shares"
-            :key="share.email"
-            :title="share.email"
-            :subtitle="messages.readOnly"
-            ><template #append
-              ><v-btn
-                variant="text"
-                color="error"
-                :disabled="busy"
-                @click="change(share.email, 'revoke')"
-                >{{ messages.revoke }}</v-btn
-              ></template
-            ></v-list-item
-          ></v-list
-        >
-        <v-form
-          class="vault-share-form"
-          @submit.prevent="change(email, 'grant')"
-          ><v-text-field
-            v-model="email"
-            type="email"
-            :label="messages.recipientEmail"
-            autocomplete="off"
-            required
-            maxlength="254"
-            :disabled="busy || shares.length >= 50"
-          /><v-btn
-            type="submit"
-            color="primary"
-            :loading="busy"
-            :disabled="busy || !email.trim() || shares.length >= 50"
-            >{{ messages.share }}</v-btn
-          ></v-form
-        >
-      </template>
-    </v-card>
-  </v-dialog>
+          <template #append
+            ><v-btn
+              icon="mdi-account-remove-outline"
+              variant="text"
+              color="error"
+              :disabled="busy"
+              :aria-label="messages.revoke + ' — ' + share.email"
+              :title="messages.revoke"
+              @click="change(share.email, 'revoke')"
+          /></template>
+        </v-list-item>
+      </v-list>
+    </template>
+    <template #actions>
+      <v-btn
+        variant="text"
+        :disabled="busy"
+        @click="open = false"
+        >{{ messages.close }}</v-btn
+      >
+      <v-btn
+        color="primary"
+        type="submit"
+        form="vault-share-form"
+        :loading="busy"
+        :disabled="busy || loading || !email.trim() || shares.length >= 50"
+        >{{ messages.share }}</v-btn
+      >
+    </template>
+  </VaultDialog>
 </template>

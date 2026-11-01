@@ -3,14 +3,18 @@ import type { VaultEntry } from '../types';
 import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultPasswordCell from './VaultPasswordCell.vue';
 import VaultUsernameCopy from './VaultUsernameCopy.vue';
-defineProps<{
-  entries: VaultEntry[];
-  secretAvailable: boolean;
-  busy: boolean;
-  resetKey: number;
-  canEdit: (entry: VaultEntry) => boolean;
-  canArchive: (entry: VaultEntry) => boolean;
-}>();
+withDefaults(
+  defineProps<{
+    entries: VaultEntry[];
+    secretAvailable: boolean;
+    sharingAvailable?: boolean;
+    busy: boolean;
+    resetKey: number;
+    canEdit: (entry: VaultEntry) => boolean;
+    canArchive: (entry: VaultEntry) => boolean;
+  }>(),
+  { sharingAvailable: true },
+);
 defineEmits<{
   detail: [entry: VaultEntry];
   edit: [entry: VaultEntry];
@@ -145,7 +149,7 @@ function website(value: string) {
               @click="$emit('password', entry)"
             />
             <v-list-item
-              v-if="entry.isOwner && canEdit(entry)"
+              v-if="sharingAvailable && entry.isOwner && canEdit(entry)"
               prepend-icon="mdi-account-multiple-outline"
               :title="messages.shareTitle"
               @click="$emit('share', entry)"

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import VaultDialog from '../components/VaultDialog.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import { vaultRpc as rpc, parseEntries } from '../live-api';
 import VaultAccountList from '../components/VaultAccountList.vue';
@@ -494,24 +495,14 @@ onMounted(() => {
       :close-on-submit="false"
       @save="write"
     />
-    <v-dialog
+    <VaultDialog
       v-model="detailOpen"
-      max-width="440"
-      class="vault-detail-drawer"
-      transition="slide-x-reverse-transition"
-      :aria-label="messages.details"
-      ><v-card
-        v-if="detail"
-        class="vault-dialog"
-        ><div class="vault-dialog-heading">
-          <h2>{{ detail.name }}</h2>
-          <v-btn
-            icon="mdi-close"
-            variant="text"
-            :aria-label="messages.close"
-            @click="detail = null"
-          />
-        </div>
+      :title="detail?.name ?? messages.details"
+      :subtitle="messages.details"
+      :busy="busy"
+      drawer
+    >
+      <template v-if="detail">
         <v-alert
           v-if="failure"
           type="error"
@@ -532,9 +523,11 @@ onMounted(() => {
           <dt>{{ messages.updated }}</dt>
           <dd>
             {{
-              new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
-                new Date(detail.updatedAt),
-              )
+              new Intl.DateTimeFormat(locale, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+                timeZone: 'Asia/Jakarta',
+              }).format(new Date(detail.updatedAt))
             }}
           </dd>
           <dt>{{ messages.password }}</dt>
@@ -543,87 +536,108 @@ onMounted(() => {
         <p class="vault-field-hint">
           {{ secretAvailable ? messages.encryptedHint : messages.passwordHint }}
         </p>
-        <div class="vault-dialog-actions vault-detail-actions">
-          <v-btn
-            v-if="secretAvailable && detail.status === 'active'"
-            variant="text"
-            :disabled="busy"
-            @click="
-              secretMode = 'reveal';
-              secretTarget = detail;
-              detail = null;
-            "
-            >{{ messages.reveal }}</v-btn
-          >
-          <v-btn
-            v-if="secretAvailable && detail.status === 'active' && canEdit(detail)"
-            variant="text"
-            :disabled="busy"
-            @click="
-              secretMode = 'write';
-              secretTarget = detail;
-              detail = null;
-            "
-            >{{ messages.setPassword }}</v-btn
-          >
-          <v-btn
-            v-if="detail.isOwner && canEdit(detail)"
-            variant="text"
-            :disabled="busy"
-            @click="
-              sharingTarget = detail;
-              detail = null;
-            "
-            >{{ messages.shareTitle }}</v-btn
-          >
-          <v-btn
-            v-if="canArchive(detail)"
-            variant="text"
-            :disabled="busy"
-            @click="
-              detail.status === 'active'
-                ? (archiveTarget = detail)
-                : changeStatus(detail, 'restore')
-            "
-            >{{ detail.status === 'active' ? messages.archive : messages.restore }}</v-btn
-          ><v-btn
-            color="primary"
-            :disabled="busy || !canEdit(detail)"
-            @click="edit(detail)"
-            >{{ messages.edit }}</v-btn
-          >
-        </div></v-card
-      ></v-dialog
-    >
-    <v-dialog
-      v-model="archiveOpen"
-      :persistent="busy"
-      max-width="440"
-      ><v-card class="vault-dialog"
-        ><h2>{{ messages.archiveTitle }}</h2>
-        <v-alert
-          v-if="failure"
-          type="error"
-          variant="tonal"
-          role="alert"
-          >{{ failure }}</v-alert
+      </template>
+      <template
+        v-if="detail"
+        #actions
+      >
+        <v-btn
+          v-if="secretAvailable && detail.status === 'active'"
+          variant="text"
+          :disabled="busy"
+          @click="
+            secretMode = 'reveal';
+            secretTarget = detail;
+            detail = null;
+          "
+          >{{ messages.reveal }}</v-btn
         >
-        <p class="vault-confirm-hint">{{ messages.archiveHint }}</p>
-        <div class="vault-dialog-actions">
-          <v-btn
-            variant="text"
-            :disabled="busy"
-            @click="archiveTarget = null"
-            >{{ messages.cancel }}</v-btn
-          ><v-btn
-            color="primary"
-            :loading="busy"
-            @click="archiveTarget && changeStatus(archiveTarget, 'archive')"
-            >{{ messages.archive }}</v-btn
-          >
-        </div></v-card
-      ></v-dialog
+        <v-menu
+          v-if="canEdit(detail) || canArchive(detail)"
+          location="top end"
+        >
+          <template #activator="{ props: menu }"
+            ><v-btn
+              v-bind="menu"
+              icon="mdi-dots-vertical"
+              variant="text"
+              :disabled="busy"
+              :aria-label="messages.actions"
+              :title="messages.actions"
+          /></template>
+          <v-list density="compact">
+            <v-list-item
+              v-if="secretAvailable && detail.status === 'active' && canEdit(detail)"
+              prepend-icon="mdi-key-outline"
+              :title="messages.setPassword"
+              @click="
+                secretMode = 'write';
+                secretTarget = detail;
+                detail = null;
+              "
+            />
+            <v-list-item
+              v-if="detail.isOwner && canEdit(detail)"
+              prepend-icon="mdi-account-multiple-outline"
+              :title="messages.shareTitle"
+              @click="
+                sharingTarget = detail;
+                detail = null;
+              "
+            />
+            <v-list-item
+              v-if="canArchive(detail)"
+              :prepend-icon="
+                detail.status === 'active' ? 'mdi-archive-outline' : 'mdi-archive-arrow-up-outline'
+              "
+              :title="detail.status === 'active' ? messages.archive : messages.restore"
+              @click="
+                detail.status === 'active'
+                  ? (archiveTarget = detail)
+                  : changeStatus(detail, 'restore')
+              "
+            />
+          </v-list>
+        </v-menu>
+        <v-btn
+          v-if="canEdit(detail)"
+          color="primary"
+          :disabled="busy"
+          @click="edit(detail)"
+          >{{ messages.edit }}</v-btn
+        >
+      </template>
+    </VaultDialog>
+    <VaultDialog
+      v-model="archiveOpen"
+      :title="messages.archiveTitle"
+      :busy="busy"
+      :width="440"
     >
+      <v-alert
+        v-if="failure"
+        type="error"
+        variant="tonal"
+        density="compact"
+        role="alert"
+        >{{ failure }}</v-alert
+      >
+      <p class="vault-field-hint vault-panel-intro">{{ messages.archiveHint }}</p>
+      <template #actions>
+        <v-btn
+          variant="text"
+          :disabled="busy"
+          @click="archiveTarget = null"
+          >{{ messages.cancel }}</v-btn
+        >
+        <v-btn
+          color="primary"
+          :loading="busy"
+          @click="archiveTarget && changeStatus(archiveTarget, 'archive')"
+          >{{ messages.archive }}</v-btn
+        >
+      </template>
+    </VaultDialog>
     <VaultSecretDialog
       v-if="secretTarget"
       v-model="secretOpen"

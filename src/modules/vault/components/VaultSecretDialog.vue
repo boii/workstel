@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import VaultDialog from './VaultDialog.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import type { VaultEntry } from '../types';
 import { getSupabase } from '../../../auth/client';
@@ -176,150 +177,163 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <v-dialog
+  <VaultDialog
     v-model="open"
-    max-width="600"
-    :persistent="busy"
+    :title="
+      mode === 'verify'
+        ? messages.verifyIdentity
+        : mode === 'write'
+          ? messages.setPassword
+          : messages.reveal
+    "
+    :subtitle="entry.name"
+    :busy="busy"
   >
-    <v-card class="vault-dialog">
-      <div class="vault-dialog-heading">
-        <h2>
-          {{
-            mode === 'verify'
-              ? messages.verifyIdentity
-              : mode === 'write'
-                ? messages.setPassword
-                : messages.reveal
-          }}
-        </h2>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          :aria-label="messages.close"
-          :disabled="busy"
-          @click="open = false"
-        />
-      </div>
-      <p class="vault-confirm-hint">{{ entry.name }}</p>
-      <v-alert
-        v-if="failure"
-        type="error"
-        variant="tonal"
-        role="alert"
-        class="my-4"
-        >{{ failure }}</v-alert
-      >
-      <v-alert
-        v-if="saved"
-        type="success"
-        variant="tonal"
-        role="status"
-        class="my-4"
-        >{{ messages.passwordSaved }}</v-alert
-      >
-      <v-skeleton-loader
-        v-if="loading"
-        type="list-item-two-line"
+    <v-alert
+      v-if="failure"
+      type="error"
+      variant="tonal"
+      density="compact"
+      role="alert"
+      class="mb-3"
+      >{{ failure }}</v-alert
+    >
+    <v-alert
+      v-if="saved"
+      type="success"
+      variant="tonal"
+      density="compact"
+      role="status"
+      class="mb-3"
+      >{{ messages.passwordSaved }}</v-alert
+    >
+    <v-skeleton-loader
+      v-if="loading"
+      type="list-item-two-line"
+    />
+    <v-form
+      v-else-if="requiresAuth"
+      id="vault-verify-form"
+      class="vault-panel-fields"
+      @submit.prevent="reauthenticate"
+    >
+      <p class="vault-field-hint vault-panel-intro">
+        {{ mode === 'verify' ? messages.inlineReauthenticateHint : messages.reauthenticateHint }}
+      </p>
+      <v-text-field
+        v-model="loginPassword"
+        type="password"
+        :label="messages.signInPassword"
+        autocomplete="current-password"
+        required
+        :disabled="busy"
+        autofocus
       />
-      <v-form
-        v-else-if="requiresAuth"
-        class="vault-secret-form"
-        @submit.prevent="reauthenticate"
+    </v-form>
+    <v-form
+      v-else-if="mode === 'write' && version !== null"
+      id="vault-password-form"
+      class="vault-panel-fields"
+      @submit.prevent="act"
+    >
+      <p class="vault-field-hint vault-panel-intro">{{ messages.encryptedHint }}</p>
+      <v-text-field
+        v-model="password"
+        type="password"
+        :label="messages.newStoredPassword"
+        autocomplete="off"
+        required
+        :disabled="busy"
+        autofocus
+      />
+      <v-text-field
+        v-model="confirmation"
+        type="password"
+        :label="messages.confirmStoredPassword"
+        autocomplete="off"
+        required
+        :disabled="busy"
+      />
+    </v-form>
+    <template v-else-if="mode === 'reveal' && version !== null">
+      <p
+        v-if="!hasSecret"
+        class="vault-field-hint vault-panel-intro"
       >
-        <p class="vault-field-hint">
-          {{ mode === 'verify' ? messages.inlineReauthenticateHint : messages.reauthenticateHint }}
-        </p>
+        {{ messages.noPassword }}
+      </p>
+      <template v-else>
+        <p class="vault-field-hint vault-panel-intro">{{ messages.revealHint }}</p>
         <v-text-field
-          v-model="loginPassword"
-          type="password"
-          :label="messages.signInPassword"
-          autocomplete="current-password"
-          required
-          :disabled="busy"
-        />
-        <v-btn
-          type="submit"
-          color="primary"
-          :loading="busy"
-          :disabled="!loginPassword || busy"
-          >{{ messages.verifyIdentity }}</v-btn
-        >
-      </v-form>
-      <v-form
-        v-else-if="mode === 'write' && version !== null"
-        class="vault-secret-form"
-        @submit.prevent="act"
-      >
-        <p class="vault-field-hint">{{ messages.encryptedHint }}</p>
-        <v-text-field
-          v-model="password"
-          type="password"
-          :label="messages.newStoredPassword"
+          v-if="revealed"
+          :model-value="revealed"
+          :label="messages.password"
+          readonly
           autocomplete="off"
-          required
-          :disabled="busy"
+          spellcheck="false"
         />
-        <v-text-field
-          v-model="confirmation"
-          type="password"
-          :label="messages.confirmStoredPassword"
-          autocomplete="off"
-          required
-          :disabled="busy"
-        />
-        <v-btn
-          type="submit"
-          color="primary"
-          :loading="busy"
-          :disabled="busy || !password || password !== confirmation"
-          >{{ messages.savePassword }}</v-btn
-        >
-      </v-form>
-      <template v-else-if="mode === 'reveal' && version !== null">
         <p
-          v-if="!hasSecret"
+          v-if="revealed"
           class="vault-field-hint"
         >
-          {{ messages.noPassword }}
+          {{ messages.clipboardHint }}
         </p>
-        <template v-else>
-          <p class="vault-field-hint">{{ messages.revealHint }}</p>
-          <v-text-field
-            v-if="revealed"
-            :model-value="revealed"
-            :label="messages.password"
-            readonly
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <v-btn
-            v-if="!revealed"
+      </template>
+    </template>
+    <template #actions>
+      <v-btn
+        variant="text"
+        :disabled="busy"
+        @click="open = false"
+        >{{ messages.close }}</v-btn
+      >
+      <v-btn
+        v-if="!loading && requiresAuth"
+        type="submit"
+        form="vault-verify-form"
+        color="primary"
+        :loading="busy"
+        :disabled="!loginPassword || busy"
+        >{{ messages.verifyIdentity }}</v-btn
+      >
+      <v-btn
+        v-else-if="!loading && mode === 'write' && version !== null"
+        type="submit"
+        form="vault-password-form"
+        color="primary"
+        :loading="busy"
+        :disabled="busy || !password || password !== confirmation"
+        >{{ messages.savePassword }}</v-btn
+      >
+      <template v-else-if="!loading && mode === 'reveal' && version !== null && hasSecret">
+        <v-btn
+          v-if="!revealed"
+          color="primary"
+          :loading="busy"
+          @click="act"
+          >{{ messages.reveal }}</v-btn
+        >
+        <template v-else
+          ><v-btn
+            icon="mdi-eye-off-outline"
+            variant="text"
+            :aria-label="messages.hidePassword"
+            :title="messages.hidePassword"
+            @click="clearReveal"
+          /><v-btn
             color="primary"
-            :loading="busy"
-            @click="act"
-            >{{ messages.reveal }}</v-btn
-          >
-          <template v-else
-            ><v-btn
-              variant="text"
-              @click="clearReveal"
-              >{{ messages.hidePassword }}</v-btn
-            ><v-btn
-              variant="text"
-              @click="copy"
-              >{{ copied ? messages.copied : messages.copyPassword }}</v-btn
-            >
-            <p class="vault-field-hint">{{ messages.clipboardHint }}</p></template
-          >
-        </template>
+            @click="copy"
+            >{{ copied ? messages.copied : messages.copyPassword }}</v-btn
+          ></template
+        >
       </template>
       <v-btn
-        v-else
+        v-else-if="!loading && version === null && !requiresAuth"
         variant="text"
         :disabled="busy"
         @click="inspect"
         >{{ messages.retry }}</v-btn
       >
-    </v-card>
-  </v-dialog>
+    </template>
+  </VaultDialog>
 </template>

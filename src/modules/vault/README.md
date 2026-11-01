@@ -2,6 +2,21 @@
 
 The production implementation uses authenticated Supabase RPCs for account metadata and durable audit. The development demo uses in-memory sample records only.
 
+## Layout contract
+
+Use `VaultDialog.vue` for Vault overlays. It owns the compact title, close control,
+scrollable body and fixed action footer. Standard forms use 560px maximum width;
+detail drawers and confirmations use 440px, and Audit log uses 960px. Detail and
+audit views fill the mobile screen. Short forms remain content-sized with a
+scrollable body when space is limited.
+
+Shared styles use 20px horizontal gutters on desktop and 16px on mobile, 20/19px
+dialog titles, 36px desktop actions and at least 44px mobile touch targets. Keep
+primary actions at the right of the footer. Use the toolbar slot for audit
+filters so controls remain visible while the body scrolls. Metadata forms keep
+password guidance separate from editable account fields. The development demo
+reuses the list and dialog layouts while retaining its explicit preview limits.
+
 ## Access model
 
 Accounts are private to their original creator by default. Hotel/department administrative permissions do not grant account metadata access. Owners can explicitly grant read-only access to active staff at the same hotel by exact email, and revoke it. Recipients cannot edit, archive or reshare. Writes and access changes have optimistic version checks and transactional audit.
