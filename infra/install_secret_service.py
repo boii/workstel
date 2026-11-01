@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Install only the Workstel secret function and reviewed Compose overlay."""
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -26,12 +27,26 @@ def main():
     backup=root/'backups'/('function-source-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     backup.mkdir(mode=0o700,parents=True)
     target.mkdir(mode=0o755,exist_ok=True)
+    target.chmod(0o755)  # mkdir mode is reduced by the caller's umask.
     for name in ['index.ts','handler.ts']:
         destination=target/name
         if destination.is_symlink():raise RuntimeError('Existing function source is a symlink; review it manually.')
         if destination.exists():shutil.copy2(destination,backup/name)
         shutil.copyfile(release/'backend/vault'/name,destination)
         destination.chmod(0o644)
+    # The edge runtime cannot read the mounted CA file; provide the public CA as one base64 line.
+    import base64
+    ca=base64.b64encode(Path('/opt/workstel-openbao/tls/ca.crt').read_bytes()).decode()
+    environment=root/'.env.workstel-vault'
+    if environment.is_symlink():raise RuntimeError('Application environment is a symlink; review it manually.')
+    lines=[line for line in settings.splitlines() if not line.startswith('WORKSTEL_OPENBAO_CA_PEM_B64=')]
+    lines.append('WORKSTEL_OPENBAO_CA_PEM_B64='+ca)
+    shutil.copy2(environment,backup/environment.name)
+    temporary=environment.with_name(environment.name+'.new')
+    if temporary.exists():temporary.unlink()
+    fd=os.open(temporary,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+    with os.fdopen(fd,'w',encoding='utf8') as stream:stream.write('\n'.join(lines)+'\n')
+    os.replace(temporary,environment)
     overlay=root/'docker-compose.workstel-vault.yml'
     if overlay.is_symlink():raise RuntimeError('Compose overlay is a symlink; review it manually.')
     if overlay.exists():shutil.copy2(overlay,backup/overlay.name)

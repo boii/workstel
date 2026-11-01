@@ -19,7 +19,8 @@ def main():
     opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
     token=None;count=0;created=None
     def request(path,body=None,authenticated=True,expected=()):
-        headers={'apikey':key,'Origin':'https://workstel.pages.dev','Content-Type':'application/json'}
+        # Cloudflare's browser integrity check blocks the default Python-urllib agent (error 1010).
+        headers={'apikey':key,'Origin':'https://workstel.pages.dev','Content-Type':'application/json','User-Agent':'Workstel-Commissioning/1.0'}
         if authenticated and token:headers['Authorization']='Bearer '+token
         req=urllib.request.Request('https://workstel.gabot.my.id'+path,data=json.dumps(body).encode() if body is not None else None,headers=headers,method='POST')
         try:

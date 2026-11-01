@@ -3,7 +3,10 @@ services:
     image: ${WORKSTEL_OPENBAO_IMAGE:?Pin the official OpenBao image before starting}
     container_name: workstel-openbao
     restart: unless-stopped
-    user: '1000:1000'
+    user: '${WORKSTEL_KMS_UID:?Set the workstel-kms UID}:${WORKSTEL_KMS_GID:?Set the workstel-kms GID}'
+    # Bypass the image entrypoint: it chowns bind mounts, which the read-only
+    # non-root runtime intentionally cannot do. Ownership is set on the host.
+    entrypoint: ['bao']
     command: ['server', '-config=/openbao/config/openbao.hcl']
     read_only: true
     cap_drop: [ALL]

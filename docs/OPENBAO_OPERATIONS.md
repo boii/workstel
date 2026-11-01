@@ -2,7 +2,14 @@
 
 This is an administrator workflow. Staff only use Workstel. Never send initialization output, unseal keys, operator tokens, application environment files or backups to chat.
 
-Status: server-only handler, SQL boundary and gated frontend implemented/tested locally. OpenBao/runtime encryption has not yet been commissioned on the hotel server. The application environment starts with WORKSTEL_SECRET_SERVICE_ENABLED=false.
+Status (1 November 2026): commissioned on the hotel server. OpenBao 2.7.2 is initialized/unsealed, configure_openbao.py passed, migration 202611010004 is recorded, and commission_secret_service.py passed all 17 checks over the public HTTPS endpoint. WORKSTEL_SECRET_SERVICE_ENABLED=true. Sharing with a second real staff account, key rotation, restore drills and off-VM backups remain unvalidated.
+
+## Commissioning findings
+
+- The OpenBao container must run as the host workstel-kms UID/GID (WORKSTEL_KMS_UID/GID) and bypass the image entrypoint, which tries to chown read-only mounts.
+- The Supabase edge runtime ignores DENO_CERT and cannot read files outside the function bundle. The installer writes the public CA as WORKSTEL_OPENBAO_CA_PEM_B64; the function trusts it only for OpenBao requests.
+- Cloudflare's browser integrity check rejects the default Python-urllib User-Agent (error 1010); the verifier sends its own User-Agent.
+- After a host reboot, Docker may start before eth1 has 10.10.10.108, so workstel-envoy (api-gw) and workstel-pooler fail to bind and the public API returns 502. Recreate api-gw with all four Compose files and unseal OpenBao after every reboot. A permanent boot-order fix is pending.
 
 ## 1. Prepare the isolated key manager
 
