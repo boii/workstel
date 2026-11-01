@@ -1,4 +1,14 @@
 export default {
+  access: 'Access',
+  allAccounts: 'All accessible accounts',
+  filters: 'Filters',
+  loadedAccounts: 'loaded accounts',
+  accessLoadedHint: 'Access filters apply to loaded accounts. Load more to search further.',
+  copyUsername: 'Copy username',
+  openWebsite: 'Open website',
+  passwordHidden: 'Password hidden',
+  inlineReauthenticateHint:
+    'Enter your Workstel sign-in password to continue this action. If you use Google, close this dialog and sign out and back in first.',
   passwordActions: 'Use the password actions below.',
   managedSeparately: 'Managed separately',
   separatePasswordHint: 'Save the account first, then use Set password in account details.',

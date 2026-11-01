@@ -1,5 +1,16 @@
 import type en from './en';
 export default {
+  access: 'Akses',
+  allAccounts: 'Semua akun yang dapat diakses',
+  filters: 'Filter',
+  loadedAccounts: 'akun dimuat',
+  accessLoadedHint:
+    'Filter akses berlaku pada akun yang dimuat. Muat lagi untuk mencari lebih lanjut.',
+  copyUsername: 'Salin username',
+  openWebsite: 'Buka website',
+  passwordHidden: 'Password disembunyikan',
+  inlineReauthenticateHint:
+    'Masukkan password login Workstel untuk melanjutkan tindakan ini. Jika memakai Google, tutup dialog lalu keluar dan login kembali terlebih dahulu.',
   passwordActions: 'Gunakan tombol password di bawah ini.',
   managedSeparately: 'Dikelola terpisah',
   separatePasswordHint: 'Simpan akun terlebih dahulu, lalu gunakan Atur password di detail akun.',

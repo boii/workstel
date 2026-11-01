@@ -5,8 +5,8 @@ import { getSupabase } from '../../../auth/client';
 import { secretOperation, SecretOperationError } from '../secret-api';
 import { useVaultMessages } from '../composables/useVaultMessages';
 const open = defineModel<boolean>({ required: true });
-const props = defineProps<{ entry: VaultEntry; mode: 'write' | 'reveal' }>();
-const emit = defineEmits<{ changed: [] }>();
+const props = defineProps<{ entry: VaultEntry; mode: 'write' | 'reveal' | 'verify' }>();
+const emit = defineEmits<{ changed: []; verified: [] }>();
 const messages = useVaultMessages();
 const loading = ref(true),
   busy = ref(false),
@@ -70,6 +70,7 @@ async function inspect() {
   }
 }
 async function act() {
+  if (props.mode === 'verify') return;
   if (busy.value || loading.value || version.value === null) return;
   clearReveal();
   failure.value = '';
@@ -134,6 +135,11 @@ async function reauthenticate() {
     if (error || data.user?.id !== current.data.user.id) throw Error();
     if (disposed) return;
     requiresAuth.value = false;
+    if (props.mode === 'verify') {
+      emit('verified');
+      open.value = false;
+      return;
+    }
     await inspect();
   } catch {
     if (!disposed) failure.value = messages.value.reauthenticationFailed;
@@ -156,7 +162,10 @@ function visibilityChanged() {
 onMounted(() => {
   document.addEventListener('visibilitychange', visibilityChanged);
   window.addEventListener('blur', clearSensitive);
-  void inspect();
+  if (props.mode === 'verify') {
+    loading.value = false;
+    requiresAuth.value = true;
+  } else void inspect();
 });
 onUnmounted(() => {
   disposed = true;
@@ -174,7 +183,15 @@ onUnmounted(() => {
   >
     <v-card class="vault-dialog">
       <div class="vault-dialog-heading">
-        <h2>{{ mode === 'write' ? messages.setPassword : messages.reveal }}</h2>
+        <h2>
+          {{
+            mode === 'verify'
+              ? messages.verifyIdentity
+              : mode === 'write'
+                ? messages.setPassword
+                : messages.reveal
+          }}
+        </h2>
         <v-btn
           icon="mdi-close"
           variant="text"
@@ -209,7 +226,9 @@ onUnmounted(() => {
         class="vault-secret-form"
         @submit.prevent="reauthenticate"
       >
-        <p class="vault-field-hint">{{ messages.reauthenticateHint }}</p>
+        <p class="vault-field-hint">
+          {{ mode === 'verify' ? messages.inlineReauthenticateHint : messages.reauthenticateHint }}
+        </p>
         <v-text-field
           v-model="loginPassword"
           type="password"

@@ -29,3 +29,39 @@ Status: private metadata implementation tested locally; actual-server metadata c
 - Complete off-server backup/restore, audit retention/archival, alerting and restart recovery exercises.
 
 Do not mark the complete Password Vault production-ready based on metadata tests alone.
+
+## Compact account list — 2 November 2026
+
+Implemented a compact desktop account list and two-line mobile rows using the
+existing Vuetify theme. Search, access filtering and refresh share one toolbar;
+status/department/hotel filters expand on demand. Account details open in a
+focus-trapped right-side dialog, full-screen on mobile. Metadata edit, password
+write, sharing and archive/restore remain subject to the existing capabilities.
+
+Passwords are fixed-length placeholders until an explicit eye/copy action calls
+the existing audited reveal endpoint. Plaintext is kept only in component
+memory, cleared after 30 seconds, on blur/hidden tab, list refresh/filter change,
+detail/dialog opening and component disposal. Requests are aborted/invalidated
+when cleared so a delayed response cannot reopen a password. Copy feedback is
+local; the device clipboard and its history cannot be reliably cleared.
+Reauthentication reuses the existing identity check and resumes only the
+requested action. No secret is fetched automatically for list rows.
+
+The access selector filters loaded metadata only; counts say "loaded accounts"
+and a pagination hint explains the scope while more pages remain. Search,
+department/status and backend authorization still run on the server. Closing
+details retains list state. Saving metadata refreshes the previously loaded
+number of pages without replacing the list with an initial loading screen.
+
+Browser acceptance uses isolated fictional fixtures excluded from builds. Real
+staff password actions and multi-user acceptance must still be checked on the
+deployed application; no real secrets were used in visual checks.
+
+Verified desktop and 390 × 844 browser layouts with long record values and
+English/Indonesian labels, including a 390px full-screen detail dialog with no
+horizontal document overflow. Browser checks passed for inline reveal/copy,
+30-second auto-hide, delayed-response cancellation when opening details, denied
+reveal feedback, failed/successful reauthentication, shared-account read-only
+menus, loaded access filtering, and search-button/Enter submission with no-result
+feedback. These checks exercised actual UI components with fictional API/Auth
+fixtures, not production accounts.
