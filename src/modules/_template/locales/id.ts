@@ -1,0 +1,21 @@
+import type en from './en';
+export default {
+  title: 'Modul Baru',
+  description: 'Jelaskan tujuan operasional modul ini.',
+  search: 'Cari data',
+  create: 'Tambah data',
+  name: 'Nama',
+  save: 'Simpan',
+  cancel: 'Batal',
+  emptyTitle: 'Belum ada data',
+  emptyDescription: 'Tambahkan data pertama untuk memulai.',
+  noResults: 'Tidak ada data yang cocok',
+  noResultsDescription: 'Coba pencarian lain.',
+  retry: 'Coba lagi',
+  loadError: 'Data tidak dapat dimuat.',
+  required: 'Masukkan nama.',
+  demoNotice: 'Pratinjau template. Data hanya disimpan di memori.',
+  created: 'Data ditambahkan.',
+  close: 'Tutup',
+  records: 'Data',
+} satisfies Record<keyof typeof en, string>;

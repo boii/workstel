@@ -1,0 +1,94 @@
+# Workstel module standard
+
+Status: mandatory for all new modules. Approved visual reference: DESIGN_REFERENCE.md.
+The current application is a prototype. SSO, server authorization, storage, event delivery and production module routing are not implemented.
+
+## Create a module
+
+Run: npm run module:new -- stock-transfer "Stock Transfer"
+Then run: npm run modules:check and npm run build.
+The generator copies src/modules/_template and adds its manifest to src/modules/registry.ts.
+The generated dashboard card opens the existing metadata preview. Wire ModuleListPage.vue into production routing when implementing the module; generation alone does not enable operational functionality.
+Do not generate modules directly in production.
+
+## Required files
+
+- manifest.ts: immutable identity, version, category, icon, permissions and events.
+- pages/ModuleListPage.vue: initial page built with shared/ModulePage.vue.
+- locales/en.ts and locales/id.ts: typed, matching system message keys.
+- types.ts: domain records and request types.
+- api.ts: API service contract, never direct database access from the browser.
+- README.md: module purpose, setup, dependencies and integration details.
+- ACCEPTANCE.md: acceptance evidence before release.
+  Add components/, composables/, pages/ModuleDetailPage.vue and pages/ModuleFormPage.vue as real requirements emerge; do not create empty abstractions.
+  Keep business logic inside its module. Share only domain-independent primitives.
+  Future monorepo destinations: apps/web/src/modules, apps/api/src/modules, packages/contracts and packages/ui.
+
+## Manifest and integration
+
+IDs must be unique, permanent kebab-case; versions use semver.
+English titles/descriptions are source metadata; display them through module translation keys.
+Use MDI icons, the approved category values, and theme color tokens.
+Permissions use module-id:action. Every mutation needs a specific permission.
+Events use module-id.action.vN; published events belong to the publishing module.
+Declare every subscription; registered publishers must exist. External events need an explicit adapter contract.
+Use ModuleEvent and RecordReference, not direct cross-module table access.
+Validate event payloads on the server. Publish after transaction commit using an outbox.
+Consumers must be idempotent by event ID and support retry, dead-letter handling and correlation IDs.
+Breaking event payload changes require a new event version.
+
+## Shared data and API
+
+Domain records extend BaseRecord; use UUIDs and ISO 8601 UTC timestamps.
+The server derives hotel, department and actor scope from its authenticated session.
+Share canonical user, hotel, department, location and asset IDs; never duplicate master data.
+Define allowed status transitions, units and concurrency/version behavior.
+Money uses integer minor units and an explicit currency.
+API prefix: /api/v1/modules/<module-id>.
+Responses use {data, meta, error}; lists have bounded pagination and allowlisted filters/sorts.
+Errors contain code, messageKey, fieldErrors and correlationId. Never expose stacks or secrets.
+Validate requests and responses at runtime on the server; TypeScript types alone are insufficient.
+Use idempotency keys for critical writes and version checks for conflicting updates.
+Use a shared authenticated client once implemented, including cancellation, session expiration and safe error handling.
+
+## Security and audit
+
+SSO login is the first page. Remove demo bypass before production.
+Check permissions and hotel/department scope on every server endpoint. Hiding UI is not authorization.
+Audit create, update, delete, approve, export and secret reveal without recording secret values.
+Vault stores metadata and secret references in the portal; secret values require a dedicated encrypted backend and separate key management.
+Never put credentials, secrets or sensitive operational data in localStorage, logs, analytics or events.
+Frontend permission states must mirror server capabilities, without replacing server enforcement.
+
+## Visual and interaction standard
+
+Vue + TypeScript + Vite + Vuetify; use shared/ModulePage.vue and the global Vuetify theme.
+Quicksand UI, Noto Sans tables, MDI icons; primary #0096C7, background #F2F5F8, white cards, 6px radius.
+Use the exact measured shadow tokens in DESIGN_REFERENCE.md.
+No sidebar, marketing banners, decorative animations, duplicate headers or fabricated metrics.
+Desktop uses the shared thin header. Mobile uses one-column cards, full-width search and navigation beneath the top header row.
+Pages include a title, one primary action, search/filter where needed, content and pagination.
+Loading uses skeletons; errors have safe messages and retry; distinguish empty data from no search results.
+Forms have visible labels, inline validation, saving state, submit protection, success feedback and cancellation.
+Verify denied access, expired sessions, offline/network failures and conflicting edits when backend exists.
+Preserve focus, dialog Escape behavior, keyboard access, touch targets and reduced-motion preferences.
+Verify 390px mobile and desktop with no horizontal page overflow. Dense tables may scroll within a labeled region.
+
+## Language and code
+
+English is the default UI and engineering language.
+Use camelCase variables/functions, PascalCase components/types, kebab-case module IDs.
+Use English comments, API fields, event names and error codes.
+Use typed translation keys for all system copy, labels, validation and accessibility names.
+Module locales must contain matching English and Indonesian keys; English is fallback.
+Never translate user-entered records. Format values with Intl using locale, hotel time zone and currency.
+Do not use translated display labels as persisted identifiers, API values or permission names.
+The current prototype shell has a legacy English-text translation adapter; new modules must use explicit keys as shown in the template.
+
+## Automated gates and review
+
+npm run build runs modules:check, Vue/TypeScript checks and the production build.
+modules:check validates registry identity, permission/event naming, publisher availability, required scaffold files and locale-key parity.
+These checks do not prove secure authorization, correct translations, accessibility or business correctness.
+Complete ACCEPTANCE.md, add focused domain/API/event tests and record UI verification before release.
+Generated prototype modules must remain clearly identified as demo until production requirements are satisfied.
