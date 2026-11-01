@@ -3,7 +3,7 @@ import ts from 'typescript-eslint';
 import vue from 'eslint-plugin-vue';
 import prettier from 'eslint-config-prettier';
 export default ts.config(
-  { ignores: ['dist/**', 'node_modules/**'] },
+  { ignores: ['dist/**', 'node_modules/**', '.local-release/**', '.wrangler/**'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   ...vue.configs['flat/recommended'],

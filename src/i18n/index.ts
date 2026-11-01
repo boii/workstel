@@ -1,9 +1,10 @@
 import { ref, watch } from 'vue';
 export const english = {
+  loading: 'Restoring your session',
   productionPending: 'This module is not enabled for production yet.',
   productionLogin: 'Sign in with your approved account.',
   sessionPolicy:
-    'For your security, reloading this page requires another sign-in. Sign out when you finish using this device.',
+    'Your session can survive a page refresh for up to 12 hours. Sign out when you finish using this device.',
   workspaceAccess: 'Workspace access',
   accessChanges: 'Contact your hotel administrator to change your access.',
   productionHelp:
@@ -101,10 +102,11 @@ export const english = {
 } as const;
 export type MessageKey = keyof typeof english;
 const indonesian: Record<MessageKey, string> = {
+  loading: 'Memulihkan sesi Anda',
   productionPending: 'Modul ini belum diaktifkan untuk produksi.',
   productionLogin: 'Masuk dengan akun yang telah disetujui.',
   sessionPolicy:
-    'Untuk keamanan, memuat ulang halaman mengharuskan login kembali. Keluar setelah selesai menggunakan perangkat ini.',
+    'Sesi Anda tetap tersedia setelah memuat ulang halaman hingga 12 jam. Keluar setelah selesai menggunakan perangkat ini.',
   workspaceAccess: 'Akses workspace',
   accessChanges: 'Hubungi administrator hotel untuk mengubah akses Anda.',
   productionHelp:

@@ -149,7 +149,17 @@ function logout() {
 </script>
 <template>
   <v-app>
-    <template v-if="!session"
+    <v-main
+      v-if="auth.restoring.value"
+      class="d-flex align-center justify-center"
+    >
+      <v-progress-circular
+        indeterminate
+        color="primary"
+        :aria-label="t('loading')"
+      />
+    </v-main>
+    <template v-else-if="!session"
       ><header class="login-header">
         <span
           class="wordmark"

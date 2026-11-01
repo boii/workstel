@@ -15,6 +15,7 @@ export interface StaffAssignment {
 }
 export function useAuth() {
   const authenticated = ref(false),
+    restoring = ref(!runtime.demo && runtime.configured),
     busy = ref(false),
     failure = ref<'authFailed' | 'authUnavailable' | 'accessDenied' | null>(null),
     email = ref(''),
@@ -82,13 +83,22 @@ export function useAuth() {
     const client = getSupabase();
     const { data } = client.auth.onAuthStateChange((event, session) => {
       // Password sign-in synchronizes once below; token refresh still rechecks access.
-      if (event === 'SIGNED_IN' && busy.value) return;
+      if (busy.value && (event === 'SIGNED_IN' || restoring.value)) return;
       queueMicrotask(() => {
         void synchronize(session);
       });
     });
     stop = () => data.subscription.unsubscribe();
     try {
+      // INITIAL_SESSION may already contain an OAuth callback session. Otherwise restore
+      // via the server cookie; the marker is never a real refresh credential.
+      const initial = await client.auth.getSession();
+      if (!initial.data.session) {
+        busy.value = true;
+        const restored = await client.auth.refreshSession({ refresh_token: 'http-only-session' });
+        await synchronize(restored.data.session);
+        busy.value = false;
+      }
       const response = await fetch(runtime.supabaseUrl + '/auth/v1/settings', {
         headers: { apikey: runtime.anonKey },
         signal: AbortSignal.timeout(10000),
@@ -99,7 +109,10 @@ export function useAuth() {
       googleEnabled.value = settings.external?.google === true;
       emailEnabled.value = settings.external?.email === true;
     } catch {
+      busy.value = false;
       failure.value = 'authUnavailable';
+    } finally {
+      restoring.value = false;
     }
     // The initial auth event also handles OAuth callbacks and token expiry.
   }
@@ -164,6 +177,7 @@ export function useAuth() {
   });
   return {
     authenticated,
+    restoring,
     busy,
     failure,
     email,
