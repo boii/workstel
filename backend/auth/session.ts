@@ -100,7 +100,7 @@ export function makeSessionHandler(
         }
       }
       async function auth(path: string, body?: unknown, authorization?: string) {
-        return fetcher(upstream.origin + '/auth/v1/' + path, {
+        const result = await fetcher(upstream.origin + '/auth/v1/' + path, {
           method: 'POST',
           headers: {
             apikey: env.SESSION_SUPABASE_PUBLIC_KEY,
@@ -111,6 +111,8 @@ export function makeSessionHandler(
           redirect: 'error',
           signal: AbortSignal.timeout(15000),
         });
+        if (!result.ok) console.warn('Session Auth upstream status', result.status);
+        return result;
       }
       if (request.method === 'DELETE') {
         cookie('', 0);
@@ -220,7 +222,8 @@ export function makeSessionHandler(
         expires_in: session.expires_in,
         user: session.user,
       });
-    } catch {
+    } catch (error) {
+      console.warn('Session bridge failure', error instanceof Error ? error.name : 'UnknownError');
       return fail(503, 'session_unavailable');
     }
   };
