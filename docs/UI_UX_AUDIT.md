@@ -27,3 +27,14 @@ Production component checks covered the Vault toolbar/list, long account names/u
 At 390 × 640, the form body scrolled independently while Save/Cancel remained inside the viewport. Submitting an empty form focused vault-name and exposed its validation message. At 390 × 844, the form remained within the viewport. Native device keyboards and physical iOS/Android devices were not tested.
 
 Automated acceptance: npm run format and npm run check (formatting, ESLint, module-generator tests, domain/API/PostgreSQL/handler tests, manifest/locale checks, TypeScript and Vite production build). Browser screenshots were saved as review artifacts outside the source tree. This is a focused layout/accessibility improvement, not a claim of a complete WCAG audit or live backend acceptance.
+
+## Coming-soon card overlay — 2 November 2026
+
+Replaced the small status badge with a transparent surface overlay covering the
+entire unavailable module card, including its favorite control. The status is
+centered; underlying content remains visible. Module and favorite buttons remain
+disabled. Existing English/Indonesian status messages are reused.
+
+Verified the local demo dashboard at desktop and a 390 × 844 mobile viewport.
+Every mobile overlay matched its card bounds, and the document had no horizontal
+overflow. `npm run format` and `npm run check` passed.

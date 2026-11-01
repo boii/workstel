@@ -207,6 +207,7 @@ p {
   gap: 16px;
 }
 .module-card {
+  position: relative;
   display: flex;
   align-items: flex-start;
   background: white;
@@ -581,16 +582,20 @@ footer small {
 .module-coming-soon .module-open p {
   color: #687984;
 }
-.coming-soon-label {
-  display: inline-block;
-  margin-top: 7px;
-  border: 1px solid #e1e7eb;
-  border-radius: 4px;
-  padding: 2px 6px;
-  color: #62737f;
-  font-size: 10px;
-  font-weight: 500;
-  background: #f7f9fa;
+.coming-soon-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  padding: 16px;
+  color: var(--workstel-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(var(--v-theme-surface), 0.72);
+  pointer-events: none;
 }
 .module-coming-soon:has(.module-open:hover) {
   background: white;

@@ -483,12 +483,7 @@ function logout() {
                   ><span
                     ><h2>{{ translate(m.title) }}</h2>
                     <p>{{ translate(m.description) }}</p>
-                    <span
-                      v-if="!canOpenModule(m)"
-                      class="coming-soon-label"
-                      >{{ t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon') }}</span
-                    ></span
-                  ></button
+                  </span></button
                 ><v-btn
                   :icon="favorites.includes(m.id) ? 'mdi-star' : 'mdi-star-outline'"
                   :color="favorites.includes(m.id) ? 'primary' : undefined"
@@ -499,7 +494,12 @@ function logout() {
                   :aria-label="t('favorites') + ' ' + translate(m.title)"
                   :aria-pressed="favorites.includes(m.id)"
                   @click="toggleFavorite(m.id)"
-              /></v-card>
+                /><span
+                  v-if="!canOpenModule(m)"
+                  class="coming-soon-overlay"
+                  >{{ t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon') }}</span
+                ></v-card
+              >
             </div>
             <div
               v-if="!visible.length"
