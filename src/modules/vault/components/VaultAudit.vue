@@ -76,20 +76,22 @@ onUnmounted(() => {
       </div>
       <p class="vault-field-hint">{{ messages.auditHint }}</p>
       <v-card-text class="pa-0">
-        <v-select
-          v-model="department"
-          :label="messages.department"
-          :items="departments"
-          clearable
-          @update:model-value="load"
-        />
-        <v-btn
-          variant="text"
-          color="primary"
-          :loading="loading"
-          @click="load"
-          >{{ messages.refresh }}</v-btn
-        >
+        <div class="vault-audit-toolbar">
+          <v-select
+            v-model="department"
+            :label="messages.department"
+            :items="departments"
+            clearable
+            @update:model-value="load"
+          />
+          <v-btn
+            variant="text"
+            color="primary"
+            :loading="loading"
+            @click="load"
+            >{{ messages.refresh }}</v-btn
+          >
+        </div>
         <v-skeleton-loader
           v-if="loading"
           type="list-item-two-line@3"

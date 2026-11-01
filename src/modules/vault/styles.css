@@ -16,12 +16,13 @@
 }
 .vault-toolbar {
   display: grid;
-  grid-template-columns: minmax(240px, 1.6fr) minmax(170px, 1fr) minmax(140px, 0.7fr);
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr);
+  align-items: center;
   gap: 12px;
 }
 .vault-list-summary {
   font-size: 11px;
-  color: #7d8b95;
+  color: var(--workstel-text-secondary);
   margin-top: 15px;
 }
 .vault-desktop {
@@ -51,7 +52,7 @@
 }
 .vault-account-website {
   font-size: 10px;
-  color: #909ca3;
+  color: var(--workstel-text-secondary);
   display: block;
   margin-top: 4px;
   overflow-wrap: anywhere;
@@ -66,7 +67,7 @@
 }
 .vault-date {
   font-size: 10px !important;
-  color: #80909a;
+  color: var(--workstel-text-secondary);
   white-space: nowrap;
 }
 .vault-mobile {
@@ -100,13 +101,13 @@
 }
 .vault-field-hint {
   font-size: 11px;
-  color: #82919a;
+  color: var(--workstel-text-secondary);
   line-height: 1.7;
   margin: 8px 0;
 }
 .vault-detail-subtitle {
   font-size: 12px;
-  color: #86939c;
+  color: var(--workstel-text-secondary);
   margin: 8px 0 24px;
 }
 .vault-details {
@@ -114,7 +115,7 @@
 }
 .vault-details dt {
   font-size: 11px;
-  color: #87959e;
+  color: var(--workstel-text-secondary);
   margin-top: 16px;
 }
 .vault-details dd {
@@ -176,7 +177,7 @@
   .vault-toolbar {
     grid-template-columns: 1fr 1fr;
   }
-  .vault-toolbar > .v-input:first-child {
+  .vault-toolbar:not(.vault-toolbar--live) > .v-input:first-child {
     grid-column: 1/-1;
   }
   .vault-mobile-card {
@@ -193,7 +194,7 @@
   }
   .vault-mobile-card > p {
     font-size: 12px;
-    color: #748591;
+    color: var(--workstel-text-secondary);
     overflow-wrap: anywhere;
   }
   .vault-mobile-footer {
@@ -203,9 +204,177 @@
     gap: 8px;
     margin-top: 16px;
     font-size: 10px;
-    color: #8b98a1;
+    color: var(--workstel-text-secondary);
   }
 }
+
+.vault-toolbar > * {
+  min-width: 0;
+}
+.vault-toolbar--live {
+  grid-template-columns:
+    minmax(200px, 1.7fr) minmax(140px, 1fr) minmax(110px, 0.8fr) minmax(140px, 1fr)
+    auto;
+  grid-template-areas: 'search hotel status department submit';
+}
+.vault-search {
+  grid-area: search;
+}
+.vault-hotel-filter {
+  grid-area: hotel;
+}
+.vault-status-filter {
+  grid-area: status;
+}
+.vault-department-filter {
+  grid-area: department;
+}
+.vault-search-submit {
+  grid-area: submit;
+  min-height: 40px;
+}
+.vault-live-entry {
+  padding: 18px 20px;
+}
+.vault-live-entry + .vault-live-entry {
+  border-top: 1px solid var(--workstel-border);
+}
+.vault-live-entry .v-list-item-subtitle {
+  opacity: 1;
+  -webkit-line-clamp: unset;
+}
+.vault-live-entry .v-list-item-title {
+  white-space: normal;
+}
+.vault-entry-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-right: 16px;
+  border-radius: 6px;
+  background: #edf7fa;
+  color: #0096c7;
+}
+.vault-live-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.vault-live-username {
+  display: block;
+  color: var(--workstel-text-secondary);
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.vault-live-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  color: var(--workstel-text-secondary);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.vault-load-more {
+  display: flex;
+  margin: 16px auto 0;
+}
+.vault-dialog-heading > h2 {
+  min-width: 0;
+  line-height: 1.4;
+}
+.vault-dialog-heading > .v-btn {
+  flex-shrink: 0;
+}
+.vault-dialog.vault-form-dialog {
+  padding: 0;
+  overflow: hidden !important;
+}
+.vault-form-dialog .vault-dialog-heading {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--workstel-border);
+  flex-shrink: 0;
+}
+.vault-entry-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.vault-form-body {
+  padding: 0 24px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+.vault-form-body .field-label {
+  margin-top: 16px;
+}
+.vault-form-dialog .vault-dialog-actions {
+  margin: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--workstel-border);
+  background: white;
+  flex-shrink: 0;
+}
+.vault-share-form {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 20px;
+}
+.vault-share-form > .v-input {
+  min-width: 0;
+  flex: 1;
+}
+.vault-share-form > .v-btn {
+  min-height: 40px;
+}
+.vault-share-list .v-list-item-title {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.vault-share-list .v-list-item-subtitle {
+  opacity: 1;
+  color: var(--workstel-text-secondary);
+}
+.vault-secret-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+.vault-secret-form > .vault-field-hint {
+  margin: 0;
+}
+.vault-secret-form > .v-btn {
+  justify-self: end;
+}
+.vault-audit-toolbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 12px 0 20px;
+}
+.vault-audit-toolbar > .v-input {
+  min-width: 0;
+  flex: 1;
+}
+.vault-audit-toolbar > .v-btn {
+  min-height: 40px;
+}
+@media (max-width: 1100px) {
+  .vault-toolbar--live {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: 'search search submit' 'hotel department status';
+  }
+}
+
 @media (max-width: 680px) {
   .vault-dialog {
     padding: 22px;
@@ -228,13 +397,79 @@
     height: 44px;
     width: 44px;
   }
-}
-
-@media (max-width: 680px) {
   .vault-dialog .v-btn {
     min-height: 44px;
   }
   .vault-dialog .v-btn--icon {
     min-width: 44px;
+  }
+  .vault-toolbar--live {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 'search search' 'hotel status' 'department submit';
+  }
+  .vault-live-entry {
+    padding: 16px;
+  }
+  .vault-entry-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 12px;
+  }
+  .vault-live-entry .v-list-item__append {
+    padding-inline-start: 8px;
+  }
+  .vault-detail-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .vault-detail-actions > .v-btn {
+    min-width: 0;
+  }
+  .vault-detail-actions > .v-btn:last-child {
+    grid-column: 1 / -1;
+  }
+  .vault-form-dialog .vault-dialog-heading {
+    padding: 16px 18px 12px;
+  }
+  .vault-form-body {
+    padding: 0 18px 20px;
+  }
+  .vault-form-dialog .vault-dialog-actions {
+    padding: 12px 18px;
+  }
+  .vault-form-dialog .vault-dialog-actions > .v-btn {
+    flex: 1;
+  }
+  .vault-share-form {
+    flex-direction: column;
+  }
+  .vault-share-form > * {
+    width: 100%;
+  }
+  .vault-share-list .v-list-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 0;
+  }
+  .vault-share-list .v-list-item__append {
+    align-self: flex-end;
+  }
+  .vault-share-list .v-list-item__spacer {
+    display: none;
+  }
+  .vault-secret-form > .v-btn {
+    width: 100%;
+  }
+  .vault-toolbar .v-field__input,
+  .vault-audit-toolbar .v-field__input,
+  .vault-share-form .v-field__input {
+    min-height: 44px;
+  }
+  .vault-search-submit,
+  .vault-audit-toolbar > .v-btn,
+  .vault-share-form > .v-btn {
+    min-height: 44px;
   }
 }

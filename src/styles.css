@@ -1,4 +1,6 @@
 :root {
+  --workstel-text-secondary: #5f6f7b;
+  --workstel-border: #e0e6eb;
   font-family: Quicksand, sans-serif;
   color: rgba(0, 0, 0, 0.87);
   background: #f2f5f8;
@@ -149,6 +151,8 @@ p {
   font-size: 30px;
   font-weight: 400;
   letter-spacing: -0.7px;
+  min-width: 0;
+  line-height: 1.35;
 }
 .page-heading h1 .v-icon {
   color: #555;
@@ -157,12 +161,13 @@ p {
   margin-left: auto;
 }
 .demo-label {
-  font-size: 9px;
-  color: #78868f;
+  font-size: 10px;
+  color: var(--workstel-text-secondary);
   letter-spacing: 1px;
   border: 1px solid #dae1e6;
   border-radius: 4px;
   padding: 4px 6px;
+  white-space: nowrap;
 }
 .module-toolbar {
   display: flex;
@@ -173,6 +178,7 @@ p {
 }
 .module-search {
   max-width: 290px;
+  min-width: 0;
 }
 .module-search .v-field {
   border-radius: 28px;
@@ -188,6 +194,8 @@ p {
 .category-tabs {
   height: 36px !important;
   gap: 4px;
+  max-width: 100%;
+  flex-shrink: 0;
 }
 .category-tabs .v-btn {
   font-size: 12px;
@@ -202,16 +210,18 @@ p {
   display: flex;
   align-items: flex-start;
   background: white;
+  height: 100%;
 }
 .module-open {
   display: flex;
-  align-items: center;
-  gap: 17px;
+  align-items: flex-start;
+  gap: 16px;
   text-align: left;
   flex: 1;
   min-width: 0;
   min-height: 104px;
   padding: 20px 8px 20px 20px;
+  width: 100%;
 }
 .module-icon {
   display: grid;
@@ -220,6 +230,7 @@ p {
   color: #0096c7;
   width: 42px;
   height: 42px;
+  margin-top: 1px;
 }
 .module-icon.mint {
   color: #379985;
@@ -238,7 +249,7 @@ p {
 }
 .module-open p {
   font-size: 12px;
-  color: #7b858b;
+  color: var(--workstel-text-secondary);
   line-height: 1.6;
 }
 .favorite-button {
@@ -254,6 +265,7 @@ p {
   text-align: center;
   padding: 45px;
   color: #73818b;
+  line-height: 1.7;
 }
 .empty-state h2 {
   font-size: 18px;
@@ -401,6 +413,7 @@ footer small {
 }
 .info-panel {
   padding: 28px;
+  overflow-wrap: anywhere;
 }
 .info-panel h2 {
   font-size: 22px;
@@ -420,10 +433,6 @@ footer small {
   justify-content: space-between;
   padding: 0 38px;
   border-bottom: 1px solid #e5ebef;
-}
-.login-header > span {
-  font-size: 12px;
-  color: #81909a;
 }
 .login-main {
   display: flex;
@@ -512,8 +521,16 @@ footer small {
     display: none;
   }
   .switch-button {
+    width: 40px;
     min-width: 40px !important;
     padding: 0 8px !important;
+  }
+  .switch-button .v-btn__content,
+  .switch-button .v-btn__append {
+    display: none;
+  }
+  .switch-button .v-btn__prepend {
+    margin: 0;
   }
   .module-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -522,32 +539,116 @@ footer small {
     flex-wrap: wrap;
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+.wordmark,
+.top-nav > button,
+.module-open {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  appearance: none;
+}
+.top-nav > button {
+  border-bottom: 2px solid transparent;
+}
+.top-nav > button.active {
+  border-bottom-color: #0096c7;
+  color: #0096c7;
+}
+.login-language {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #81909a;
+  font-size: 12px;
+}
+.module-coming-soon .module-open {
+  cursor: default;
+}
+.module-coming-soon .module-icon {
+  color: #9ca8af;
+}
+.module-coming-soon .module-open h2 {
+  color: #647580;
+}
+.module-coming-soon .module-open p {
+  color: #687984;
+}
+.coming-soon-label {
+  display: inline-block;
+  margin-top: 7px;
+  border: 1px solid #e1e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: #62737f;
+  font-size: 10px;
+  font-weight: 500;
+  background: #f7f9fa;
+}
+.module-coming-soon:has(.module-open:hover) {
+  background: white;
+}
+
+.header-inner,
+.workspace-content,
+.header-actions,
+.module-toolbar {
+  min-width: 0;
+}
+.wordmark,
+.header-actions {
+  flex-shrink: 0;
+}
+.top-nav > button:disabled {
+  color: var(--workstel-text-secondary);
+  cursor: default;
+}
+.module-open > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.login-panel p,
+.login-support,
+.login-note,
+.info-panel p {
+  color: var(--workstel-text-secondary);
+}
+.password-login {
+  margin-top: 24px;
+}
+.password-login .v-btn {
+  margin-top: 24px;
+  min-height: 44px;
+}
 @media (max-width: 680px) {
-  .portal-header {
-    height: 112px !important;
-  }
-  .portal-header .v-toolbar__content {
-    height: 112px !important;
-    overflow: visible;
-  }
   .header-inner {
     height: 112px;
     flex-wrap: wrap;
     gap: 0;
     padding: 8px 18px 0;
     align-content: space-between;
+    padding-left: 14px;
+    padding-right: 14px;
   }
   .wordmark {
-    font-size: 23px;
+    font-size: 21px;
   }
   .header-actions {
     order: 1;
+    gap: 0;
   }
   .top-nav {
     order: 2;
     height: 44px;
     width: 100%;
-    gap: 25px;
+    gap: 24px;
   }
   .switch-button .v-btn__content,
   .switch-button .v-btn__append {
@@ -557,32 +658,28 @@ footer small {
     margin: 0;
   }
   .switch-button {
-    width: 36px;
-    height: 36px !important;
-  }
-  .header-actions > .v-btn {
-    width: 34px;
+    width: 44px;
+    min-width: 44px !important;
+    height: 44px !important;
   }
   .workspace-content {
     padding: 26px 18px 20px;
-  }
-  .v-main {
-    --v-layout-top: 112px !important;
+    padding-top: 24px;
   }
   .page-heading {
     margin-bottom: 22px;
     gap: 12px;
+    flex-wrap: wrap;
   }
   .page-heading h1 {
     font-size: 25px;
     gap: 9px;
   }
-  .demo-label {
-    font-size: 8px;
-  }
+
   .module-toolbar {
     gap: 14px;
     margin-bottom: 18px;
+    align-items: stretch;
   }
   .module-search {
     max-width: none;
@@ -592,13 +689,16 @@ footer small {
   .category-tabs {
     width: 100%;
     height: auto !important;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
   }
   .category-tabs .v-btn {
-    padding: 0 9px;
-    font-size: 10px;
+    padding: 0 12px;
+    font-size: 12px;
     min-width: 0;
-    height: 34px;
+    min-height: 44px;
+    border-radius: 6px !important;
   }
   .module-grid {
     grid-template-columns: 1fr;
@@ -629,12 +729,10 @@ footer small {
   }
   .task-time {
     font-size: 10px;
+    flex-shrink: 0;
   }
   .login-header {
     padding: 0 20px;
-  }
-  .login-header > span {
-    font-size: 10px;
   }
   .login-panel {
     padding: 28px 24px;
@@ -645,82 +743,49 @@ footer small {
   .login-note {
     align-items: flex-start;
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-.wordmark,
-.top-nav > button,
-.module-open {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  appearance: none;
-}
-.top-nav > button {
-  border-bottom: 2px solid transparent;
-}
-.top-nav > button.active {
-  border-bottom-color: #0096c7;
-  color: #0096c7;
-}
-.module-open {
-  width: 100%;
-}
-.login-language {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #81909a;
-  font-size: 12px;
-}
-@media (max-width: 680px) {
-  .header-inner {
-    padding-left: 14px;
-    padding-right: 14px;
-  }
-  .header-actions {
-    gap: 0;
-  }
   .header-actions .v-btn--icon {
-    width: 32px;
-    height: 40px;
-  }
-  .wordmark {
-    font-size: 21px;
+    width: 44px;
+    min-height: 44px;
   }
   .login-language > span {
     display: none;
   }
+  .top-nav > button {
+    min-height: 44px;
+  }
+  .favorite-button.v-btn--icon {
+    min-width: 44px;
+    height: 44px;
+    margin: 8px 4px 0 0;
+  }
+  .task-row > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .login-main {
+    padding: 28px 18px;
+  }
+  .empty-state {
+    padding: 32px 16px;
+  }
+  .info-panel {
+    padding: 22px;
+  }
+  footer {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
 }
-.module-coming-soon .module-open {
-  cursor: default;
-}
-.module-coming-soon .module-icon {
-  color: #9ca8af;
-}
-.module-coming-soon .module-open h2 {
-  color: #7f8a91;
-}
-.module-coming-soon .module-open p {
-  color: #9aa4aa;
-}
-.coming-soon-label {
-  display: inline-block;
-  margin-top: 7px;
-  border: 1px solid #e1e7eb;
-  border-radius: 4px;
-  padding: 2px 6px;
-  color: #8a959c;
-  font-size: 9px;
-  font-weight: 500;
-  background: #f7f9fa;
-}
-.module-coming-soon:has(.module-open:hover) {
-  background: white;
+
+@media (max-width: 360px) {
+  .notification-button {
+    display: none;
+  }
+  .header-inner .wordmark {
+    font-size: 19px;
+  }
+  .header-inner .wordmark > .v-icon {
+    font-size: 24px;
+    margin-right: 6px;
+  }
 }

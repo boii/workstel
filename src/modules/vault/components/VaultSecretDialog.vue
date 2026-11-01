@@ -206,6 +206,7 @@ onUnmounted(() => {
       />
       <v-form
         v-else-if="requiresAuth"
+        class="vault-secret-form"
         @submit.prevent="reauthenticate"
       >
         <p class="vault-field-hint">{{ messages.reauthenticateHint }}</p>
@@ -227,6 +228,7 @@ onUnmounted(() => {
       </v-form>
       <v-form
         v-else-if="mode === 'write' && version !== null"
+        class="vault-secret-form"
         @submit.prevent="act"
       >
         <p class="vault-field-hint">{{ messages.encryptedHint }}</p>

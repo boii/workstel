@@ -2,7 +2,9 @@
 import { computed, ref, watch, onMounted } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
-import { useLocale } from 'vuetify';
+import { useDisplay, useLocale } from 'vuetify';
+const { width } = useDisplay();
+const headerHeight = computed(() => (width.value <= 680 ? 112 : 64));
 const { current: materialLocale } = useLocale();
 watch(
   locale,
@@ -149,12 +151,12 @@ function logout() {
   <v-app>
     <template v-if="!session"
       ><header class="login-header">
-        <button
+        <span
           class="wordmark"
           aria-label="Workstel"
         >
           <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span>
-        </button>
+        </span>
         <div class="login-language">
           <span>{{ t('portal') }}</span
           ><v-menu
@@ -249,7 +251,7 @@ function logout() {
     >
     <template v-else
       ><v-app-bar
-        height="64"
+        :height="headerHeight"
         class="portal-header"
         ><div class="header-inner">
           <button
@@ -269,6 +271,7 @@ function logout() {
               v-for="item in ['Dashboard', 'My tasks', 'Favorites']"
               :key="item"
               :class="{ active: view === item }"
+              :aria-current="view === item ? 'page' : undefined"
               :disabled="!runtime.demo && item === 'My tasks'"
               :title="!runtime.demo && item === 'My tasks' ? t('comingSoon') : undefined"
               @click="nav(item)"
@@ -305,6 +308,7 @@ function logout() {
                   v-bind="props"
                   variant="text"
                   class="switch-button"
+                  :aria-label="t('switchModule')"
                   prepend-icon="mdi-apps"
                   append-icon="mdi-chevron-down"
                   >{{ t('switchModule') }}</v-btn
@@ -339,7 +343,8 @@ function logout() {
                   v-bind="props"
                   icon="mdi-bell-outline"
                   variant="text"
-                  :aria-label="t('notifications')" /></template
+                  :aria-label="t('notifications')"
+                  class="notification-button" /></template
               ><v-card class="notification-card"
                 ><h3>{{ t('notifications') }}</h3>
                 <p>{{ t('noNotifications') }}</p>
@@ -389,7 +394,11 @@ function logout() {
                     ? 'mdi-clipboard-check-outline'
                     : view === 'Favorites'
                       ? 'mdi-star-outline'
-                      : 'mdi-view-dashboard-outline'
+                      : view === 'Settings'
+                        ? 'mdi-cog-outline'
+                        : view === 'Help'
+                          ? 'mdi-help-circle-outline'
+                          : 'mdi-view-dashboard-outline'
                 "
                 size="28"
               />{{ translate(view) }}
@@ -530,11 +539,10 @@ function logout() {
           <v-card
             v-else
             class="info-panel"
-            ><h2>{{ translate(view) }}</h2>
-            <template v-if="view === 'Settings' && !runtime.demo"
+            ><template v-if="view === 'Settings' && !runtime.demo"
               ><p>{{ auth.email.value }}</p>
               <p>{{ t('sessionPolicy') }}</p>
-              <h3 class="mt-6">{{ t('workspaceAccess') }}</h3>
+              <h2 class="mt-6">{{ t('workspaceAccess') }}</h2>
               <v-list
                 ><v-list-item
                   v-for="assignment in auth.assignments.value"

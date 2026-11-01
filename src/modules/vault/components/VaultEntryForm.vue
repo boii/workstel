@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { useVaultMessages } from '../composables/useVaultMessages';
 import { departmentIds } from '../types';
 import type { VaultEntry, VaultEntryInput, VaultField, VaultValidationError } from '../types';
@@ -59,10 +59,17 @@ watch(open, (value) => {
   );
   errors.value = {};
 });
-function submit() {
+async function submit() {
   if (props.saving) return;
   errors.value = validateEntry(draft.value);
-  if (Object.keys(errors.value).length) return;
+  const invalid = Object.keys(errors.value)[0] as VaultField | undefined;
+  if (invalid) {
+    await nextTick();
+    document
+      .getElementById('vault-' + (invalid === 'departmentId' ? 'department' : invalid))
+      ?.focus();
+    return;
+  }
   emit('save', normalizeEntry(draft.value), props.entry?.id);
   if (props.closeOnSubmit) open.value = false;
 }
@@ -76,7 +83,7 @@ function fieldError(field: VaultField) {
     v-model="open"
     :persistent="saving"
     max-width="600"
-    ><v-card class="vault-dialog"
+    ><v-card class="vault-dialog vault-form-dialog"
       ><div class="vault-dialog-heading">
         <h2>{{ entry ? messages.edit : messages.add }}</h2>
         <v-btn
@@ -87,97 +94,108 @@ function fieldError(field: VaultField) {
           @click="open = false"
         />
       </div>
-      <v-alert
-        v-if="serverError"
-        type="error"
-        variant="tonal"
-        class="mb-4"
-        >{{ serverError }}</v-alert
-      ><v-form @submit.prevent="submit"
-        ><label
-          for="vault-name"
-          class="field-label"
-          >{{ messages.name }}</label
-        ><v-text-field
-          id="vault-name"
-          v-model="draft.name"
-          autofocus
-          autocomplete="off"
-          maxlength="150"
-          :hint="messages.nameHint"
-          :error-messages="fieldError('name')"
-        />
-        <div class="vault-form-grid">
-          <div>
-            <label
-              for="vault-username"
-              class="field-label"
-              >{{ messages.username }}</label
-            ><v-text-field
-              id="vault-username"
-              v-model="draft.username"
-              autocomplete="off"
-              maxlength="150"
-              :error-messages="fieldError('username')"
-            />
+      <v-form
+        class="vault-entry-form"
+        @submit.prevent="submit"
+      >
+        <div class="vault-form-body">
+          <v-alert
+            v-if="serverError"
+            role="alert"
+            type="error"
+            variant="tonal"
+            class="mb-4"
+            >{{ serverError }}</v-alert
+          ><label
+            for="vault-name"
+            class="field-label"
+            >{{ messages.name }}</label
+          ><v-text-field
+            id="vault-name"
+            v-model="draft.name"
+            :disabled="saving"
+            autofocus
+            autocomplete="off"
+            maxlength="150"
+            :hint="messages.nameHint"
+            :error-messages="fieldError('name')"
+          />
+          <div class="vault-form-grid">
+            <div>
+              <label
+                for="vault-username"
+                class="field-label"
+                >{{ messages.username }}</label
+              ><v-text-field
+                id="vault-username"
+                v-model="draft.username"
+                :disabled="saving"
+                autocomplete="off"
+                maxlength="150"
+                :error-messages="fieldError('username')"
+              />
+            </div>
+            <div>
+              <label
+                for="vault-department"
+                class="field-label"
+                >{{ messages.department }}</label
+              ><v-select
+                id="vault-department"
+                v-model="draft.departmentId"
+                :disabled="saving"
+                :items="
+                  allowedDepartments.map((value) => ({
+                    value,
+                    title: messages[departmentKeys[value]],
+                  }))
+                "
+                :error-messages="fieldError('departmentId')"
+              />
+            </div>
           </div>
-          <div>
-            <label
-              for="vault-department"
-              class="field-label"
-              >{{ messages.department }}</label
-            ><v-select
-              id="vault-department"
-              v-model="draft.departmentId"
-              :items="
-                allowedDepartments.map((value) => ({
-                  value,
-                  title: messages[departmentKeys[value]],
-                }))
-              "
-              :error-messages="fieldError('departmentId')"
-            />
-          </div>
+          <label
+            for="vault-website"
+            class="field-label"
+            >{{ messages.website }}</label
+          ><v-text-field
+            id="vault-website"
+            v-model="draft.website"
+            :disabled="saving"
+            type="url"
+            placeholder="https://service.example.com"
+            maxlength="2048"
+            :error-messages="fieldError('website')"
+          /><label
+            for="vault-password"
+            class="field-label"
+            >{{ messages.password }}</label
+          ><v-text-field
+            id="vault-password"
+            disabled
+            :placeholder="
+              passwordServiceAvailable ? messages.managedSeparately : messages.unavailable
+            "
+            prepend-inner-icon="mdi-lock-outline"
+          />
+          <p class="vault-field-hint">
+            {{ passwordServiceAvailable ? messages.separatePasswordHint : messages.passwordHint }}
+          </p>
+          <label
+            for="vault-notes"
+            class="field-label"
+            >{{ messages.notes }}</label
+          ><v-textarea
+            id="vault-notes"
+            v-model="draft.notes"
+            :disabled="saving"
+            rows="2"
+            maxlength="1000"
+            :hint="messages.notesHint"
+            persistent-hint
+            :error-messages="fieldError('notes')"
+          />
         </div>
-        <label
-          for="vault-website"
-          class="field-label"
-          >{{ messages.website }}</label
-        ><v-text-field
-          id="vault-website"
-          v-model="draft.website"
-          type="url"
-          placeholder="https://service.example.com"
-          maxlength="2048"
-          :error-messages="fieldError('website')"
-        /><label
-          for="vault-password"
-          class="field-label"
-          >{{ messages.password }}</label
-        ><v-text-field
-          id="vault-password"
-          disabled
-          :placeholder="
-            passwordServiceAvailable ? messages.managedSeparately : messages.unavailable
-          "
-          prepend-inner-icon="mdi-lock-outline"
-        />
-        <p class="vault-field-hint">
-          {{ passwordServiceAvailable ? messages.separatePasswordHint : messages.passwordHint }}
-        </p>
-        <label
-          for="vault-notes"
-          class="field-label"
-          >{{ messages.notes }}</label
-        ><v-textarea
-          id="vault-notes"
-          v-model="draft.notes"
-          rows="2"
-          maxlength="1000"
-          :hint="messages.notesHint"
-          persistent-hint
-          :error-messages="fieldError('notes')"
-        />
         <div class="vault-dialog-actions">
           <v-btn
             variant="text"

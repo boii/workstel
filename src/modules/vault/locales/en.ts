@@ -68,6 +68,7 @@ export default {
   edit: 'Edit account',
   save: 'Save account',
   cancel: 'Cancel',
+  searchAction: 'Search',
   search: 'Search accounts, usernames, or websites',
   allDepartments: 'All departments',
   active: 'Active',

@@ -32,6 +32,8 @@ const vuetify = createVuetify({
     VCard: { rounded: 'sm', elevation: 2 },
     VBtn: { rounded: 'sm', height: 36 },
     VTextField: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
+    VSelect: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
+    VTextarea: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
     VDialog: { maxWidth: 520 },
   },
 });

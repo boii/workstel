@@ -76,6 +76,12 @@ function departmentName(code: string) {
       ?.departmentName ?? code
   );
 }
+function resetFilters() {
+  search.value = '';
+  status.value = 'active';
+  department.value = null;
+  void load();
+}
 function changedHotel() {
   department.value = null;
   detail.value = null;
@@ -279,21 +285,23 @@ onMounted(() => {
       "
       :retry-label="messages.retry"
       @retry="load()"
-      ><template #actions
-        ><v-btn
-          :disabled="!canWrite || busy"
-          color="primary"
-          prepend-icon="mdi-plus"
-          @click="edit()"
-          >{{ messages.add }}</v-btn
-        ><v-btn
+      ><template #actions>
+        <v-btn
           v-if="canAudit"
           variant="text"
           prepend-icon="mdi-history"
           @click="auditOpen = true"
           >{{ messages.auditTitle }}</v-btn
-        ></template
-      ><template #toolbar
+        >
+        <v-btn
+          :disabled="!canWrite || busy"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="edit()"
+          >{{ messages.add }}</v-btn
+        >
+      </template>
+      <template #toolbar
         ><v-alert
           type="info"
           variant="tonal"
@@ -301,20 +309,27 @@ onMounted(() => {
           class="vault-notice"
           >{{ secretAvailable ? messages.secretReady : messages.privateNotice }}</v-alert
         ><v-form
-          class="vault-toolbar"
+          class="vault-toolbar vault-toolbar--live"
           @submit.prevent="load()"
           ><v-text-field
             v-model="search"
+            class="vault-search"
+            prepend-inner-icon="mdi-magnify"
+            hide-details
             :label="messages.search"
             maxlength="150"
           /><v-select
             v-model="hotelId"
+            class="vault-hotel-filter"
+            hide-details
             :label="messages.hotel"
             :items="hotels"
             :disabled="busy || formOpen"
             @update:model-value="changedHotel"
           /><v-select
             v-model="status"
+            class="vault-status-filter"
+            hide-details
             :label="messages.status"
             :items="[
               { value: 'active', title: messages.active },
@@ -324,37 +339,68 @@ onMounted(() => {
             @update:model-value="load()"
           /><v-select
             v-model="department"
+            class="vault-department-filter"
+            hide-details
             :items="departments"
             :label="messages.department"
             clearable
             @update:model-value="load()"
           /><v-btn
             type="submit"
-            variant="text"
+            class="vault-search-submit"
+            variant="tonal"
             color="primary"
             :loading="loading"
-            >{{ messages.search }}</v-btn
+            >{{ messages.searchAction }}</v-btn
           ></v-form
         ></template
-      ><v-card
-        ><v-list
-          ><v-list-item
+      >
+      <template #empty-action>
+        <v-btn
+          v-if="search.trim() || status !== 'active' || department"
+          variant="text"
+          color="primary"
+          @click="resetFilters"
+          >{{ messages.reset }}</v-btn
+        >
+      </template>
+      <v-card class="vault-live-list">
+        <v-list class="pa-0">
+          <v-list-item
             v-for="entry in entries"
             :key="entry.id"
-            :title="entry.name"
-            :subtitle="
-              (entry.isOwner ? messages.ownedByMe : messages.sharedWithMe) +
-              ' · ' +
-              entry.username +
-              ' · ' +
-              departmentName(entry.departmentId) +
-              ' · ' +
-              (entry.status === 'active' ? messages.active : messages.archived)
-            "
+            class="vault-live-entry"
             append-icon="mdi-chevron-right"
-            @click="detail = entry" /></v-list></v-card
-      ><v-btn
+            @click="detail = entry"
+          >
+            <template #prepend
+              ><span class="vault-entry-icon"
+                ><v-icon
+                  icon="mdi-key-outline"
+                  size="22" /></span
+            ></template>
+            <template #title
+              ><span class="vault-live-name">{{ entry.name }}</span></template
+            >
+            <template #subtitle>
+              <span class="vault-live-username">{{ entry.username }}</span>
+              <span class="vault-live-meta">
+                <span>{{ departmentName(entry.departmentId) }}</span>
+                <span>{{ entry.isOwner ? messages.ownedByMe : messages.sharedWithMe }}</span>
+                <v-chip
+                  size="x-small"
+                  variant="tonal"
+                  :color="entry.status === 'active' ? 'primary' : undefined"
+                  >{{ entry.status === 'active' ? messages.active : messages.archived }}</v-chip
+                >
+              </span>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card>
+      <v-btn
         v-if="next"
+        class="vault-load-more"
         variant="text"
         :loading="loading"
         @click="load(true)"
@@ -413,7 +459,7 @@ onMounted(() => {
         <p class="vault-field-hint">
           {{ secretAvailable ? messages.encryptedHint : messages.passwordHint }}
         </p>
-        <div class="vault-dialog-actions">
+        <div class="vault-dialog-actions vault-detail-actions">
           <v-btn
             v-if="secretAvailable && detail.status === 'active'"
             variant="text"

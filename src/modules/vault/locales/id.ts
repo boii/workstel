@@ -69,6 +69,7 @@ export default {
   edit: 'Edit akun',
   save: 'Simpan akun',
   cancel: 'Batal',
+  searchAction: 'Cari',
   search: 'Cari akun, username, atau website',
   allDepartments: 'Semua departemen',
   active: 'Aktif',

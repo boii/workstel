@@ -125,7 +125,9 @@ onUnmounted(() => {
         >
           {{ messages.privateOnly }}
         </p>
-        <v-list v-else
+        <v-list
+          v-else
+          class="vault-share-list"
           ><v-list-item
             v-for="share in shares"
             :key="share.email"
@@ -142,7 +144,9 @@ onUnmounted(() => {
             ></v-list-item
           ></v-list
         >
-        <v-form @submit.prevent="change(email, 'grant')"
+        <v-form
+          class="vault-share-form"
+          @submit.prevent="change(email, 'grant')"
           ><v-text-field
             v-model="email"
             type="email"
