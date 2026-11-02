@@ -1,5 +1,6 @@
 import type en from './en';
 export default {
+  accountUnavailable: 'Akun tidak ditemukan atau akses tidak tersedia.',
   access: 'Akses',
   allAccounts: 'Semua akun yang dapat diakses',
   filters: 'Filter',

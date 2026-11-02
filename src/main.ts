@@ -11,6 +11,7 @@ import '@fontsource/quicksand/700.css';
 import '@fontsource/noto-sans/400.css';
 import './styles.css';
 import App from './App.vue';
+import { router } from './router';
 const vuetify = createVuetify({
   locale: { locale: 'en', fallback: 'en', messages: { en, id } },
   icons: { defaultSet: 'mdi', aliases, sets: { mdi } },
@@ -37,4 +38,5 @@ const vuetify = createVuetify({
     VDialog: { maxWidth: 520 },
   },
 });
-createApp(App).use(vuetify).mount('#root');
+const app = createApp(App).use(vuetify).use(router);
+void router.isReady().then(() => app.mount('#root'));

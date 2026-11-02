@@ -1,6 +1,7 @@
 import { ref, watch } from 'vue';
 export const english = {
   loading: 'Restoring your session',
+  pageNotFound: 'Page not found.',
   productionPending: 'This module is not enabled for production yet.',
   productionLogin: 'Sign in with your approved account.',
   sessionPolicy:
@@ -9,7 +10,6 @@ export const english = {
   accessChanges: 'Contact your hotel administrator to change your access.',
   productionHelp:
     'Open an available module from the dashboard. Use filters to find accounts and your account menu to sign out. For account access or login assistance, contact your hotel administrator.',
-  productionMode: 'INTERNAL WORKSPACE',
   accessDenied: 'Your account has not been granted workspace access. Contact your administrator.',
   authFailed: 'Sign-in could not be completed. Check your credentials or try again.',
   authUnavailable: 'Production sign-in is not configured. Contact your administrator.',
@@ -102,6 +102,7 @@ export const english = {
 } as const;
 export type MessageKey = keyof typeof english;
 const indonesian: Record<MessageKey, string> = {
+  pageNotFound: 'Halaman tidak ditemukan.',
   loading: 'Memulihkan sesi Anda',
   productionPending: 'Modul ini belum diaktifkan untuk produksi.',
   productionLogin: 'Masuk dengan akun yang telah disetujui.',
@@ -111,7 +112,6 @@ const indonesian: Record<MessageKey, string> = {
   accessChanges: 'Hubungi administrator hotel untuk mengubah akses Anda.',
   productionHelp:
     'Buka modul yang tersedia dari dashboard. Gunakan filter untuk mencari akun dan menu akun untuk keluar. Untuk akses akun atau bantuan login, hubungi administrator hotel.',
-  productionMode: 'WORKSPACE INTERNAL',
   accessDenied: 'Akun Anda belum diberi akses workspace. Hubungi administrator.',
   authFailed: 'Login tidak berhasil. Periksa kredensial atau coba lagi.',
   authUnavailable: 'Login produksi belum dikonfigurasi. Hubungi administrator.',

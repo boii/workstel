@@ -21,6 +21,44 @@ export async function vaultRpc(name: string, args: Record<string, unknown>, sign
   return data;
 }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export async function findAccount(
+  hotelId: string,
+  accountId: string,
+  signal: AbortSignal,
+  request = vaultRpc,
+): Promise<VaultEntry | null> {
+  if (!uuid.test(accountId)) return null;
+  let cursor: string | null = null;
+  const seen = new Set<string>();
+  // Bound restoration work until the server offers a dedicated account-read RPC.
+  for (let page = 0; page < 20; page++) {
+    signal.throwIfAborted();
+    const result = await request(
+      'vault_list_accounts',
+      {
+        p_hotel_id: hotelId,
+        p_department_id: null,
+        p_status: 'all',
+        p_search: '',
+        p_after: cursor,
+        p_limit: 100,
+      },
+      signal,
+    );
+    signal.throwIfAborted();
+    const entries = parseEntries(result.data, hotelId);
+    const entry = entries.find((item) => item.id === accountId);
+    if (entry) return entry;
+    const next = result.meta?.nextCursor;
+    if (!next) return null;
+    if (typeof next !== 'string' || !uuid.test(next) || seen.has(next)) {
+      throw new VaultRequestError('INVALID_RESPONSE');
+    }
+    seen.add(next);
+    cursor = next;
+  }
+  throw new VaultRequestError('REQUEST_FAILED');
+}
 export function parseEntries(data: unknown, hotelId: string): VaultEntry[] {
   if (!Array.isArray(data) || data.length > 100) throw new VaultRequestError('INVALID_RESPONSE');
   const ids = new Set<string>();

@@ -5,6 +5,10 @@ The production shell uses Supabase authentication, membership authorization and 
 
 ## Create a module
 
+Implemented modules must expose module-owned lazy routes following [ROUTING.md](ROUTING.md).
+Use the manifest ID as the entry route name; include module routes in src/routes.ts.
+Page navigation belongs in URLs so refresh and browser history preserve location.
+
 Run: npm run module:new -- stock-transfer "Stock Transfer"
 Then run: npm run modules:check and npm run build.
 The generator copies src/modules/_template and adds its manifest to src/modules/registry.ts.

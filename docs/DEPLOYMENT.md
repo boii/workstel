@@ -151,3 +151,19 @@ The encrypted service uses backend/vault Web Crypto AES-256-GCM and the service-
 The operator explicitly deferred off-VM backup implementation. Track it as an operational limitation, retain local migration backups and preserve recovery shares separately. Do not claim off-server recovery or high availability is verified.
 
 Latest private frontend deployment: https://b6f87319.workstel.pages.dev/; production URL https://workstel.pages.dev returned HTTP 200 and the expected current asset. The password UI remains availability-gated by authenticated backend status; local AES-GCM HTTPS commissioning is recorded in VAULT_OPERATIONS.md. Local production dependency audit reported zero vulnerabilities. The current local-encryption release contains server source, SQL migrations and installation/commissioning helpers; no credentials, keyring or frontend environment are included.
+
+## URL routing release — 2 November 2026
+
+Vue Router navigation and Vault account deep links were deployed to
+https://62829a97.workstel.pages.dev/ (production https://workstel.pages.dev/).
+The production root, /vault, /settings, a fictional UUID account path and an
+unknown path returned HTTP 200 with the matching current application asset.
+Unknown-page content is handled by the client router; HTTP 200 is the SPA fallback.
+
+npm run format and npm run check passed, including 50 tests plus the module
+generator test. Production configuration and Pages header preparation passed.
+Local demo browser checks verified direct module entry, detail URL, refresh with
+preview re-entry, Back/Forward, desktop drawer and 390px mobile layout. No real
+accounts or secrets were used. Authenticated production refresh/deep-link
+acceptance remains for the operator. See ROUTING.md for module integration,
+OAuth callback limitations and the bounded metadata restoration scan.

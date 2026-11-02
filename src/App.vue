@@ -15,10 +15,19 @@ watch(
 );
 import { modules } from './modules/registry';
 import { isModuleEnabled } from './core/module';
-import { defineAsyncComponent } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { shellPaths } from './routes';
+const route = useRoute();
+const router = useRouter();
+const view = computed(() => String(route.meta.view ?? 'Not found'));
+watch(
+  () => route.path,
+  () => {
+    query.value = '';
+    category.value = 'All modules';
+  },
+);
 import './modules/vault/styles.css';
-const VaultPage = defineAsyncComponent(() => import('./modules/vault/pages/ModuleListPage.vue'));
-const VaultLivePage = defineAsyncComponent(() => import('./modules/vault/pages/VaultLivePage.vue'));
 import type { ModuleManifest } from './core/module';
 import { runtime } from './config/runtime';
 import { useAuth } from './auth/useAuth';
@@ -31,7 +40,6 @@ watch(auth.authenticated, (value) => {
   if (!runtime.demo) {
     session.value = value;
     if (!value) {
-      view.value = 'Dashboard';
       creating.value = false;
       notice.value = false;
       query.value = '';
@@ -41,7 +49,6 @@ watch(auth.authenticated, (value) => {
 
 const session = ref(false),
   ssoNotice = ref(false),
-  view = ref('Dashboard'),
   query = ref(''),
   category = ref('All modules'),
   favorites = ref(['vault']),
@@ -101,17 +108,19 @@ const visible = computed(() =>
 const remaining = computed(() => tasks.value.filter((t) => !t.done).length);
 function nav(v: string) {
   if (!runtime.demo && v === 'My tasks') return;
-  view.value = v;
+  if (shellPaths[v]) void router.push(shellPaths[v]);
   query.value = '';
   category.value = 'All modules';
 }
 function openModule(module: ModuleManifest) {
   if (!canOpenModule(module)) return;
-  if (module.id === 'vault') nav('Password Vault');
+  void router.push({ name: module.id });
 }
 function canOpenModule(module: ModuleManifest) {
   return (
-    isModuleEnabled(module) && (runtime.demo || module.id !== 'vault' || auth.vaultReady.value)
+    router.hasRoute(module.id) &&
+    isModuleEnabled(module) &&
+    (runtime.demo || module.id !== 'vault' || auth.vaultReady.value)
   );
 }
 function toggleFavorite(id: string) {
@@ -141,7 +150,7 @@ function addTask() {
 function logout() {
   if (!runtime.demo) void auth.signOut();
   session.value = false;
-  view.value = 'Dashboard';
+  void router.replace('/');
 
   creating.value = false;
   notice.value = false;
@@ -153,9 +162,11 @@ function logout() {
       v-if="auth.restoring.value"
       class="d-flex align-center justify-center"
     >
-      <v-progress-circular
-        indeterminate
-        color="primary"
+      <v-skeleton-loader
+        type="article"
+        width="560"
+        max-width="100%"
+        role="status"
         :aria-label="t('loading')"
       />
     </v-main>
@@ -248,10 +259,7 @@ function logout() {
               variant="text"
               color="primary"
               append-icon="mdi-arrow-right"
-              @click="
-                session = true;
-                nav('Dashboard');
-              "
+              @click="session = true"
               >{{ t('demoDashboard') }}</v-btn
             ><small>{{ t('demoAuth') }}</small>
           </div></v-card
@@ -411,11 +419,14 @@ function logout() {
                           : 'mdi-view-dashboard-outline'
                 "
                 size="28"
-              />{{ translate(view) }}
+              />{{ view === 'Not found' ? t('pageNotFound') : translate(view) }}
             </h1>
-            <span class="demo-label">{{ runtime.demo ? t('demoMode') : t('productionMode') }}</span
+            <span
+              v-if="runtime.demo"
+              class="demo-label"
+              >{{ t('demoMode') }}</span
             ><v-btn
-              v-if="view === 'My tasks'"
+              v-if="view === 'My tasks' && runtime.demo"
               color="primary"
               prepend-icon="mdi-plus"
               @click="
@@ -425,13 +436,10 @@ function logout() {
               >{{ t('createTask') }}</v-btn
             >
           </div>
-          <VaultPage
-            v-if="runtime.demo && view === 'Password Vault'"
-            @back="nav('Dashboard')"
-          />
-          <VaultLivePage
-            v-else-if="view === 'Password Vault'"
+          <router-view
+            v-if="route.meta.moduleId"
             :assignments="auth.assignments.value"
+            :available="auth.vaultReady.value"
             @back="nav('Dashboard')"
           />
           <section
@@ -523,7 +531,7 @@ function logout() {
             </div>
           </section>
           <v-card
-            v-else-if="view === 'My tasks'"
+            v-else-if="view === 'My tasks' && runtime.demo"
             class="task-panel"
             ><div class="panel-heading">
               <h2>{{ t('todayAgenda') }}</h2>
@@ -561,6 +569,8 @@ function logout() {
                   :subtitle="assignment.hotelName" /><v-list-item
                   :title="t('accessChanges')" /></v-list
             ></template>
+            <p v-else-if="view === 'Not found'">{{ t('pageNotFound') }}</p>
+            <p v-else-if="view === 'My tasks' && !runtime.demo">{{ t('productionPending') }}</p>
             <p v-else-if="view === 'Settings'">{{ t('settingsPending') }}</p>
             <p v-else>{{ runtime.demo ? t('sharedStandards') : t('productionHelp') }}</p>
             <v-btn

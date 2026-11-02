@@ -1,4 +1,5 @@
 export default {
+  accountUnavailable: 'Account not found or access is unavailable.',
   access: 'Access',
   allAccounts: 'All accessible accounts',
   filters: 'Filters',

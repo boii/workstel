@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
     "check": "npm run format:check && npm run lint && npm test && npm run build",
-    "test": "npm run modules:test && tsx --test src/core/module.test.ts src/config/runtime.test.ts src/modules/vault/validation.test.ts src/modules/vault/live-api.test.ts supabase/tests/vault.test.ts supabase/tests/private-vault.test.ts supabase/tests/secret-boundary.test.ts backend/vault/handler.test.ts backend/auth/session.test.ts",
+    "test": "npm run modules:test && tsx --test src/routes.test.ts src/core/module.test.ts src/config/runtime.test.ts src/modules/vault/validation.test.ts src/modules/vault/live-api.test.ts supabase/tests/vault.test.ts supabase/tests/private-vault.test.ts supabase/tests/secret-boundary.test.ts backend/vault/handler.test.ts backend/auth/session.test.ts",
     "build:production": "tsx scripts/check-production.ts && npm run build && tsx scripts/prepare-pages.ts",
     "preview": "vite preview --host 127.0.0.1",
     "check:connectivity": "tsx scripts/check-connectivity.ts"
@@ -40,6 +40,7 @@
     "@mdi/font": "^7.4.47",
     "@supabase/supabase-js": "^2.118.0",
     "vue": "^3.5.44",
+    "vue-router": "^4.6.4",
     "vuetify": "^4.3.1"
   }
 }

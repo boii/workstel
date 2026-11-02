@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+const route = useRoute();
+const router = useRouter();
 import VaultDialog from '../components/VaultDialog.vue';
 import VaultAccountList from '../components/VaultAccountList.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
@@ -17,7 +20,12 @@ const messages = useVaultMessages(),
   status = ref<'active' | 'archived' | 'all'>('active'),
   formOpen = ref(false),
   editing = ref<VaultEntry | null>(null),
-  detailId = ref<string | null>(null),
+  detailId = computed<string | null>({
+    get: () => (typeof route.params.accountId === 'string' ? route.params.accountId : null),
+    set: (id) => {
+      void router.push({ path: id ? '/vault/accounts/' + id : '/vault', query: route.query });
+    },
+  }),
   archiveId = ref<string | null>(null),
   feedback = ref<'saved' | 'archiveDone' | 'restoreDone' | null>(null);
 const departmentKeys = {

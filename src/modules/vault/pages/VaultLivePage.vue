@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import VaultDialog from '../components/VaultDialog.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
-import { vaultRpc as rpc, parseEntries } from '../live-api';
+import { vaultRpc as rpc, parseEntries, findAccount } from '../live-api';
 import VaultAccountList from '../components/VaultAccountList.vue';
 import VaultAudit from '../components/VaultAudit.vue';
 import VaultSharing from '../components/VaultSharing.vue';
@@ -14,6 +14,9 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultEntryForm from '../components/VaultEntryForm.vue';
 import type { VaultEntry, VaultEntryInput, DepartmentId } from '../types';
 import { departmentIds } from '../types';
+import { useRoute, useRouter } from 'vue-router';
+const route = useRoute();
+const router = useRouter();
 const props = defineProps<{ assignments: StaffAssignment[] }>();
 const emit = defineEmits<{ back: [] }>();
 const messages = useVaultMessages(),
@@ -45,7 +48,11 @@ const sharingOpen = computed({
     if (!value) sharingTarget.value = null;
   },
 });
-const hotelId = ref(props.assignments[0]?.hotelId ?? '');
+const hotelId = ref(
+  props.assignments.find((a) => a.hotelId === route.query.hotel)?.hotelId ??
+    props.assignments[0]?.hotelId ??
+    '',
+);
 const hotels = computed(() => [
   ...new Map(
     props.assignments.map((a) => [a.hotelId, { value: a.hotelId, title: a.hotelName }]),
@@ -93,6 +100,79 @@ const writableDepartments = computed(() =>
     )
     .map((a) => a.departmentCode as DepartmentId),
 );
+function queryValue(key: string) {
+  const value = route.query[key];
+  return typeof value === 'string' ? value : '';
+}
+function readFilters() {
+  search.value = queryValue('search').slice(0, 150);
+  const state = queryValue('status');
+  status.value = state === 'archived' || state === 'all' ? state : 'active';
+  const scope = queryValue('access');
+  access.value = scope === 'mine' || scope === 'shared' ? scope : 'all';
+  department.value = departments.value.some((a) => a.value === queryValue('department'))
+    ? queryValue('department')
+    : null;
+}
+readFilters();
+function filterQuery() {
+  return {
+    hotel: hotelId.value,
+    ...(search.value.trim() ? { search: search.value.trim().slice(0, 150) } : {}),
+    ...(status.value !== 'active' ? { status: status.value } : {}),
+    ...(access.value !== 'all' ? { access: access.value } : {}),
+    ...(department.value ? { department: department.value } : {}),
+  };
+}
+function openDetail(entry: VaultEntry) {
+  detail.value = entry;
+  void router.push({ path: '/vault/accounts/' + entry.id, query: filterQuery() });
+}
+let loadedFilterKey = '';
+let detailController: AbortController | undefined;
+const detailLoading = ref(false);
+async function restoreDetail() {
+  detailController?.abort();
+  detailController = new AbortController();
+  const signal = detailController.signal;
+  const id = typeof route.params.accountId === 'string' ? route.params.accountId : '';
+  if (!id) {
+    detail.value = null;
+    detailLoading.value = false;
+    return;
+  }
+  if (detail.value?.id === id && detail.value.hotelId === hotelId.value) return;
+  detail.value = null;
+  detailLoading.value = true;
+  try {
+    const entry = await findAccount(hotelId.value, id, signal);
+    if (signal.aborted) return;
+    detail.value = entry;
+    if (!entry) failure.value = messages.value.accountUnavailable;
+  } catch (error) {
+    if (!signal.aborted) showError(error);
+  } finally {
+    if (!signal.aborted) detailLoading.value = false;
+  }
+}
+watch(
+  () => route.fullPath,
+  () => {
+    const hotel = props.assignments.find((a) => a.hotelId === route.query.hotel)?.hotelId;
+    if (hotel && hotel !== hotelId.value) hotelId.value = hotel;
+    readFilters();
+    if (loadedFilterKey !== JSON.stringify(filterQuery())) void load();
+    void restoreDetail();
+  },
+);
+watch(access, () => {
+  void router.replace({ query: filterQuery() });
+});
+watch(detail, (entry) => {
+  if (!entry && !detailLoading.value && route.params.accountId) {
+    void router.replace({ path: '/vault', query: filterQuery() });
+  }
+});
 function departmentName(code: string) {
   return (
     props.assignments.find((a) => a.hotelId === hotelId.value && a.departmentCode === code)
@@ -148,8 +228,14 @@ onUnmounted(() => {
   ++request;
   lifetime.abort();
   controller?.abort();
+  detailController?.abort();
 });
 async function load(more = false, preserve = false) {
+  if (JSON.stringify(route.query) !== JSON.stringify(filterQuery())) {
+    await router.replace({ query: filterQuery() });
+    return;
+  }
+  loadedFilterKey = JSON.stringify(filterQuery());
   secretReset.value++;
   const current = ++request;
   controller?.abort();
@@ -271,9 +357,14 @@ async function changeStatus(entry: VaultEntry, action: 'archive' | 'restore') {
   }
 }
 const detailOpen = computed({
-  get: () => !!detail.value,
+  get: () => !!detail.value || detailLoading.value,
   set: (value) => {
-    if (!value) detail.value = null;
+    if (!value) {
+      detailController?.abort();
+      detailLoading.value = false;
+      detail.value = null;
+      void router.replace({ path: '/vault', query: filterQuery() });
+    }
   },
 });
 const archiveOpen = computed({
@@ -284,6 +375,7 @@ const archiveOpen = computed({
 });
 onMounted(() => {
   void load();
+  void restoreDetail();
   void secretOperation('status', {}, lifetime.signal)
     .then((result) => {
       if (!lifetime.signal.aborted) secretAvailable.value = result.available === true;
@@ -312,7 +404,10 @@ onMounted(() => {
       :empty-title="hasFilters ? messages.noResults : messages.emptyTitle"
       :empty-description="hasFilters ? messages.noResultsHint : messages.liveEmpty"
       :retry-label="messages.retry"
-      @retry="load()"
+      @retry="
+        load();
+        restoreDetail();
+      "
       ><template #actions>
         <v-btn
           v-if="canAudit"
@@ -460,7 +555,7 @@ onMounted(() => {
         :reset-key="secretReset"
         :can-edit="canEdit"
         :can-archive="canArchive"
-        @detail="detail = $event"
+        @detail="openDetail"
         @edit="edit($event)"
         @password="
           secretMode = 'write';
@@ -502,7 +597,11 @@ onMounted(() => {
       :busy="busy"
       drawer
     >
-      <template v-if="detail">
+      <v-skeleton-loader
+        v-if="detailLoading"
+        type="article"
+      />
+      <template v-else-if="detail">
         <v-alert
           v-if="failure"
           type="error"
