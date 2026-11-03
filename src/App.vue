@@ -559,26 +559,48 @@ function logout() {
                   ><span
                     ><h2>{{ translate(m.title) }}</h2>
                     <p>{{ translate(m.description) }}</p>
+                    <span
+                      v-if="!canOpenModule(m)"
+                      class="module-status"
+                      >{{ t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon') }}</span
+                    >
                   </span></button
                 ><v-btn
+                  v-if="canOpenModule(m)"
                   :icon="favorites.includes(m.id) ? 'mdi-star' : 'mdi-star-outline'"
                   :color="favorites.includes(m.id) ? 'primary' : undefined"
                   variant="text"
                   size="small"
                   class="favorite-button"
-                  :disabled="!canOpenModule(m)"
-                  :aria-label="t('favorites') + ' ' + translate(m.title)"
+                  :aria-label="
+                    t(favorites.includes(m.id) ? 'removeFavorite' : 'addFavorite') +
+                    ' ' +
+                    translate(m.title)
+                  "
                   :aria-pressed="favorites.includes(m.id)"
                   @click="toggleFavorite(m.id)"
-                /><span
-                  v-if="!canOpenModule(m)"
-                  class="coming-soon-overlay"
-                  >{{ t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon') }}</span
-                ></v-card
+              /></v-card>
+            </div>
+            <div
+              v-if="view === 'Favorites' && !favorites.length"
+              class="empty-state"
+            >
+              <v-icon
+                icon="mdi-star-outline"
+                size="32"
+              />
+              <h2>{{ t('noFavorites') }}</h2>
+              <p>{{ t('noFavoritesHint') }}</p>
+              <v-btn
+                variant="text"
+                color="primary"
+                prepend-icon="mdi-view-dashboard-outline"
+                @click="nav('Dashboard')"
+                >{{ t('browseModules') }}</v-btn
               >
             </div>
             <div
-              v-if="!visible.length"
+              v-else-if="!visible.length"
               class="empty-state"
             >
               <v-icon
