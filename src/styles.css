@@ -89,6 +89,24 @@ p {
 .v-btn-toggle .v-btn--active.text-primary {
   color: var(--workstel-primary-text) !important;
 }
+/* Choice groups show each option as its own button with an 8px gap, never joined segments. */
+.choice-group.v-btn-toggle {
+  gap: 8px;
+  height: auto !important;
+  flex-wrap: wrap;
+  overflow: visible;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+.choice-group.v-btn-toggle > .v-btn {
+  min-height: 40px;
+  border: 1px solid var(--workstel-border) !important;
+  border-radius: 6px !important;
+  background: rgb(var(--v-theme-surface));
+}
+.choice-group.v-btn-toggle > .v-btn.v-btn--active {
+  border-color: currentColor !important;
+}
 .v-alert--variant-tonal.text-info .v-alert__content {
   color: #0b4f6c;
 }
@@ -247,7 +265,7 @@ p {
 }
 .category-tabs {
   height: 36px !important;
-  gap: 4px;
+  gap: 8px;
   max-width: 100%;
   flex-shrink: 0;
 }
@@ -746,7 +764,7 @@ footer small {
     height: auto !important;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px;
+    gap: 8px;
   }
   .category-tabs .v-btn {
     padding: 0 12px;
@@ -829,6 +847,12 @@ footer small {
   footer {
     gap: 12px;
     flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 680px) {
+  .choice-group.v-btn-toggle > .v-btn {
+    min-height: 44px;
   }
 }
 

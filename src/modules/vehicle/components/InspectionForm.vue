@@ -124,11 +124,10 @@ const fieldError = (field: InspectionField) => {
           ><v-btn-toggle
             v-model="fuelLevel"
             mandatory
-            divided
             variant="outlined"
             color="primary"
             density="comfortable"
-            class="inspection-fuel"
+            class="choice-group inspection-fuel"
             role="radiogroup"
             aria-labelledby="inspection-fuel-label"
             :disabled="saving"
@@ -174,9 +173,9 @@ const fieldError = (field: InspectionField) => {
           <span :id="'inspection-item-' + item">{{ messages[itemKeys[item]] }}</span>
           <v-btn-toggle
             v-model="items[item]"
-            divided
             variant="outlined"
             density="comfortable"
+            class="choice-group"
             :color="items[item] === 'issue' ? 'error' : 'primary'"
             :aria-labelledby="'inspection-item-' + item"
             :disabled="saving"
@@ -236,7 +235,7 @@ const fieldError = (field: InspectionField) => {
 }
 .inspection-fuel {
   width: 100%;
-  height: 40px !important;
+  flex-wrap: nowrap;
 }
 .inspection-fuel .v-btn {
   flex: 1;
@@ -254,7 +253,7 @@ const fieldError = (field: InspectionField) => {
   margin-bottom: 0;
 }
 .inspection-hint {
-  margin: 4px 0 8px;
+  margin: 2px 0 12px;
   font-size: 11px;
   color: var(--workstel-text-secondary);
 }
@@ -273,8 +272,8 @@ const fieldError = (field: InspectionField) => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 48px;
-  padding: 6px 6px 6px 12px;
+  min-height: 56px;
+  padding: 8px 8px 8px 12px;
   font-size: 13px;
 }
 .inspection-items li + li {
@@ -285,7 +284,6 @@ const fieldError = (field: InspectionField) => {
 }
 .inspection-items .v-btn-toggle {
   flex-shrink: 0;
-  height: 36px !important;
 }
 .inspection-items .v-btn {
   font-size: 12px;
@@ -296,11 +294,9 @@ const fieldError = (field: InspectionField) => {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;
   }
-  .inspection-fuel {
-    height: 44px !important;
-  }
-  .inspection-items .v-btn-toggle {
-    height: 44px !important;
+  /* Stacked columns need the normal gap above the second label. */
+  .inspection-row > div + div .inspection-first-label {
+    margin-top: 20px;
   }
   .inspection-checklist-heading .v-btn {
     min-height: 44px;
