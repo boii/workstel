@@ -3,14 +3,18 @@ import { computed } from 'vue';
 import { locale, t } from '../i18n';
 import type { MessageKey } from '../i18n';
 import type { StaffAssignment } from '../auth/useAuth';
+import type { ModuleManifest } from '../core/module';
+import ModuleSwitches from './module-switches.vue';
 
 const props = defineProps<{
   demo: boolean;
   email: string;
   hotelName: string;
   assignments: StaffAssignment[];
+  platformAdmin: boolean;
+  switchableModules: readonly ModuleManifest[];
 }>();
-const emit = defineEmits<{ signOut: []; openShortcuts: [] }>();
+const emit = defineEmits<{ signOut: []; openShortcuts: []; modulesChanged: [] }>();
 
 // Demo access mirrors the Vault sample departments and is labelled by the page's demo badge.
 const demoAssignments: StaffAssignment[] = [
@@ -143,6 +147,12 @@ function granted(assignment: StaffAssignment) {
       </p>
     </v-card>
 
+    <ModuleSwitches
+      v-if="platformAdmin"
+      :demo="demo"
+      :modules="switchableModules"
+      @changed="emit('modulesChanged')"
+    />
     <v-card
       tag="section"
       class="settings-card settings-card--wide"

@@ -151,6 +151,24 @@ export const english = {
   faqPersonalQ: 'Can I save my personal accounts?',
   faqPersonalA:
     'No. Vault is for hotel work accounts that your team needs. Keep personal accounts elsewhere.',
+  modulesTitle: 'Modules',
+  developerOnly: 'Developer',
+  modulesHint:
+    'Turning a module off hides it and blocks it on the server for everyone. Its data and access grants are kept.',
+  modulesDemoHint: 'Demo only: switches change the dashboard here and reset on reload.',
+  moduleSwitchLoadFailed: 'Module status could not be loaded.',
+  retryLoad: 'Try again',
+  moduleNotInstalled: 'Not installed on this server',
+  moduleLastChanged: 'Last changed',
+  moduleOn: 'On',
+  moduleOff: 'Off',
+  moduleDisableTitle: 'Turn off this module?',
+  moduleDisableBody: 'Everyone loses access until it is turned on again. No data is deleted.',
+  cancelAction: 'Cancel',
+  moduleTurnOff: 'Turn off',
+  moduleEnabledDone: 'Module turned on.',
+  moduleDisabledDone: 'Module turned off.',
+  moduleSwitchFailed: 'The module could not be switched. Try again.',
 } as const;
 export type English = typeof english;
 export type MessageKey = keyof typeof english;
@@ -306,6 +324,26 @@ const indonesian: Record<MessageKey, string> = {
   faqPersonalQ: 'Bisakah saya menyimpan akun pribadi?',
   faqPersonalA:
     'Tidak. Vault untuk akun kerja hotel yang dibutuhkan tim. Simpan akun pribadi di tempat lain.',
+  modulesTitle: 'Modul',
+  developerOnly: 'Developer',
+  modulesHint:
+    'Mematikan modul akan menyembunyikan dan memblokirnya di server untuk semua orang. Data dan izin aksesnya tetap disimpan.',
+  modulesDemoHint:
+    'Khusus demo: sakelar mengubah dashboard di sini dan kembali semula saat dimuat ulang.',
+  moduleSwitchLoadFailed: 'Status modul tidak bisa dimuat.',
+  retryLoad: 'Coba lagi',
+  moduleNotInstalled: 'Belum terpasang di server ini',
+  moduleLastChanged: 'Terakhir diubah',
+  moduleOn: 'Aktif',
+  moduleOff: 'Mati',
+  moduleDisableTitle: 'Matikan modul ini?',
+  moduleDisableBody:
+    'Semua orang kehilangan akses sampai modul diaktifkan lagi. Tidak ada data yang dihapus.',
+  cancelAction: 'Batal',
+  moduleTurnOff: 'Matikan',
+  moduleEnabledDone: 'Modul diaktifkan.',
+  moduleDisabledDone: 'Modul dimatikan.',
+  moduleSwitchFailed: 'Modul gagal diubah. Coba lagi.',
 };
 export type Locale = 'en' | 'id';
 const saved = (() => {

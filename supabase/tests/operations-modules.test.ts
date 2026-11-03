@@ -354,6 +354,69 @@ test('Vehicle Checklist and Bin Card enforce module scope in PostgreSQL', async 
       );
     });
 
+    await t.test('developers switch modules on the server without losing data', async () => {
+      await db.exec('reset role');
+      await db.exec(await readFile('supabase/migrations/202611040006_module_switch.sql', 'utf8'));
+      await as(manager);
+      assert.equal((await rpc('workstel_module_access')).meta?.platformAdmin, false);
+      assert.equal(
+        (await rpc('workstel_set_module_enabled', ['vehicle', false])).error,
+        'ACCESS_DENIED',
+      );
+      assert.equal((await rpc('workstel_list_modules')).error, 'ACCESS_DENIED');
+      await db.exec('reset role');
+      await db.query('insert into workstel_private.platform_admins(user_id) values ($1)', [
+        manager,
+      ]);
+      await as(manager);
+      assert.equal((await rpc('workstel_module_access')).meta?.platformAdmin, true);
+      const before = await rpc('vehicle_list_units', [hotel, null, 'all']);
+      assert.equal((before.data as unknown[]).length, 1);
+
+      const off = await rpc('workstel_set_module_enabled', ['vehicle', false]);
+      assert.equal(off.data?.enabled, false);
+      const access = await rpc('workstel_module_access');
+      assert.deepEqual(access.meta?.installedModules, ['bin-card']);
+      assert.ok(
+        !(access.data as Record<string, unknown>[]).some((row) => row.moduleId === 'vehicle'),
+      );
+      // The switch is enforced by every module RPC, not only hidden in the dashboard.
+      assert.equal((await rpc('vehicle_list_units', [hotel])).error, 'ACCESS_DENIED');
+      assert.ok((await rpc('bin_card_list_items', [hotel])).data);
+      const listed = (await rpc('workstel_list_modules')).data as Record<string, unknown>[];
+      assert.deepEqual(
+        listed.map((row) => [row.moduleId, row.enabled, row.updatedByEmail]),
+        [
+          ['bin-card', true, null],
+          ['vehicle', false, 'manager@example.com'],
+        ],
+      );
+
+      assert.equal(
+        (await rpc('workstel_set_module_enabled', ['vehicle', true])).data?.enabled,
+        true,
+      );
+      const after = await rpc('vehicle_list_units', [hotel, null, 'all']);
+      assert.deepEqual(after.data, before.data);
+      assert.equal(
+        (await rpc('workstel_set_module_enabled', ['sales-crm', false])).error,
+        'MODULE_NOT_INSTALLED',
+      );
+      await db.exec('reset role');
+      const events = (
+        await db.query<{ action: string; outcome: string }>(
+          "select action,outcome from workstel_private.audit_events where action like 'platform.%' order by occurred_at",
+        )
+      ).rows.map((row) => row.action + ':' + row.outcome);
+      assert.deepEqual(events, [
+        'platform.module.switch:denied',
+        'platform.module.list:denied',
+        'platform.admin.insert:success',
+        'platform.module.vehicle.disable:success',
+        'platform.module.vehicle.enable:success',
+      ]);
+    });
+
     await t.test('module events are recorded in their own audit namespaces', async () => {
       await db.exec('reset role');
       const actions = (

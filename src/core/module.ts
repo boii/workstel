@@ -7,6 +7,9 @@ export interface ModuleManifest {
   category: 'Operations' | 'Commercial' | 'Administration';
   color: 'mint' | 'blue' | 'peach' | 'yellow';
   icon?: `mdi-${string}`;
+  /** How access is granted: legacy department flags (Vault) or per-module server grants
+   * that a developer can switch on and off. Defaults to department flags. */
+  access?: 'department' | 'module-grants';
   permissions: readonly string[];
   publishes: readonly string[];
   subscribes: readonly string[];

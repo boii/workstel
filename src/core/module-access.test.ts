@@ -36,3 +36,16 @@ test('malformed or older-server responses fail closed', () => {
     noModuleAccess,
   );
 });
+
+test('only an explicit server flag marks a platform developer', () => {
+  const base = { data: [row], meta: { installedModules: ['vehicle'] } };
+  assert.equal(parseModuleAccess(base).platformAdmin, false);
+  assert.equal(
+    parseModuleAccess({ ...base, meta: { ...base.meta, platformAdmin: 'true' } }).platformAdmin,
+    false,
+  );
+  assert.equal(
+    parseModuleAccess({ ...base, meta: { ...base.meta, platformAdmin: true } }).platformAdmin,
+    true,
+  );
+});

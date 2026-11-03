@@ -8,6 +8,7 @@ export default defineModule({
   icon: 'mdi-package-variant-closed',
   color: 'mint',
   availability: 'available',
+  access: 'module-grants',
   permissions: ['bin-card:read', 'bin-card:write', 'bin-card:manage'],
   publishes: ['bin-card.stock-low.v1'],
   subscribes: [],

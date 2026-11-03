@@ -11,10 +11,17 @@ export interface ModuleAssignment {
   canManage: boolean;
 }
 export interface ModuleAccess {
+  /** Modules the server reports as installed and switched on. */
   installed: string[];
   assignments: ModuleAssignment[];
+  /** True for platform developers, who may switch modules on and off. */
+  platformAdmin: boolean;
 }
-export const noModuleAccess: ModuleAccess = Object.freeze({ installed: [], assignments: [] });
+export const noModuleAccess: ModuleAccess = Object.freeze({
+  installed: [],
+  assignments: [],
+  platformAdmin: false,
+});
 
 const textFields = [
   'moduleId',
@@ -29,7 +36,10 @@ const flagFields = ['canRead', 'canWrite', 'canManage'] as const;
 /** Validate the workstel_module_access response; anything unexpected fails closed. */
 export function parseModuleAccess(response: unknown): ModuleAccess {
   if (!response || typeof response !== 'object') return noModuleAccess;
-  const { data, meta } = response as { data?: unknown; meta?: { installedModules?: unknown } };
+  const { data, meta } = response as {
+    data?: unknown;
+    meta?: { installedModules?: unknown; platformAdmin?: unknown };
+  };
   const reported = meta?.installedModules;
   if (
     !Array.isArray(data) ||
@@ -52,6 +62,7 @@ export function parseModuleAccess(response: unknown): ModuleAccess {
   return {
     installed: [...installed],
     assignments: (data as ModuleAssignment[]).filter((row) => row.canRead),
+    platformAdmin: meta?.platformAdmin === true,
   };
 }
 
