@@ -6,7 +6,7 @@ An internal hotel operations workspace built with Vue, TypeScript, Vite and Vuet
 
 This repository contains the approved desktop/mobile shell, module development foundation and authenticated Vault metadata service. Email/password login to Cloudflare Pages and the hotel-hosted Supabase backend has been confirmed by the operator.
 Private-by-default ownership, explicit read-only sharing and durable audit are implemented. The operator confirmed all 16 actual-server private metadata checks and the live Vault/audit entry points. See docs/DEPLOYMENT.md for release evidence and the server update workflow.
-Real password storage/reveal, Google provider setup and cross-module event delivery are not commissioned. Other operational modules remain Coming soon. Do not enter passwords in metadata fields.
+Real password storage/reveal, Google provider setup and cross-module event delivery are not commissioned. Vehicle Checklist and Bin Card are implemented with module-specific server grants; they open in production after their migrations are installed on the hotel server (see docs/DEPLOYMENT.md). Other operational modules remain Coming soon. Do not enter passwords in metadata fields.
 Development demo records stay in memory and reset on reload. Production uses scoped server RPCs; tokens stay in memory and reloading requires sign-in. Only language preferences persist locally.
 
 ## Development

@@ -15,6 +15,7 @@ watch(
 );
 import { modules } from './modules/registry';
 import { isModuleEnabled } from './core/module';
+import { canUseModule } from './core/module-access';
 import { useRoute, useRouter } from 'vue-router';
 import { shellPaths } from './routes';
 const route = useRoute();
@@ -192,9 +193,21 @@ function canOpenModule(module: ModuleManifest) {
   return (
     router.hasRoute(module.id) &&
     isModuleEnabled(module) &&
-    (runtime.demo || module.id !== 'vault' || auth.vaultReady.value)
+    (runtime.demo || module.id !== 'vault' || auth.vaultReady.value) &&
+    // Operational modules open only when the server reports them installed and readable.
+    (runtime.demo ||
+      !moduleScoped.includes(module.id) ||
+      canUseModule(auth.moduleAccess.value, module.id))
   );
 }
+const moduleScoped = ['vehicle', 'bin-card'];
+const currentModule = computed(() => modules.find((m) => m.id === route.meta.moduleId));
+// Vault gates itself; other module pages render only when the caller may open them.
+const moduleOpen = computed(
+  () =>
+    route.meta.moduleId === 'vault' ||
+    (!!currentModule.value && canOpenModule(currentModule.value)),
+);
 function toggleFavorite(id: string) {
   favorites.value = favorites.value.includes(id)
     ? favorites.value.filter((x) => x !== id)
@@ -486,7 +499,7 @@ function logout() {
       ><v-main :id="session ? 'workspace-main' : undefined"
         ><div class="workspace-content">
           <div
-            v-if="view !== 'Password Vault'"
+            v-if="!route.meta.moduleId"
             class="page-heading"
           >
             <h1>
@@ -521,11 +534,27 @@ function logout() {
             >
           </div>
           <router-view
-            v-if="route.meta.moduleId"
-            :assignments="auth.assignments.value"
-            :available="auth.vaultReady.value"
+            v-if="route.meta.moduleId && moduleOpen"
+            v-bind="
+              route.meta.moduleId === 'vault'
+                ? { assignments: auth.assignments.value, available: auth.vaultReady.value }
+                : { access: auth.moduleAccess.value.assignments }
+            "
             @back="nav('Dashboard')"
           />
+          <v-card
+            v-else-if="route.meta.moduleId"
+            class="info-panel"
+          >
+            <p>{{ t('temporarilyUnavailable') }}</p>
+            <v-btn
+              variant="text"
+              color="primary"
+              prepend-icon="mdi-arrow-left"
+              @click="nav('Dashboard')"
+              >{{ t('backDashboard') }}</v-btn
+            >
+          </v-card>
           <section
             v-else-if="['Dashboard', 'Favorites'].includes(view)"
             :aria-label="t('moduleList')"

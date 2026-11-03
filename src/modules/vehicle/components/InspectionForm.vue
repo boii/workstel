@@ -1,0 +1,309 @@
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
+import {
+  errorMessage,
+  fuelKeys,
+  itemKeys,
+  useVehicleMessages,
+} from '../composables/useVehicleMessages';
+import { checklistItems, fuelLevels } from '../types';
+import type { ChecklistItem, FuelLevel, InspectionInput, ItemState, Vehicle } from '../types';
+import { hasIssue, parseOdometer, validateInspection } from '../validation';
+import type { InspectionField, ValidationError } from '../validation';
+
+const open = defineModel<boolean>({ required: true });
+const props = defineProps<{
+  vehicle: Vehicle | null;
+  record: (input: InspectionInput, idempotencyKey: string) => Promise<void>;
+}>();
+const messages = useVehicleMessages();
+const odometer = ref('');
+const fuelLevel = ref<FuelLevel>('full');
+const items = ref<Partial<Record<ChecklistItem, ItemState>>>({});
+const notes = ref('');
+const errors = ref<Partial<Record<InspectionField, ValidationError>>>({});
+const saving = ref(false);
+const failure = ref('');
+// One key per opened form, so a retried submit after a network error is not recorded twice.
+let idempotencyKey = '';
+watch(open, (value) => {
+  if (!value) return;
+  odometer.value = '';
+  fuelLevel.value = 'full';
+  items.value = {};
+  notes.value = '';
+  errors.value = {};
+  failure.value = '';
+  idempotencyKey = crypto.randomUUID();
+});
+const issueMarked = computed(() => hasIssue(items.value));
+function markAllOk() {
+  items.value = Object.fromEntries(checklistItems.map((item) => [item, 'ok']));
+  if (errors.value.items) errors.value = { ...errors.value, items: undefined };
+}
+async function submit() {
+  if (saving.value || !props.vehicle) return;
+  errors.value = validateInspection({
+    odometer: odometer.value,
+    fuelLevel: fuelLevel.value,
+    items: items.value,
+    notes: notes.value,
+  });
+  const invalid = (Object.keys(errors.value) as InspectionField[]).find((key) => errors.value[key]);
+  if (invalid) {
+    document.getElementById('inspection-' + invalid)?.focus();
+    return;
+  }
+  saving.value = true;
+  failure.value = '';
+  try {
+    await props.record(
+      {
+        odometerKm: parseOdometer(odometer.value) ?? null,
+        fuelLevel: fuelLevel.value,
+        items: items.value as Record<ChecklistItem, ItemState>,
+        notes: notes.value,
+      },
+      idempotencyKey,
+    );
+    open.value = false;
+  } catch (error) {
+    failure.value = errorMessage(messages.value, error);
+  } finally {
+    saving.value = false;
+  }
+}
+const fieldError = (field: InspectionField) => {
+  const key = errors.value[field];
+  if (!key) return '';
+  return field === 'items' ? messages.value.itemsRequired : messages.value[key];
+};
+</script>
+<template>
+  <ModuleDialog
+    v-model="open"
+    :title="messages.inspectionTitle"
+    :subtitle="vehicle ? vehicle.name + ' · ' + vehicle.plateNumber : ''"
+    :busy="saving"
+    :width="620"
+  >
+    <v-form
+      id="inspection-form"
+      @submit.prevent="submit"
+    >
+      <v-alert
+        v-if="failure"
+        type="error"
+        variant="tonal"
+        role="alert"
+        class="mb-4"
+        >{{ failure }}</v-alert
+      >
+      <div class="inspection-row">
+        <div>
+          <label
+            for="inspection-odometerKm"
+            class="field-label inspection-first-label"
+            >{{ messages.odometer }}</label
+          ><v-text-field
+            id="inspection-odometerKm"
+            v-model="odometer"
+            :disabled="saving"
+            inputmode="numeric"
+            maxlength="7"
+            :hint="messages.odometerHint"
+            :error-messages="fieldError('odometerKm')"
+          />
+        </div>
+        <div>
+          <span
+            id="inspection-fuel-label"
+            class="field-label inspection-first-label"
+            >{{ messages.fuelLevel }}</span
+          ><v-btn-toggle
+            v-model="fuelLevel"
+            mandatory
+            divided
+            variant="outlined"
+            color="primary"
+            density="comfortable"
+            class="inspection-fuel"
+            role="radiogroup"
+            aria-labelledby="inspection-fuel-label"
+            :disabled="saving"
+            ><v-btn
+              v-for="level in fuelLevels"
+              :key="level"
+              :value="level"
+              role="radio"
+              :aria-checked="fuelLevel === level"
+              >{{ messages[fuelKeys[level]] }}</v-btn
+            ></v-btn-toggle
+          >
+        </div>
+      </div>
+      <div class="inspection-checklist-heading">
+        <span
+          id="inspection-items"
+          class="field-label"
+          tabindex="-1"
+          >{{ messages.checklist }}</span
+        ><v-btn
+          variant="text"
+          color="primary"
+          size="small"
+          :disabled="saving"
+          @click="markAllOk"
+          >{{ messages.markAllOk }}</v-btn
+        >
+      </div>
+      <p
+        class="inspection-hint"
+        :class="{ 'inspection-error': errors.items }"
+        :role="errors.items ? 'alert' : undefined"
+      >
+        {{ errors.items ? messages.itemsRequired : messages.checklistHint }}
+      </p>
+      <ul class="inspection-items">
+        <li
+          v-for="item in checklistItems"
+          :key="item"
+          :class="{ 'inspection-item--issue': items[item] === 'issue' }"
+        >
+          <span :id="'inspection-item-' + item">{{ messages[itemKeys[item]] }}</span>
+          <v-btn-toggle
+            v-model="items[item]"
+            divided
+            variant="outlined"
+            density="comfortable"
+            :color="items[item] === 'issue' ? 'error' : 'primary'"
+            :aria-labelledby="'inspection-item-' + item"
+            :disabled="saving"
+            ><v-btn
+              value="ok"
+              prepend-icon="mdi-check"
+              >{{ messages.ok }}</v-btn
+            ><v-btn
+              value="issue"
+              prepend-icon="mdi-alert-outline"
+              >{{ messages.issue }}</v-btn
+            ></v-btn-toggle
+          >
+        </li>
+      </ul>
+      <label
+        for="inspection-notes"
+        class="field-label"
+        >{{ messages.notes }}</label
+      ><v-textarea
+        id="inspection-notes"
+        v-model="notes"
+        :disabled="saving"
+        rows="2"
+        auto-grow
+        maxlength="1000"
+        :hint="issueMarked ? messages.notesHint : ''"
+        :persistent-hint="issueMarked"
+        :error-messages="fieldError('notes')"
+      />
+    </v-form>
+    <template #actions>
+      <v-btn
+        variant="text"
+        :disabled="saving"
+        @click="open = false"
+        >{{ messages.cancel }}</v-btn
+      ><v-btn
+        color="primary"
+        type="submit"
+        form="inspection-form"
+        :loading="saving"
+        @click.prevent="submit"
+        >{{ messages.saveInspection }}</v-btn
+      >
+    </template>
+  </ModuleDialog>
+</template>
+<style scoped>
+.inspection-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 16px;
+}
+.inspection-first-label {
+  margin-top: 0;
+}
+.inspection-fuel {
+  width: 100%;
+  height: 40px !important;
+}
+.inspection-fuel .v-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 0 4px;
+  font-size: 12px;
+}
+.inspection-checklist-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+}
+.inspection-checklist-heading .field-label {
+  margin-bottom: 0;
+}
+.inspection-hint {
+  margin: 4px 0 8px;
+  font-size: 11px;
+  color: var(--workstel-text-secondary);
+}
+.inspection-hint.inspection-error {
+  color: rgb(var(--v-theme-error));
+}
+.inspection-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--workstel-border);
+  border-radius: 6px;
+}
+.inspection-items li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 6px 6px 12px;
+  font-size: 13px;
+}
+.inspection-items li + li {
+  border-top: 1px solid var(--workstel-border);
+}
+.inspection-item--issue {
+  background: #fdf3e7;
+}
+.inspection-items .v-btn-toggle {
+  flex-shrink: 0;
+  height: 36px !important;
+}
+.inspection-items .v-btn {
+  font-size: 12px;
+  padding: 0 10px;
+}
+@media (max-width: 680px) {
+  .inspection-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .inspection-fuel {
+    height: 44px !important;
+  }
+  .inspection-items .v-btn-toggle {
+    height: 44px !important;
+  }
+  .inspection-checklist-heading .v-btn {
+    min-height: 44px;
+  }
+}
+</style>

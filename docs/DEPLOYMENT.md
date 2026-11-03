@@ -198,3 +198,11 @@ password reveal, sharing mutation or secret storage was exercised.
 ## Module audit isolation — 3 November 2026
 
 Apply `supabase/migrations/202611030001_module_audit_isolation.sql` through the existing reviewed database migration process after the existing migrations, before deploying the updated frontend. The previous privacy installer does not apply this migration. Back up the existing database first. This additive migration changes the Vault audit RPC, records its version and reloads the API schema; it does not delete or rewrite audit history. Verify that scoped readers receive only `vault.*`, unauthorized scopes remain denied, and new reader attempts are recorded as `vault.audit.read`. Platform events remain stored but are not available through Vault. Source and embedded PostgreSQL tests do not establish production deployment or acceptance.
+
+## Operational modules release — 4 November 2026
+
+Vehicle Checklist and Bin Card add module-specific capabilities in `workstel_private.module_access` (separate from Vault and `staff_access` flags), their own tables and scoped RPCs, and `public.workstel_module_access()`, which reports installed modules and the caller's grants. Migrations: `202611040001_module_access.sql`, `202611040002_vehicle_checklist.sql`, `202611040003_bin_card.sql`.
+
+Install on the hotel server with `bash infra/apply-operations-modules.sh /path/to/supabase/migrations`. The helper requires the base schema and migration ledger, makes a restricted local custom-format backup and checks its archive listing, applies only migrations not yet recorded, and exits without changes if all three are present. It does not modify Vault data or audit history. Then grant access per staff member and department with `infra/grant-module-access.sql`; no grants exist after installation.
+
+The frontend is safe to deploy before the migration: when `workstel_module_access` is missing or returns no grant, both dashboard cards show Temporarily unavailable and direct URLs show the same message. Embedded PostgreSQL tests cover scope, validation, balances, idempotency, append-only records and audit namespaces; they do not establish acceptance on the actual pinned Supabase stack. Event delivery for `vehicle.inspected.v1` and `bin-card.stock-low.v1` is not implemented.

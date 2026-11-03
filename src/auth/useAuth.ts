@@ -2,6 +2,8 @@ import { ref, onScopeDispose } from 'vue';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase } from './client';
 import { runtime } from '../config/runtime';
+import { noModuleAccess, parseModuleAccess } from '../core/module-access';
+import type { ModuleAccess } from '../core/module-access';
 export interface StaffAssignment {
   hotelId: string;
   hotelName: string;
@@ -22,13 +24,15 @@ export function useAuth() {
     vaultReady = ref(false),
     googleEnabled = ref(false),
     emailEnabled = ref(false),
-    assignments = ref<StaffAssignment[]>([]);
+    assignments = ref<StaffAssignment[]>([]),
+    moduleAccess = ref<ModuleAccess>(noModuleAccess);
   let generation = 0;
   let stop: (() => void) | undefined;
   async function synchronize(session: Session | null) {
     const current = ++generation;
     if (!session) {
       vaultReady.value = false;
+      moduleAccess.value = noModuleAccess;
       authenticated.value = false;
       assignments.value = [];
       email.value = '';
@@ -64,6 +68,10 @@ export function useAuth() {
         })
       )
         throw Error('Invalid access response');
+      // Servers without the operational-module migration keep those modules unavailable.
+      const modules = await client.rpc('workstel_module_access');
+      if (current !== generation) return;
+      moduleAccess.value = modules.error ? noModuleAccess : parseModuleAccess(modules.data);
       assignments.value = rows as StaffAssignment[];
       vaultReady.value = data.meta?.vaultPolicy === 'private-v1';
       email.value = user.user.email ?? '';
@@ -73,6 +81,7 @@ export function useAuth() {
       if (current === generation) {
         authenticated.value = false;
         assignments.value = [];
+        moduleAccess.value = noModuleAccess;
         email.value = '';
         failure.value = 'authFailed';
       }
@@ -165,6 +174,7 @@ export function useAuth() {
     assignments.value = [];
     email.value = '';
     vaultReady.value = false;
+    moduleAccess.value = noModuleAccess;
     try {
       if (runtime.configured) await getSupabase().auth.signOut({ scope: 'local' });
     } catch {
@@ -182,6 +192,7 @@ export function useAuth() {
     failure,
     email,
     assignments,
+    moduleAccess,
     vaultReady,
     googleEnabled,
     emailEnabled,
