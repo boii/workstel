@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# Apply the reviewed Vehicle Checklist, Bin Card and Accounting department migrations to the existing hotel stack.
+# Apply the reviewed operational module and department migrations to the existing hotel stack.
 set -euo pipefail
 umask 077
 migrations_dir="${1:?Usage: bash apply-operations-modules.sh /path/to/supabase/migrations}"
-files=(202611040001_module_access.sql 202611040002_vehicle_checklist.sql 202611040003_bin_card.sql 202611040004_accounting_department.sql)
+files=(202611040001_module_access.sql 202611040002_vehicle_checklist.sql 202611040003_bin_card.sql 202611040004_accounting_department.sql 202611040005_hr_admin_departments.sql)
 for file in "${files[@]}"; do
   [[ -f "$migrations_dir/$file" ]] || { printf 'ERROR: Missing migration %s.\n' "$file" >&2; exit 1; }
 done
 psql_query() { docker exec -u postgres workstel-db psql -X -At --dbname=postgres --set=ON_ERROR_STOP=1 -c "$1"; }
 [[ "$(psql_query "select to_regclass('workstel_private.staff_access') is not null and to_regclass('workstel_private.schema_migrations') is not null;")" == t ]] \
   || { printf 'ERROR: The Workstel base schema and migration ledger are required first.\n' >&2; exit 1; }
-if [[ "$(psql_query "select count(*) from workstel_private.schema_migrations where version in ('202611040001','202611040002','202611040003','202611040004');")" == 4 ]]; then
+if [[ "$(psql_query "select count(*) from workstel_private.schema_migrations where version in ('202611040001','202611040002','202611040003','202611040004','202611040005');")" == 5 ]]; then
   printf 'Operational modules are already installed. Nothing to do.\n'
   exit 0
 fi

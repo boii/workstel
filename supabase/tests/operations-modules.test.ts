@@ -329,6 +329,31 @@ test('Vehicle Checklist and Bin Card enforce module scope in PostgreSQL', async 
       },
     );
 
+    await t.test('Human Resource and Admin and General are canonical departments', async () => {
+      await db.exec('reset role');
+      const migration = await readFile(
+        'supabase/migrations/202611040005_hr_admin_departments.sql',
+        'utf8',
+      );
+      await db.exec(migration);
+      const rows = await db.query<{ code: string; name: string }>(
+        "select code,name from public.workstel_departments where hotel_id=$1 and code in ('human-resource','admin-general') order by code",
+        [hotel],
+      );
+      assert.deepEqual(rows.rows, [
+        { code: 'admin-general', name: 'Admin and General' },
+        { code: 'human-resource', name: 'Human Resource' },
+      ]);
+      // Re-running the backfill is harmless and unknown codes stay rejected.
+      await db.exec(migration);
+      await assert.rejects(
+        db.query(
+          "insert into public.workstel_departments(hotel_id,code,name) values ($1,'housekeeping','Housekeeping')",
+          [hotel],
+        ),
+      );
+    });
+
     await t.test('module events are recorded in their own audit namespaces', async () => {
       await db.exec('reset role');
       const actions = (

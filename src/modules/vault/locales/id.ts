@@ -128,6 +128,8 @@ export default {
   engineering: 'Engineering',
   it: 'IT',
   accounting: 'Accounting',
+  humanResource: 'Human Resource',
+  adminGeneral: 'Admin and General',
   security: 'IT & Keamanan',
   history: 'Aktivitas',
   createdActivity: 'Akun dibuat',

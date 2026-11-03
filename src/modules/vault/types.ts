@@ -1,5 +1,13 @@
 import type { BaseRecord } from '../../core/module';
-export const departmentIds = ['front-office', 'sales', 'engineering', 'it', 'accounting'] as const;
+export const departmentIds = [
+  'front-office',
+  'sales',
+  'engineering',
+  'it',
+  'accounting',
+  'human-resource',
+  'admin-general',
+] as const;
 export type DepartmentId = (typeof departmentIds)[number];
 export type VaultStatus = 'active' | 'archived';
 export interface VaultEntry extends BaseRecord {
