@@ -358,8 +358,11 @@ function logout() {
               :title="!runtime.demo && item === 'My tasks' ? t('comingSoon') : undefined"
               @click="nav(item)"
             >
-              {{ translate(item)
-              }}<span
+              <span
+                class="nav-label"
+                :data-label="translate(item)"
+                >{{ translate(item) }}</span
+              ><span
                 v-if="runtime.demo && item === 'My tasks'"
                 class="task-count"
                 >{{ remaining }}</span
