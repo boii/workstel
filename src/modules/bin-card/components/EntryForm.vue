@@ -121,10 +121,9 @@ const unit = computed(() => props.item?.unit ?? '');
       ><v-btn-toggle
         v-model="type"
         mandatory
-        divided
         variant="outlined"
         color="primary"
-        class="entry-types"
+        class="choice-group entry-types"
         aria-labelledby="bin-entry-type"
         :disabled="saving"
         ><v-btn
@@ -218,16 +217,11 @@ const unit = computed(() => props.item?.unit ?? '');
 }
 .entry-types {
   width: 100%;
-  height: 40px !important;
+  flex-wrap: nowrap;
 }
 .entry-types .v-btn {
   flex: 1;
   min-width: 0;
   font-size: 12px;
-}
-@media (max-width: 680px) {
-  .entry-types {
-    height: 44px !important;
-  }
 }
 </style>

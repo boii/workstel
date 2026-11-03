@@ -81,10 +81,10 @@ function granted(assignment: StaffAssignment) {
         <v-btn-toggle
           v-model="locale"
           mandatory
-          variant="text"
+          variant="outlined"
           color="primary"
           density="comfortable"
-          class="settings-language"
+          class="choice-group settings-language"
           role="group"
           aria-labelledby="settings-language"
           ><v-btn value="en">English</v-btn><v-btn value="id">Bahasa Indonesia</v-btn></v-btn-toggle
