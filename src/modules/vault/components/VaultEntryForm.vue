@@ -91,6 +91,13 @@ function fieldError(field: VaultField) {
       @submit.prevent="submit"
     >
       <div class="vault-account-fields">
+        <p class="vault-field-hint vault-password-policy vault-panel-intro">
+          <v-icon
+            icon="mdi-office-building-outline"
+            size="14"
+          />
+          {{ messages.scopeHint }}
+        </p>
         <v-alert
           v-if="serverError"
           role="alert"

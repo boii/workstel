@@ -90,7 +90,7 @@ export const english = {
   salesTitle: 'Sales CRM',
   salesDescription: 'Manage leads and sales follow-ups.',
   vaultTitle: 'Password Vault',
-  vaultDescription: 'Manage department account access.',
+  vaultDescription: 'Store hotel work accounts by department.',
   checklistTitle: 'Daily Checklist',
   checklistDescription: 'Daily and shift task checklists.',
   documentsTitle: 'Documents & SOPs',
@@ -120,7 +120,7 @@ export const english = {
   helpStep3: 'Change the language or sign out in Settings.',
   openSettings: 'Open settings',
   helpVault: 'Using Password Vault',
-  helpVault1: 'Select Add account to save a new account.',
+  helpVault1: 'Select Add account to save a hotel work account.',
   helpVault2: 'Use the ⋮ menu on a row to edit, share read-only, or archive.',
   helpVault3: 'Set Status to Archived to find and restore archived accounts.',
   helpVault4: 'Audit log shows recent activity within your access.',
@@ -147,6 +147,10 @@ export const english = {
   copyFailed: 'Copy failed',
   helpSearchShortcut: 'Search modules, or accounts in Vault',
   helpNewAccount: 'Add an account in Vault',
+  helpVaultScope: 'Vault is for hotel work accounts only. Keep personal accounts out of it.',
+  faqPersonalQ: 'Can I save my personal accounts?',
+  faqPersonalA:
+    'No. Vault is for hotel work accounts that your team needs. Keep personal accounts elsewhere.',
 } as const;
 export type English = typeof english;
 export type MessageKey = keyof typeof english;
@@ -240,7 +244,7 @@ const indonesian: Record<MessageKey, string> = {
   salesTitle: 'Sales CRM',
   salesDescription: 'Kelola prospek dan tindak lanjut sales.',
   vaultTitle: 'Password Vault',
-  vaultDescription: 'Kelola akses akun departemen.',
+  vaultDescription: 'Simpan akun kerja hotel per departemen.',
   checklistTitle: 'Daily Checklist',
   checklistDescription: 'Checklist pekerjaan harian dan shift.',
   documentsTitle: 'Dokumen & SOP',
@@ -270,7 +274,7 @@ const indonesian: Record<MessageKey, string> = {
   helpStep3: 'Ganti bahasa atau keluar di Pengaturan.',
   openSettings: 'Buka pengaturan',
   helpVault: 'Memakai Password Vault',
-  helpVault1: 'Pilih Tambah akun untuk menyimpan akun baru.',
+  helpVault1: 'Pilih Tambah akun untuk menyimpan akun kerja hotel.',
   helpVault2: 'Pakai menu ⋮ di setiap baris untuk mengubah, berbagi akses baca, atau mengarsipkan.',
   helpVault3: 'Pilih Status Diarsipkan untuk menemukan dan memulihkan akun yang diarsipkan.',
   helpVault4: 'Log audit menampilkan aktivitas terbaru sesuai akses Anda.',
@@ -298,6 +302,10 @@ const indonesian: Record<MessageKey, string> = {
   copyFailed: 'Gagal menyalin',
   helpSearchShortcut: 'Cari modul, atau akun di Vault',
   helpNewAccount: 'Tambah akun di Vault',
+  helpVaultScope: 'Vault khusus untuk akun kerja hotel. Jangan simpan akun pribadi.',
+  faqPersonalQ: 'Bisakah saya menyimpan akun pribadi?',
+  faqPersonalA:
+    'Tidak. Vault untuk akun kerja hotel yang dibutuhkan tim. Simpan akun pribadi di tempat lain.',
 };
 export type Locale = 'en' | 'id';
 const saved = (() => {

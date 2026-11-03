@@ -16,13 +16,14 @@ const steps: MessageKey[] = ['helpStep1', 'helpStep2', 'helpStep3'];
 // The demo Vault has no audit log, so that tip only appears in production.
 const vaultTips = computed<MessageKey[]>(() =>
   props.demo
-    ? ['helpVault1', 'helpVault2', 'helpVault3']
-    : ['helpVault1', 'helpVault2', 'helpVault3', 'helpVault4'],
+    ? ['helpVaultScope', 'helpVault1', 'helpVault2', 'helpVault3']
+    : ['helpVaultScope', 'helpVault1', 'helpVault2', 'helpVault3', 'helpVault4'],
 );
 const faq = computed<[MessageKey, MessageKey][]>(() => [
   ['faqComingQ', 'faqComingA'],
   ['faqAccessQ', 'faqAccessA'],
   ['faqSessionQ', props.demo ? 'temporaryData' : 'faqSessionA'],
+  ['faqPersonalQ', 'faqPersonalA'],
   ['faqPasswordQ', 'faqPasswordA'],
   ['faqLanguageQ', 'faqLanguageA'],
 ]);
