@@ -127,6 +127,7 @@ export default {
   sales: 'Sales & Marketing',
   engineering: 'Engineering',
   it: 'IT',
+  accounting: 'Accounting',
   security: 'IT & Keamanan',
   history: 'Aktivitas',
   createdActivity: 'Akun dibuat',

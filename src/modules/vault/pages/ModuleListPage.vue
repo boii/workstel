@@ -33,6 +33,7 @@ const departmentKeys = {
   sales: 'sales',
   engineering: 'engineering',
   it: 'it',
+  accounting: 'accounting',
 } as const;
 const actionKeys: Record<
   VaultAction,
