@@ -167,3 +167,30 @@ preview re-entry, Back/Forward, desktop drawer and 390px mobile layout. No real
 accounts or secrets were used. Authenticated production refresh/deep-link
 acceptance remains for the operator. See ROUTING.md for module integration,
 OAuth callback limitations and the bounded metadata restoration scan.
+
+## Interaction release — 3 November 2026
+
+Commit 3909eaa was pushed to GitHub main and deployed through Direct Upload to
+https://519753bb.workstel.pages.dev/ (production https://workstel.pages.dev/).
+The release adds persisted module favorites, debounced Vault search with
+AbortController cancellation, shell and Vault keyboard shortcuts, department
+marks in the account list and skip-link/dialog/list accessibility semantics. It
+contains no database, schema, RPC, storage or authorization change.
+
+npm run format and npm run check passed, including 55 tests plus the module
+generator test, manifest/locale checks, TypeScript and the production build.
+Production configuration and Pages header preparation passed. The root, /vault,
+/settings and an unknown path returned HTTP 200 with the current asset, and the
+deployed asset hashes matched the local dist build.
+
+A production browser check at https://workstel.pages.dev/ ran at 1440 x 900 and
+390 x 844. Both widths rendered the real sign-in screen with no demo action and
+no horizontal overflow (document width equalled innerWidth). The shortcuts
+remained inert without a session, localStorage held only the locale preference,
+the sole external request was the anonymous Auth settings probe, and its 401 was
+the only console error.
+
+Unavailable check: the debounced search, filter chips and new-account shortcut
+need an authenticated Supabase session. They were verified by unit test and
+source assertions, not against the production backend. No real staff account,
+password reveal, sharing mutation or secret storage was exercised.
