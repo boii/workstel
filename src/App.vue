@@ -38,6 +38,7 @@ import { focusFieldInput } from './core/focus-field';
 import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
 import SettingsPage from './shared/settings-page.vue';
+import HelpPage from './shared/help-page.vue';
 const appVersion = import.meta.env.VITE_APP_VERSION;
 const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
 const copyrightYear = new Date().getFullYear();
@@ -169,6 +170,14 @@ const shortcutRows = computed(() => [
   { keys: '?', label: t('shortcutList') },
   { keys: 'Esc', label: t('shortcutClose') },
 ]);
+// Help lists every shortcut, including the Vault-only "new account" key registered by that page.
+const helpShortcutRows = computed(() => [
+  { keys: '/', label: t('helpSearchShortcut') },
+  { keys: 'N', label: t('helpNewAccount') },
+  { keys: '?', label: t('shortcutList') },
+  { keys: 'Esc', label: t('shortcutClose') },
+]);
+const vaultModule = modules.find((m) => m.id === 'vault');
 function nav(v: string) {
   if (!runtime.demo && v === 'My tasks') return;
   if (shellPaths[v]) void router.push(shellPaths[v]);
@@ -463,6 +472,9 @@ function logout() {
                   prepend-icon="mdi-cog-outline"
                   :title="t('accountSettings')"
                   @click="nav('Settings')" /><v-list-item
+                  prepend-icon="mdi-help-circle-outline"
+                  :title="t('help')"
+                  @click="nav('Help')" /><v-list-item
                   prepend-icon="mdi-keyboard-outline"
                   :title="t('shortcuts')"
                   @click="shortcutsOpen = true" /><v-list-item
@@ -658,13 +670,21 @@ function logout() {
             @sign-out="logout"
             @open-shortcuts="shortcutsOpen = true"
           />
+          <HelpPage
+            v-else-if="view === 'Help'"
+            :demo="runtime.demo"
+            :vault-available="vaultModule ? canOpenModule(vaultModule) : false"
+            :version="`Workstel v${appVersion} · Build ${buildCommit}`"
+            :shortcuts="helpShortcutRows"
+            @open-vault="vaultModule && openModule(vaultModule)"
+            @open-settings="nav('Settings')"
+          />
           <v-card
             v-else
             class="info-panel"
           >
-            <p v-if="view === 'Not found'">{{ t('pageNotFound') }}</p>
-            <p v-else-if="view === 'My tasks' && !runtime.demo">{{ t('productionPending') }}</p>
-            <p v-else>{{ runtime.demo ? t('sharedStandards') : t('productionHelp') }}</p>
+            <p v-if="view === 'My tasks' && !runtime.demo">{{ t('productionPending') }}</p>
+            <p v-else>{{ t('pageNotFound') }}</p>
             <v-btn
               variant="text"
               color="primary"
