@@ -7,6 +7,12 @@
   color: rgba(0, 0, 0, 0.87);
   background: #f2f5f8;
   font-synthesis: none;
+  /* Keep the scrollbar space reserved so short and long pages share one layout width. */
+  scrollbar-gutter: stable;
+}
+/* The reserved gutter already replaces the scrollbar, so Vuetify's scroll-lock padding would shift the page. */
+:root.v-overlay-scroll-blocked {
+  --v-scrollbar-offset: 0px !important;
 }
 body {
   margin: 0;
@@ -137,6 +143,23 @@ p {
   color: #666;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+/* Reserve the bold label width so switching the active item never moves its neighbours. */
+.nav-label {
+  display: inline-flex;
+  flex-direction: column;
+}
+.nav-label::after {
+  content: attr(data-label);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 700;
+  user-select: none;
+  pointer-events: none;
 }
 .top-nav button.active {
   color: #0096c7;
