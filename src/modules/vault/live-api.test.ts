@@ -42,13 +42,22 @@ test('audit parser rejects unscoped or malformed responses and allowlists output
     hotel_id: hotel,
     department_id: null,
     resource_id: null,
-    action: 'audit.read',
+    action: 'vault.audit.read',
     outcome: 'success',
     occurred_at: entry.created_at,
     correlation_id: id,
     unexpected: 'excluded',
   };
   assert.equal('unexpected' in parseAudit([event], hotel)[0], false);
+  for (const action of [
+    'audit.read',
+    'session.access',
+    'staff.access.update',
+    'admin.bootstrap',
+    'stock-transfer.create',
+    'vaultish.read',
+  ])
+    assert.throws(() => parseAudit([{ ...event, action }], hotel));
   assert.throws(() => parseAudit([event], id));
   assert.throws(() => parseAudit([{ ...event, outcome: 'unknown' }], hotel));
 });

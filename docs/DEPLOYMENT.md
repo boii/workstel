@@ -194,3 +194,7 @@ Unavailable check: the debounced search, filter chips and new-account shortcut
 need an authenticated Supabase session. They were verified by unit test and
 source assertions, not against the production backend. No real staff account,
 password reveal, sharing mutation or secret storage was exercised.
+
+## Module audit isolation — 3 November 2026
+
+Apply `supabase/migrations/202611030001_module_audit_isolation.sql` through the existing reviewed database migration process after the existing migrations, before deploying the updated frontend. The previous privacy installer does not apply this migration. Back up the existing database first. This additive migration changes the Vault audit RPC, records its version and reloads the API schema; it does not delete or rewrite audit history. Verify that scoped readers receive only `vault.*`, unauthorized scopes remain denied, and new reader attempts are recorded as `vault.audit.read`. Platform events remain stored but are not available through Vault. Source and embedded PostgreSQL tests do not establish production deployment or acceptance.

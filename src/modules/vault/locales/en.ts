@@ -58,7 +58,7 @@ export default {
   auditEvent: 'Event ID',
   auditWhen: 'Time (Jakarta)',
   auditDetails: 'Expand event details',
-  auditHint: 'Latest 100 events in your scope. Viewing this log is audited.',
+  auditHint: 'Latest 100 Password Vault events in your scope. Viewing this log is audited.',
   auditEmpty: 'No audit events yet.',
   refresh: 'Refresh',
   success: 'Success',

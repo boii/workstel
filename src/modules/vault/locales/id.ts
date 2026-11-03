@@ -60,7 +60,7 @@ export default {
   auditEvent: 'ID peristiwa',
   auditWhen: 'Waktu (Jakarta)',
   auditDetails: 'Buka detail peristiwa',
-  auditHint: '100 peristiwa terbaru sesuai izin Anda. Membuka log ini juga dicatat.',
+  auditHint: '100 peristiwa Password Vault terbaru sesuai izin Anda. Membuka log ini juga dicatat.',
   auditEmpty: 'Belum ada peristiwa audit.',
   refresh: 'Muat ulang',
   success: 'Berhasil',

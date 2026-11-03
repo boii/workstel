@@ -136,6 +136,7 @@ export function parseAudit(data: unknown, hotelId: string): AuditEvent[] {
       !['id', 'actor_database_role', 'action', 'occurred_at', 'correlation_id'].every(
         (key) => typeof raw[key] === 'string',
       ) ||
+      !raw.action.startsWith('vault.') ||
       !uuid.test(raw.id) ||
       !uuid.test(raw.correlation_id) ||
       !['actor_id', 'department_id', 'resource_id'].every(

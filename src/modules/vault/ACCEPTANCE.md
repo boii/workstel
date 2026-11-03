@@ -110,3 +110,9 @@ Indonesian copy and the development preview. At 390 × 640 the account form body
 scrolls while Save/Cancel remain visible; at 390 × 844 the audit/detail views
 fill the viewport without horizontal overflow. Desktop layouts were inspected.
 No real staff records, passwords or access grants were used for these checks.
+
+## Module audit isolation — 3 November 2026
+
+Migration `202611030001_module_audit_isolation.sql` restricts the Vault audit reader to `vault.*` before pagination, retaining hotel/department authorization. Reader attempts use `vault.audit.read`; legacy platform and unnamespaced audit history is preserved without being exposed by this API. The response parser rejects foreign namespaces.
+
+PGlite regression coverage checks platform/foreign-module exclusion, more than 100 newer platform events, department and hotel boundaries, hotel-wide permission requirements, successful/denied reader auditing and preservation of platform history. Parser tests cover foreign action namespaces. No production migration or live-server acceptance was performed. Desktop/mobile browser inspection was not performed for this change; only localized explanatory text changed, with no layout changes.

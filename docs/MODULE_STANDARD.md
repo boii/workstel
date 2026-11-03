@@ -41,6 +41,13 @@ Validate event payloads on the server. Publish after transaction commit using an
 Consumers must be idempotent by event ID and support retry, dead-letter handling and correlation IDs.
 Breaking event payload changes require a new event version.
 
+## Module isolation
+
+Modules are isolated by default, including records, APIs, permissions, audit readers and events. Shared authentication, canonical identity and domain-independent UI primitives do not grant access to another module's business data.
+Cross-module access requires explicit approval and a documented contract naming the source, consumer, purpose, allowed operations, data and server-enforced permissions. A manifest subscription declares a dependency; it does not by itself grant runtime authorization. Do not import another module's internal implementation or read its tables directly.
+Each module's audit API must filter its own namespace on the server before ordering and pagination. Frontend filters are not an isolation boundary. Module audit permission must never expose platform events or another module's events. Record audit-reader access in the owning module's namespace.
+Platform session, staff-access and bootstrap events remain platform-owned. Preserve existing audit history; do not reclassify platform events as module events to make them visible. A shared physical audit table is allowed only behind scoped server APIs. No cross-module audit aggregation is authorized by default.
+
 ## Shared data and API
 
 Domain records extend BaseRecord; use UUIDs and ISO 8601 UTC timestamps.

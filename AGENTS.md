@@ -10,3 +10,5 @@ Do not translate user-entered records or persist secrets in the browser.
 Keep scope focused; do not migrate the repository into a monorepo unless that work is requested.
 
 Use the project-local .agents/skills/workstel-development/SKILL.md for Workstel implementation tasks. Run npm run format and npm run check before delivery. Keep source and documentation in English; never translate user-entered data.
+
+Keep modules isolated by default, including audit readers. Cross-module access requires explicit approval and a documented, server-enforced contract under docs/MODULE_STANDARD.md.

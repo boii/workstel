@@ -32,3 +32,9 @@ Implemented metadata fields: name, username, HTTPS website, department and notes
 Staff use Workstel. Backend AES-256-GCM uses a protected server keyring with automatic startup. Key backup and rotation remain administrator responsibilities; see docs/VAULT_OPERATIONS.md.
 
 See docs/DEPLOYMENT.md and docs/VAULT_BACKEND_DESIGN.md for setup and outstanding release requirements.
+
+## Audit isolation
+
+The Vault audit reader returns only `vault.*` events, with existing hotel/department permissions. Reader access is recorded as `vault.audit.read`. Platform session, staff-access and bootstrap events remain stored but are excluded from this API. Legacy `audit.read` records remain unchanged and are excluded because they have no module namespace. The frontend rejects responses containing non-Vault actions.
+
+Apply `supabase/migrations/202611030001_module_audit_isolation.sql` after the existing migrations before releasing the updated frontend. This repository change alone does not update the live server.

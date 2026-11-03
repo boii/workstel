@@ -17,6 +17,7 @@ test('private Vault ownership and explicit sharing are enforced by PostgreSQL', 
       '202611010001_vault_metadata',
       '202611010002_audit_visibility',
       '202611010003_private_vault',
+      '202611030001_module_audit_isolation',
     ])
       await db.exec(await readFile('supabase/migrations/' + migration + '.sql', 'utf8'));
     await db.query('insert into auth.users values ($1,$2),($3,$4),($5,$6)', [
@@ -133,6 +134,82 @@ test('private Vault ownership and explicit sharing are enforced by PostgreSQL', 
         await rpc('vault_set_share', [hotel, id, 'recipient@example.com', 2, 'revoke']);
         await as(recipient);
         assert.deepEqual((await rpc('vault_list_accounts', [hotel])).data, []);
+      },
+    );
+    await t.test(
+      'Vault audit excludes platform and foreign module events before pagination',
+      async () => {
+        await db.exec('reset role');
+        const foreignDepartment = 'bbbbbbbb-1111-4111-8111-111111111111';
+        const foreignHotel = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+        await db.query("insert into public.workstel_hotels values ($1,'Other hotel')", [
+          foreignHotel,
+        ]);
+        await db.query(
+          "insert into public.workstel_departments(id,hotel_id,code,name) values ($1,$2,'sales','Sales')",
+          [foreignDepartment, hotel],
+        );
+        for (const [scope, dept, action] of [
+          [hotel, department, 'vault.test.allowed'],
+          [hotel, null, 'vault.test.hotel'],
+          [hotel, foreignDepartment, 'vault.test.forbidden'],
+          [foreignHotel, null, 'vault.test.foreign'],
+          [hotel, department, 'vaultish.read'],
+          [hotel, department, 'stock-transfer.create'],
+          [hotel, department, 'audit.read'],
+          [hotel, null, 'admin.bootstrap'],
+          [hotel, null, 'session.access'],
+        ])
+          await db.query(
+            "insert into workstel_private.audit_events(hotel_id,department_id,action,outcome) values ($1,$2,$3,'success')",
+            [scope, dept, action],
+          );
+        // Newer platform events must not displace eligible Vault events from the bounded result.
+        await db.query(
+          "insert into workstel_private.audit_events(hotel_id,department_id,action,outcome) select $1,$2,'staff.access.update','success' from generate_series(1,110)",
+          [hotel, department],
+        );
+        await as(admin);
+        const partial = (await rpc('vault_list_audit', [hotel])).data as Record<string, unknown>[];
+        assert.ok(partial.some((e) => e.action === 'vault.test.allowed'));
+        assert.ok(
+          partial.every(
+            (e) =>
+              String(e.action).startsWith('vault.') &&
+              e.department_id === department &&
+              e.hotel_id === hotel,
+          ),
+        );
+        assert.equal(
+          (await rpc('vault_list_audit', [hotel, foreignDepartment])).error,
+          'ACCESS_DENIED',
+        );
+        assert.equal((await rpc('vault_list_audit', [foreignHotel])).error, 'ACCESS_DENIED');
+        await db.exec('reset role');
+        await db.query(
+          'insert into workstel_private.staff_access(user_id,hotel_id,department_id,can_audit) values ($1,$2,$3,true)',
+          [admin, hotel, foreignDepartment],
+        );
+        await as(admin);
+        const full = (await rpc('vault_list_audit', [hotel])).data as Record<string, unknown>[];
+        assert.ok(full.some((e) => e.action === 'vault.test.hotel'));
+        assert.ok(full.some((e) => e.action === 'vault.audit.read'));
+        assert.ok(full.every((e) => String(e.action).startsWith('vault.') && e.hotel_id === hotel));
+        const scoped = (await rpc('vault_list_audit', [hotel, department])).data as Record<
+          string,
+          unknown
+        >[];
+        assert.ok(scoped.every((e) => e.department_id === department));
+        await db.exec('reset role');
+        const platform = await db.query<{ count: number }>(
+          "select count(*)::int as count from workstel_private.audit_events where action='staff.access.update'",
+        );
+        assert.ok(platform.rows[0].count >= 110);
+        const reads = await db.query<{ outcome: string }>(
+          "select outcome from workstel_private.audit_events where action='vault.audit.read'",
+        );
+        assert.ok(reads.rows.some((e) => e.outcome === 'success'));
+        assert.ok(reads.rows.some((e) => e.outcome === 'denied'));
       },
     );
     await t.test('audit failure rolls sharing back without expanding access', async () => {
