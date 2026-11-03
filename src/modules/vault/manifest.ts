@@ -3,7 +3,7 @@ export default defineModule({
   id: 'vault',
   version: '0.1.0',
   title: 'Password Vault',
-  description: 'Manage department account access.',
+  description: 'Store hotel work accounts by department.',
   category: 'Administration',
   icon: 'mdi-key-outline',
   color: 'yellow',
