@@ -109,7 +109,6 @@ function fieldError(field: VaultField) {
           autofocus
           autocomplete="off"
           maxlength="150"
-          :hint="messages.nameHint"
           :error-messages="fieldError('name')"
         />
         <div class="vault-form-grid">
