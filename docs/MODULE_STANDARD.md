@@ -1,7 +1,7 @@
 # Workstel module standard
 
 Status: mandatory for all new modules. Approved visual reference: DESIGN_REFERENCE.md.
-The production shell uses Supabase authentication, membership authorization and Vault metadata RPCs. Real password operations, other modules and cross-module event delivery remain unavailable. See DEPLOYMENT.md for verified commissioning evidence; source implementation alone does not prove production acceptance.
+The production shell uses Supabase authentication, membership authorization, Vault metadata RPCs and, once their migrations are installed, the Vehicle Checklist and Bin Card RPCs with module-specific grants. Other modules and cross-module event delivery remain unavailable. See DEPLOYMENT.md for verified commissioning evidence; source implementation alone does not prove production acceptance.
 
 ## Create a module
 

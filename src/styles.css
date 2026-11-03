@@ -85,6 +85,7 @@ p {
 }
 .v-btn--variant-text.text-primary,
 .v-btn--variant-plain.text-primary,
+.v-btn--variant-tonal.text-primary,
 .v-btn-toggle .v-btn--active.text-primary {
   color: var(--workstel-primary-text) !important;
 }

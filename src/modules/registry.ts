@@ -1,29 +1,11 @@
 import vaultModule from './vault/manifest';
+import binCardModule from './bin-card/manifest';
+import vehicleModule from './vehicle/manifest';
 import { defineModule } from '../core/module';
 export const modules = [
   vaultModule,
-  defineModule({
-    id: 'bin-card',
-    version: '1.0.0',
-    title: 'Bin Card',
-    description: 'Track stock receipts, issues, and balances.',
-    category: 'Operations',
-    color: 'mint',
-    permissions: ['bin-card:read', 'bin-card:write'],
-    publishes: ['bin-card.stock-low.v1'],
-    subscribes: [],
-  }),
-  defineModule({
-    id: 'vehicle',
-    version: '1.0.0',
-    title: 'Vehicle Checklist',
-    description: 'Inspect vehicle condition.',
-    category: 'Operations',
-    color: 'blue',
-    permissions: ['vehicle:read', 'vehicle:write'],
-    publishes: ['vehicle.inspected.v1'],
-    subscribes: [],
-  }),
+  binCardModule,
+  vehicleModule,
   defineModule({
     id: 'sales-crm',
     version: '1.0.0',

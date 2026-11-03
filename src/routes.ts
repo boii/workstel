@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { vaultRoutes } from './modules/vault/routes';
+import { binCardRoutes } from './modules/bin-card/routes';
+import { vehicleRoutes } from './modules/vehicle/routes';
 
 export const shellPaths: Record<string, string> = {
   Dashboard: '/',
@@ -17,6 +19,8 @@ export const routes: RouteRecordRaw[] = [
     meta: { view },
   })),
   ...vaultRoutes,
+  ...binCardRoutes,
+  ...vehicleRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

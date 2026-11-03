@@ -41,9 +41,9 @@ test('metadata preview supports edit/archive/restore without persisting secret v
   vault.reset();
   assert.equal(vault.entries.value.length, 0);
 });
-test('only Password Vault can be opened while unimplemented modules are disabled', () => {
+test('only implemented modules can be opened while the rest stay disabled', () => {
   assert.deepEqual(
     modules.filter(isModuleEnabled).map((module) => module.id),
-    ['vault'],
+    ['vault', 'bin-card', 'vehicle'],
   );
 });
