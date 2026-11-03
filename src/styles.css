@@ -1,6 +1,8 @@
 :root {
   --workstel-text-secondary: #5f6f7b;
   --workstel-border: #e0e6eb;
+  /* Primary tone for text on light surfaces; #0096c7 itself is below 4.5:1 on white. */
+  --workstel-primary-text: #006f8f;
   font-family: Quicksand, sans-serif;
   color: rgba(0, 0, 0, 0.87);
   background: #f2f5f8;
@@ -75,6 +77,14 @@ p {
 .v-table {
   font-family: 'Noto Sans', sans-serif;
 }
+.v-btn--variant-text.text-primary,
+.v-btn--variant-plain.text-primary,
+.v-btn-toggle .v-btn--active.text-primary {
+  color: var(--workstel-primary-text) !important;
+}
+.v-alert--variant-tonal.text-info .v-alert__content {
+  color: #0b4f6c;
+}
 .portal-header {
   box-shadow:
     0 2px 30px -1px #55555514,
@@ -134,7 +144,7 @@ p {
   font-weight: 700;
 }
 .task-count {
-  font-size: 10px;
+  font-size: 11px;
   background: #edf1f4;
   border-radius: 4px;
   padding: 2px 5px;
@@ -285,7 +295,7 @@ p {
 .empty-state {
   text-align: center;
   padding: 45px;
-  color: #73818b;
+  color: var(--workstel-text-secondary);
   line-height: 1.7;
 }
 .empty-state h2 {
@@ -303,14 +313,14 @@ footer {
   margin-top: 32px;
   padding-top: 15px;
   border-top: 1px solid #e0e6eb;
-  color: #8b969d;
+  color: var(--workstel-text-secondary);
 }
 footer > span {
   font-size: 16px;
   font-weight: 700;
 }
 footer small {
-  font-size: 10px;
+  font-size: 11px;
 }
 .task-panel {
   padding: 22px;
@@ -370,8 +380,8 @@ footer small {
   margin: 12px 0;
 }
 .notification-card small {
-  font-size: 10px;
-  color: #83919a;
+  font-size: 11px;
+  color: var(--workstel-text-secondary);
 }
 .detail-panel {
   padding: 32px;
@@ -493,7 +503,7 @@ footer small {
   margin-top: 15px;
 }
 .login-note {
-  font-size: 10px;
+  font-size: 11px;
   color: #84929b;
   display: flex;
   align-items: center;
@@ -509,9 +519,9 @@ footer small {
   flex-direction: column;
 }
 .demo-access > span {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1px;
-  color: #909da5;
+  color: var(--workstel-text-secondary);
 }
 .demo-access .v-btn {
   font-size: 12px;
@@ -519,8 +529,8 @@ footer small {
   padding: 0;
 }
 .demo-access small {
-  font-size: 10px;
-  color: #909da5;
+  font-size: 11px;
+  color: var(--workstel-text-secondary);
 }
 .login-support {
   font-size: 11px;
@@ -581,7 +591,7 @@ footer small {
 }
 .top-nav > button.active {
   border-bottom-color: #0096c7;
-  color: #0096c7;
+  color: var(--workstel-primary-text);
 }
 .login-language {
   display: flex;
@@ -602,20 +612,16 @@ footer small {
 .module-coming-soon .module-open p {
   color: #687984;
 }
-.coming-soon-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  border-radius: inherit;
-  padding: 16px;
+.module-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #edf1f4;
   color: var(--workstel-text-secondary);
-  font-size: 12px;
-  font-weight: 600;
-  text-align: center;
-  background: rgba(var(--v-theme-surface), 0.72);
-  pointer-events: none;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.6;
 }
 .module-coming-soon:has(.module-open:hover) {
   background: white;
@@ -753,7 +759,7 @@ footer small {
     font-size: 12px;
   }
   .task-time {
-    font-size: 10px;
+    font-size: 11px;
     flex-shrink: 0;
   }
   .login-header {
