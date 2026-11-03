@@ -65,7 +65,6 @@ export const english = {
   remaining: 'remaining',
   complete: 'Complete',
   today: 'Today',
-  settingsPending: 'Settings are coming soon.',
   sharedStandards: 'Open a module from the dashboard to get started.',
   backDashboard: 'Back to dashboard',
   close: 'Close',
@@ -108,6 +107,16 @@ export const english = {
   shortcutClose: 'Close a panel or dialog',
   shortcutList: 'Shortcut list',
   skipToContent: 'Skip to main content',
+  profile: 'Profile',
+  preferences: 'Preferences',
+  session: 'Session',
+  demoRole: 'Hotel Administrator',
+  view: 'View',
+  permRead: 'Read',
+  permWrite: 'Edit',
+  permArchive: 'Archive',
+  permAudit: 'Audit',
+  noAccess: 'No departments assigned yet.',
 } as const;
 export type English = typeof english;
 export type MessageKey = keyof typeof english;
@@ -177,7 +186,6 @@ const indonesian: Record<MessageKey, string> = {
   remaining: 'belum selesai',
   complete: 'Selesaikan',
   today: 'Hari ini',
-  settingsPending: 'Pengaturan segera hadir.',
   sharedStandards: 'Buka modul dari dashboard untuk memulai.',
   backDashboard: 'Kembali ke dashboard',
   close: 'Tutup',
@@ -219,6 +227,16 @@ const indonesian: Record<MessageKey, string> = {
   shortcutClose: 'Tutup panel atau dialog',
   shortcutList: 'Daftar pintasan',
   skipToContent: 'Lompat ke konten utama',
+  profile: 'Profil',
+  preferences: 'Preferensi',
+  session: 'Sesi',
+  demoRole: 'Administrator Hotel',
+  view: 'Lihat',
+  permRead: 'Baca',
+  permWrite: 'Ubah',
+  permArchive: 'Arsip',
+  permAudit: 'Audit',
+  noAccess: 'Belum ada departemen yang ditetapkan.',
 };
 export type Locale = 'en' | 'id';
 const saved = (() => {

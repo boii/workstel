@@ -37,6 +37,7 @@ import { useShortcuts } from './core/use-shortcuts';
 import { focusFieldInput } from './core/focus-field';
 import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
+import SettingsPage from './shared/settings-page.vue';
 const appVersion = import.meta.env.VITE_APP_VERSION;
 const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
 const copyrightYear = new Date().getFullYear();
@@ -128,6 +129,9 @@ const visible = computed(() =>
   ),
 );
 const remaining = computed(() => tasks.value.filter((t) => !t.done).length);
+const hotelName = computed(() =>
+  runtime.demo ? t('hotel') : auth.assignments.value[0]?.hotelName || t('hotel'),
+);
 const shortcutsOpen = ref(false);
 const searchField = ref<FocusableField | null>(null);
 const showsModuleList = computed(() => ['Dashboard', 'Favorites'].includes(view.value));
@@ -342,9 +346,7 @@ function logout() {
             @click="nav('Dashboard')"
           >
             <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span></button
-          ><span class="hotel-name">{{
-            runtime.demo ? t('hotel') : auth.assignments.value[0]?.hotelName || t('hotel')
-          }}</span>
+          ><span class="hotel-name">{{ hotelName }}</span>
           <nav
             class="top-nav"
             :aria-label="t('navigation')"
@@ -456,7 +458,7 @@ function logout() {
                 ><v-list-item
                   :title="runtime.demo ? t('demoAdmin') : auth.email.value"
                   :subtitle="
-                    runtime.demo ? 'Hotel Administrator' : t('authorized')
+                    runtime.demo ? t('demoRole') : t('authorized')
                   " /><v-divider /><v-list-item
                   prepend-icon="mdi-cog-outline"
                   :title="t('accountSettings')"
@@ -647,24 +649,21 @@ function logout() {
               <span class="task-time">{{ translate(task.time) }}</span>
             </div></v-card
           >
+          <SettingsPage
+            v-else-if="view === 'Settings'"
+            :demo="runtime.demo"
+            :email="auth.email.value"
+            :hotel-name="hotelName"
+            :assignments="auth.assignments.value"
+            @sign-out="logout"
+            @open-shortcuts="shortcutsOpen = true"
+          />
           <v-card
             v-else
             class="info-panel"
-            ><template v-if="view === 'Settings' && !runtime.demo"
-              ><p>{{ auth.email.value }}</p>
-              <p>{{ t('sessionPolicy') }}</p>
-              <h2 class="mt-6">{{ t('workspaceAccess') }}</h2>
-              <v-list
-                ><v-list-item
-                  v-for="assignment in auth.assignments.value"
-                  :key="assignment.departmentId"
-                  :title="assignment.departmentName"
-                  :subtitle="assignment.hotelName" /><v-list-item
-                  :title="t('accessChanges')" /></v-list
-            ></template>
-            <p v-else-if="view === 'Not found'">{{ t('pageNotFound') }}</p>
+          >
+            <p v-if="view === 'Not found'">{{ t('pageNotFound') }}</p>
             <p v-else-if="view === 'My tasks' && !runtime.demo">{{ t('productionPending') }}</p>
-            <p v-else-if="view === 'Settings'">{{ t('settingsPending') }}</p>
             <p v-else>{{ runtime.demo ? t('sharedStandards') : t('productionHelp') }}</p>
             <v-btn
               variant="text"
