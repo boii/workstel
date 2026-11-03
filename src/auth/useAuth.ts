@@ -168,6 +168,14 @@ export function useAuth() {
       busy.value = false;
     }
   }
+  /** Re-read module switches and grants, for example after a developer switches a module. */
+  async function reloadModuleAccess() {
+    if (runtime.demo || !authenticated.value) return;
+    const current = generation;
+    const modules = await getSupabase().rpc('workstel_module_access');
+    if (current !== generation) return;
+    moduleAccess.value = modules.error ? noModuleAccess : parseModuleAccess(modules.data);
+  }
   async function signOut() {
     ++generation;
     authenticated.value = false;
@@ -193,6 +201,7 @@ export function useAuth() {
     email,
     assignments,
     moduleAccess,
+    reloadModuleAccess,
     vaultReady,
     googleEnabled,
     emailEnabled,

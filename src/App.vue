@@ -16,6 +16,7 @@ watch(
 import { modules } from './modules/registry';
 import { isModuleEnabled } from './core/module';
 import { canUseModule } from './core/module-access';
+import { demoDisabledModules } from './core/module-switch';
 import { useRoute, useRouter } from 'vue-router';
 import { shellPaths } from './routes';
 const route = useRoute();
@@ -114,14 +115,6 @@ const tasks = ref(
       ]
     : [],
 );
-const icons: Record<string, string> = {
-  'bin-card': 'mdi-package-variant-closed',
-  vehicle: 'mdi-car-outline',
-  'sales-crm': 'mdi-handshake-outline',
-  vault: 'mdi-key-outline',
-  checklist: 'mdi-clipboard-check-outline',
-  documents: 'mdi-file-document-multiple-outline',
-};
 const visible = computed(() =>
   modules.filter(
     (m) =>
@@ -190,24 +183,22 @@ function openModule(module: ModuleManifest) {
   void router.push({ name: module.id });
 }
 function canOpenModule(module: ModuleManifest) {
-  return (
-    router.hasRoute(module.id) &&
-    isModuleEnabled(module) &&
-    (runtime.demo || module.id !== 'vault' || auth.vaultReady.value) &&
-    // Operational modules open only when the server reports them installed and readable.
-    (runtime.demo ||
-      !moduleScoped.includes(module.id) ||
-      canUseModule(auth.moduleAccess.value, module.id))
-  );
+  if (!router.hasRoute(module.id) || !isModuleEnabled(module)) return false;
+  // Module-grant modules follow the server switch and the caller's grants (demo: in-memory switch).
+  if (module.access === 'module-grants')
+    return runtime.demo
+      ? !demoDisabledModules.value.includes(module.id)
+      : canUseModule(auth.moduleAccess.value, module.id);
+  return runtime.demo || module.id !== 'vault' || auth.vaultReady.value;
 }
-const moduleScoped = ['vehicle', 'bin-card'];
 const currentModule = computed(() => modules.find((m) => m.id === route.meta.moduleId));
-// Vault gates itself; other module pages render only when the caller may open them.
+// Department-flag modules (Vault) gate themselves; module-grant pages render only when allowed.
 const moduleOpen = computed(
   () =>
-    route.meta.moduleId === 'vault' ||
-    (!!currentModule.value && canOpenModule(currentModule.value)),
+    !!currentModule.value &&
+    (currentModule.value.access !== 'module-grants' || canOpenModule(currentModule.value)),
 );
+const switchableModules = modules.filter((m) => m.access === 'module-grants');
 function toggleFavorite(id: string) {
   favorites.value = favorites.value.includes(id)
     ? favorites.value.filter((x) => x !== id)
@@ -429,7 +420,7 @@ function logout() {
                 ><v-list-item
                   v-for="m in modules"
                   :key="m.id"
-                  :prepend-icon="m.icon || icons[m.id] || 'mdi-view-module-outline'"
+                  :prepend-icon="m.icon || 'mdi-view-module-outline'"
                   :title="translate(m.title)"
                   :disabled="!canOpenModule(m)"
                   :subtitle="
@@ -536,9 +527,9 @@ function logout() {
           <router-view
             v-if="route.meta.moduleId && moduleOpen"
             v-bind="
-              route.meta.moduleId === 'vault'
-                ? { assignments: auth.assignments.value, available: auth.vaultReady.value }
-                : { access: auth.moduleAccess.value.assignments }
+              currentModule?.access === 'module-grants'
+                ? { access: auth.moduleAccess.value.assignments }
+                : { assignments: auth.assignments.value, available: auth.vaultReady.value }
             "
             @back="nav('Dashboard')"
           />
@@ -600,7 +591,7 @@ function logout() {
                     class="module-icon"
                     :class="m.color"
                     ><v-icon
-                      :icon="m.icon || icons[m.id] || 'mdi-view-module-outline'"
+                      :icon="m.icon || 'mdi-view-module-outline'"
                       size="30" /></span
                   ><span
                     ><h2>{{ translate(m.title) }}</h2>
@@ -696,6 +687,9 @@ function logout() {
             :email="auth.email.value"
             :hotel-name="hotelName"
             :assignments="auth.assignments.value"
+            :platform-admin="runtime.demo || auth.moduleAccess.value.platformAdmin"
+            :switchable-modules="switchableModules"
+            @modules-changed="auth.reloadModuleAccess()"
             @sign-out="logout"
             @open-shortcuts="shortcutsOpen = true"
           />

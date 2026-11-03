@@ -8,6 +8,7 @@ export const modules = [
   vehicleModule,
   defineModule({
     id: 'sales-crm',
+    icon: 'mdi-handshake-outline',
     version: '1.0.0',
     title: 'Sales CRM',
     description: 'Manage leads and sales follow-ups.',
@@ -19,6 +20,7 @@ export const modules = [
   }),
   defineModule({
     id: 'checklist',
+    icon: 'mdi-clipboard-check-outline',
     version: '1.0.0',
     title: 'Daily Checklist',
     description: 'Daily and shift task checklists.',
@@ -30,6 +32,7 @@ export const modules = [
   }),
   defineModule({
     id: 'documents',
+    icon: 'mdi-file-document-multiple-outline',
     version: '1.0.0',
     title: 'Documents & SOPs',
     description: 'Hotel documents and operating procedures.',

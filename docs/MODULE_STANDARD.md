@@ -106,6 +106,14 @@ Generated prototype modules must remain clearly identified as demo until product
 
 ## Module availability
 
+### Module switch (module-grant modules)
+
+Modules whose manifest sets `access: 'module-grants'` (Vehicle Checklist, Bin Card) have a server switch in `workstel_private.installed_modules.enabled`. `workstel_private.module_allowed()` requires it, so a disabled module denies every module RPC, is omitted from `workstel_module_access()` and shows Temporarily unavailable in the dashboard and on direct URLs. Data and grants are kept, so switching it back on restores access immediately, without a deployment.
+
+Platform developers (`workstel_private.platform_admins`, granted with `infra/grant-platform-admin.sql`) switch modules from **Settings → Modules** or with `workstel_set_module_enabled(module_id, enabled)`. Changes are audited as `platform.module.<id>.enable|disable`, and denied attempts as `platform.module.switch`. The shell reads gating, route props and icons from manifests; a new module-grant module needs no App.vue change. Vault keeps its department-flag model and is not switchable yet.
+
+### Manifest availability
+
 Manifest availability is coming-soon by default. Only explicitly marked preview/available modules can open. Coming-soon modules must show a localized Coming soon label and be disabled in dashboard cards, favorites and the module switcher. Preview status does not mean production readiness.
 Password Vault is the first metadata preview; read docs/VAULT_BACKEND_DESIGN.md before implementing real secret operations.
 
