@@ -287,6 +287,48 @@ test('Vehicle Checklist and Bin Card enforce module scope in PostgreSQL', async 
       assert.deepEqual((await rpc('workstel_module_access')).data, []);
     });
 
+    await t.test(
+      'accounting is a canonical department that needs explicit membership',
+      async () => {
+        await db.exec('reset role');
+        // Applied after hotels exist, as on the live server, so the backfill has a hotel to extend.
+        await db.exec(
+          await readFile('supabase/migrations/202611040004_accounting_department.sql', 'utf8'),
+        );
+        const accounting = (
+          await db.query<{ id: string }>(
+            "select id from public.workstel_departments where hotel_id=$1 and code='accounting'",
+            [hotel],
+          )
+        ).rows[0]?.id;
+        assert.ok(accounting);
+        await db.query(
+          "insert into workstel_private.module_access(user_id,hotel_id,department_id,module_id,can_read,can_write,can_manage) values ($1,$2,$3,'bin-card',true,true,true)",
+          [vaultOnly, hotel, accounting],
+        );
+        // A module grant without a staff membership in that department grants nothing.
+        await as(vaultOnly);
+        assert.equal(
+          (await rpc('bin_card_list_items', [hotel, accounting])).error,
+          'ACCESS_DENIED',
+        );
+        await db.exec('reset role');
+        await db.query(
+          'insert into workstel_private.staff_access(user_id,hotel_id,department_id) values ($1,$2,$3)',
+          [vaultOnly, hotel, accounting],
+        );
+        await as(vaultOnly);
+        const item = JSON.stringify({ code: 'ACC-1', name: 'Receipt paper', unit: 'roll' });
+        assert.ok((await rpc('bin_card_save_item', [hotel, accounting, item])).data);
+        // Membership without Vault flags grants no Vault access in that department.
+        assert.equal(
+          (await rpc('vault_list_accounts', [hotel, accounting])).error,
+          'ACCESS_DENIED',
+        );
+        assert.equal((await rpc('vehicle_list_units', [hotel, accounting])).error, 'ACCESS_DENIED');
+      },
+    );
+
     await t.test('module events are recorded in their own audit namespaces', async () => {
       await db.exec('reset role');
       const actions = (
@@ -305,7 +347,11 @@ test('Vehicle Checklist and Bin Card enforce module scope in PostgreSQL', async 
         'vehicle.unit.save',
       ])
         assert.ok(actions.includes(action), action);
-      assert.ok(!actions.some((action) => action.startsWith('vault.')));
+      // The only Vault event is the deliberate Vault denial check above.
+      assert.deepEqual(
+        actions.filter((action) => action.startsWith('vault.')),
+        ['vault.list'],
+      );
     });
   } finally {
     await db.close();

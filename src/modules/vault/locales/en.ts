@@ -124,6 +124,7 @@ export default {
   sales: 'Sales & Marketing',
   engineering: 'Engineering',
   it: 'IT',
+  accounting: 'Accounting',
   security: 'IT & Security',
   history: 'Activity',
   createdActivity: 'Account created',

@@ -37,6 +37,7 @@ const departmentKeys = {
   sales: 'sales',
   engineering: 'engineering',
   it: 'it',
+  accounting: 'accounting',
 } as const;
 watch(open, (value) => {
   if (!value) return;
