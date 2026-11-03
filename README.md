@@ -55,3 +55,7 @@ Keep the approved compact layout, no-sidebar navigation, mobile single-column ca
 ## Production foundation
 
 The selected deployment is Cloudflare Pages plus hotel-hosted Supabase. See docs/DEPLOYMENT.md. Use npm run build:production for an externally deployed build; local npm run dev remains a metadata demo unless explicitly disabled. Real Vault passwords remain unsupported until the secret backend, key management, audit archive and recovery requirements are commissioned.
+
+### Footer release metadata
+
+The footer reads its version from package.json and embeds the short Git commit during Vite startup/build. GitHub Actions and Cloudflare Pages commit variables take precedence over the local Git checkout. Builds without Git metadata display local. The copyright year uses the current browser year when the application opens.

@@ -37,6 +37,9 @@ import { useShortcuts } from './core/use-shortcuts';
 import { focusFieldInput } from './core/focus-field';
 import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
+const appVersion = import.meta.env.VITE_APP_VERSION;
+const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
+const copyrightYear = new Date().getFullYear();
 const auth = useAuth();
 const savedModules = [...modules.map((m) => m.id)];
 const storedFavorites = usePersistedRef<string[]>(
@@ -241,8 +244,7 @@ function logout() {
           <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span>
         </span>
         <div class="login-language">
-          <span>{{ t('portal') }}</span
-          ><v-menu
+          <v-menu
             ><template #activator="{ props }"
               ><v-btn
                 v-bind="props"
@@ -649,7 +651,9 @@ function logout() {
           >
           <footer>
             <span>Workstel<span class="brand-dot">.</span></span
-            ><small>{{ t('portal') }}</small>
+            ><small
+              >v{{ appVersion }} · Build {{ buildCommit }} · © {{ copyrightYear }} Workstel.</small
+            >
           </footer>
         </div></v-main
       ></template
