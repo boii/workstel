@@ -182,6 +182,7 @@ function resetFilters() {
         :reset-key="0"
         :can-edit="() => true"
         :can-archive="() => true"
+        :department-name="(id) => messages[departmentKeys[id]]"
         @detail="detailId = $event.id"
         @edit="openForm($event)"
         @archive="archiveId = $event.id"

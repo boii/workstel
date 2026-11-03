@@ -99,7 +99,14 @@ export const english = {
   taskVehicle: 'Inspect Toyota Hiace',
   taskSales: 'Follow up on corporate proposal',
   taskPool: 'Check the swimming pool area',
+  shortcuts: 'Keyboard shortcuts',
+  shortcutHelp: 'Show keyboard shortcuts',
+  shortcutSearch: 'Search modules',
+  shortcutClose: 'Close a panel or dialog',
+  shortcutList: 'Shortcut list',
+  skipToContent: 'Skip to main content',
 } as const;
+export type English = typeof english;
 export type MessageKey = keyof typeof english;
 const indonesian: Record<MessageKey, string> = {
   pageNotFound: 'Halaman tidak ditemukan.',
@@ -200,6 +207,12 @@ const indonesian: Record<MessageKey, string> = {
   taskVehicle: 'Pemeriksaan Toyota Hiace',
   taskSales: 'Follow-up penawaran corporate',
   taskPool: 'Checklist area kolam renang',
+  shortcuts: 'Pintasan papan ketik',
+  shortcutHelp: 'Tampilkan pintasan papan ketik',
+  shortcutSearch: 'Cari modul',
+  shortcutClose: 'Tutup panel atau dialog',
+  shortcutList: 'Daftar pintasan',
+  skipToContent: 'Lompat ke konten utama',
 };
 export type Locale = 'en' | 'id';
 const saved = (() => {

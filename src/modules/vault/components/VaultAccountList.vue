@@ -3,6 +3,7 @@ import type { VaultEntry } from '../types';
 import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultPasswordCell from './VaultPasswordCell.vue';
 import VaultUsernameCopy from './VaultUsernameCopy.vue';
+import VaultDepartmentMark from './VaultDepartmentMark.vue';
 withDefaults(
   defineProps<{
     entries: VaultEntry[];
@@ -12,6 +13,7 @@ withDefaults(
     resetKey: number;
     canEdit: (entry: VaultEntry) => boolean;
     canArchive: (entry: VaultEntry) => boolean;
+    departmentName: (id: VaultEntry['departmentId']) => string;
   }>(),
   { sharingAvailable: true },
 );
@@ -64,6 +66,11 @@ function website(value: string) {
         role="cell"
       >
         <div class="vault-compact-account-title">
+          <VaultDepartmentMark
+            class="vault-compact-department"
+            :department-id="entry.departmentId"
+            :department-name="departmentName(entry.departmentId)"
+          />
           <button
             class="vault-account-name"
             @click="$emit('detail', entry)"

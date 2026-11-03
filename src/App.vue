@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from 'vue';
+import { computed, ref, watch, onMounted, nextTick } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
 import { useDisplay, useLocale } from 'vuetify';
@@ -32,7 +32,27 @@ import type { ModuleManifest } from './core/module';
 import { runtime } from './config/runtime';
 import { useAuth } from './auth/useAuth';
 import PasswordSignIn from './auth/PasswordSignIn.vue';
+import { usePersistedRef } from './core/use-persisted-ref';
+import { useShortcuts } from './core/use-shortcuts';
+import { focusFieldInput } from './core/focus-field';
+import type { FocusableField } from './core/focus-field';
+import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
 const auth = useAuth();
+const savedModules = [...modules.map((m) => m.id)];
+const storedFavorites = usePersistedRef<string[]>(
+  'workstel.favorites',
+  ['vault'],
+  (value): value is string[] =>
+    Array.isArray(value) &&
+    value.every((id) => typeof id === 'string' && savedModules.includes(id)),
+);
+// Favorites only keep modules that still exist, so removed modules never reappear.
+const favorites = computed({
+  get: () => storedFavorites.value.filter((id) => savedModules.includes(id)),
+  set: (value) => {
+    storedFavorites.value = [...new Set(value.filter((id) => savedModules.includes(id)))];
+  },
+});
 onMounted(() => {
   void auth.start();
 });
@@ -51,7 +71,6 @@ const session = ref(false),
   ssoNotice = ref(false),
   query = ref(''),
   category = ref('All modules'),
-  favorites = ref(['vault']),
   notice = ref(false),
   creating = ref(false),
   title = ref(''),
@@ -106,6 +125,43 @@ const visible = computed(() =>
   ),
 );
 const remaining = computed(() => tasks.value.filter((t) => !t.done).length);
+const shortcutsOpen = ref(false);
+const searchField = ref<FocusableField | null>(null);
+const showsModuleList = computed(() => ['Dashboard', 'Favorites'].includes(view.value));
+/** Focus the module search so `/` behaves like the shortcuts printed in the shortcut list. */
+function focusModuleSearch() {
+  if (!showsModuleList.value) {
+    nav('Dashboard');
+    void nextTick(() => focusFieldInput(searchField.value));
+    return;
+  }
+  focusFieldInput(searchField.value);
+}
+function closeOverlays() {
+  if (shortcutsOpen.value) {
+    shortcutsOpen.value = false;
+    return true;
+  }
+  if (creating.value) {
+    creating.value = false;
+    return true;
+  }
+  return false;
+}
+useShortcuts(
+  () => [
+    { key: '/', run: focusModuleSearch },
+    { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
+    { key: 'Escape', allowInInputs: true, run: closeOverlays },
+  ],
+  // Module pages register their own shortcuts; the shell must not capture the same keys twice.
+  () => session.value && !route.meta.moduleId,
+);
+const shortcutRows = computed(() => [
+  { keys: '/', label: t('shortcutSearch') },
+  { keys: '?', label: t('shortcutList') },
+  { keys: 'Esc', label: t('shortcutClose') },
+]);
 function nav(v: string) {
   if (!runtime.demo && v === 'My tasks') return;
   if (shellPaths[v]) void router.push(shellPaths[v]);
@@ -158,6 +214,12 @@ function logout() {
 </script>
 <template>
   <v-app>
+    <a
+      v-if="session"
+      class="skip-link"
+      href="#workspace-main"
+      >{{ t('skipToContent') }}</a
+    >
     <v-main
       v-if="auth.restoring.value"
       class="d-flex align-center justify-center"
@@ -394,12 +456,15 @@ function logout() {
                   prepend-icon="mdi-cog-outline"
                   :title="t('accountSettings')"
                   @click="nav('Settings')" /><v-list-item
+                  prepend-icon="mdi-keyboard-outline"
+                  :title="t('shortcuts')"
+                  @click="shortcutsOpen = true" /><v-list-item
                   prepend-icon="mdi-logout"
                   :title="t('signOut')"
                   @click="logout" /></v-list
             ></v-menu>
           </div></div></v-app-bar
-      ><v-main
+      ><v-main :id="session ? 'workspace-main' : undefined"
         ><div class="workspace-content">
           <div
             v-if="view !== 'Password Vault'"
@@ -448,6 +513,7 @@ function logout() {
           >
             <div class="module-toolbar">
               <v-text-field
+                ref="searchField"
                 v-model="query"
                 class="module-search"
                 :placeholder="t('searchPlaceholder')"
@@ -623,5 +689,9 @@ function logout() {
         ></v-card
       ></v-dialog
     >
+    <KeyboardShortcuts
+      v-model="shortcutsOpen"
+      :rows="shortcutRows"
+    />
   </v-app>
 </template>

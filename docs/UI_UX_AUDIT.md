@@ -38,3 +38,30 @@ disabled. Existing English/Indonesian status messages are reused.
 Verified the local demo dashboard at desktop and a 390 × 844 mobile viewport.
 Every mobile overlay matched its card bounds, and the document had no horizontal
 overflow. `npm run format` and `npm run check` passed.
+
+## Local UI improvements — 3 November 2026
+
+Scope: interaction and accessibility refinements that do not touch the database,
+schema, RPCs or storage. No authorization, SSO or vault-storage behavior changed.
+
+| Finding                                                                              | Implemented change                                                                                                                                               |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Module favorites reset on every reload.                                              | Favorites persist in `localStorage` through `usePersistedRef`, which validates the stored shape and degrades silently when storage is unavailable or blocked.    |
+| Vault search fired a request per keystroke.                                          | The live search debounces (300 ms), cancels in-flight requests with `AbortController`, and keeps previously loaded rows visible while a filter narrows the list. |
+| No keyboard path through the shell or the Vault list.                                | `/` focuses module search, `?` opens the shortcut reference, `Esc` closes the topmost panel, and `n` opens the new-account form. Shortcuts ignore text inputs.   |
+| Department names were the only cue for a department in the compact account list.     | `VaultDepartmentMark` renders initials derived from the record's own department name with a deterministic tone, plus a screen-reader label.                      |
+| Dialog and list semantics were implicit, and the shell lacked a way past navigation. | Added a skip link, `aria-label`/`aria-pressed` on icon controls, `role="table"/"row"/"cell"` on the account list and a screen-reader-only utility class.         |
+
+Verification: `npm run format` and `npm run check` passed (55 tests, module
+manifest/locale checks, TypeScript and the production build). The demo build was
+inspected at 1440 × 900 and 390 × 844: `scrollWidth` equalled `innerWidth` on the
+login, dashboard and Vault screens; `?` opened one dialog and `Esc` cleared all
+active overlays; `/` moved focus to the module search input; the Vault screen
+rendered three department marks and four account rows with no console errors.
+Mobile Vault reported 9 controls under 32px versus 18 on desktop, consistent with
+the 44px mobile target rules.
+
+Unavailable check: the debounced search, filter chips and `n` shortcut live in
+`VaultLivePage.vue`, which needs the Supabase backend. The demo route renders
+`ModuleListPage.vue` instead, so those three behaviors were verified by unit test
+and source assertions only, not in a running authenticated session.

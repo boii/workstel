@@ -106,6 +106,34 @@
   flex-shrink: 0;
   color: var(--workstel-text-secondary);
 }
+.vault-department {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.vault-department-mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #30697f;
+  background: #e4eef3;
+}
+.vault-department-mark--mint {
+  color: #2f7d69;
+  background: #e2f0ec;
+}
+.vault-department-mark--peach {
+  color: #a0603f;
+  background: #f7ebe3;
+}
+.vault-department-mark--yellow {
+  color: #7d6a2c;
+  background: #f5f1e0;
+}
 .vault-compact-domain {
   display: inline-flex;
   align-items: center;
@@ -168,6 +196,27 @@
   line-height: 1.5 !important;
   margin: 4px 0 !important;
   overflow-wrap: anywhere;
+}
+.vault-empty-filters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.vault-empty-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.vault-empty-chips .v-chip {
+  font-size: 11px;
+  max-width: 100%;
+}
+.vault-empty-chips .v-chip__content {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 .vault-compact-footer {
   display: flex;

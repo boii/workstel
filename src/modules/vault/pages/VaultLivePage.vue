@@ -7,6 +7,7 @@ import VaultAccountList from '../components/VaultAccountList.vue';
 import VaultAudit from '../components/VaultAudit.vue';
 import VaultSharing from '../components/VaultSharing.vue';
 import VaultSecretDialog from '../components/VaultSecretDialog.vue';
+import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { secretOperation } from '../secret-api';
 import { locale } from '../../../i18n';
 import type { StaffAssignment } from '../../../auth/useAuth';
@@ -14,6 +15,10 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultEntryForm from '../components/VaultEntryForm.vue';
 import type { VaultEntry, VaultEntryInput, DepartmentId } from '../types';
 import { departmentIds } from '../types';
+import { useShortcuts } from '../../../core/use-shortcuts';
+import type { ShortcutRow } from '../../../core/use-shortcuts';
+import { focusFieldInput } from '../../../core/focus-field';
+import type { FocusableField } from '../../../core/focus-field';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
@@ -63,7 +68,29 @@ const department = ref<string | null>(null);
 const auditOpen = ref(false);
 const access = ref<'all' | 'mine' | 'shared'>('all');
 const filtersOpen = ref(false),
-  secretReset = ref(0);
+  secretReset = ref(0),
+  searchField = ref<FocusableField | null>(null),
+  shortcutsOpen = ref(false),
+  searching = ref(false);
+const SEARCH_DELAY = 300;
+let searchTimer: ReturnType<typeof setTimeout> | undefined;
+// Typing waits for a short pause and then runs one search, instead of one request per key.
+// Requests are also aborted, so a slow answer never overwrites a newer one.
+watch(search, () => {
+  searching.value = true;
+  if (searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchTimer = undefined;
+    // A filter or URL change may already have loaded exactly this query.
+    if (JSON.stringify(filterQuery()) === loadedFilterKey) {
+      searching.value = false;
+      return;
+    }
+    void load().finally(() => {
+      if (searchTimer === undefined) searching.value = false;
+    });
+  }, SEARCH_DELAY);
+});
 const visibleEntries = computed(() =>
   entries.value.filter(
     (entry) => access.value === 'all' || (access.value === 'mine' ? entry.isOwner : !entry.isOwner),
@@ -76,6 +103,88 @@ const hasFilters = computed(
     !!department.value ||
     access.value !== 'all',
 );
+/** True once at least one list request has produced rows in this visit. */
+const hadEntries = ref(false);
+/** Placeholders appear on first load; later searches keep the current rows in place. */
+const showSkeleton = computed(() => loading.value && !hadEntries.value);
+/** Filters that are currently narrowing the list, each with its own clear action. */
+const activeFilters = computed(() => {
+  const rows: { key: string; label: string; clear: () => void }[] = [];
+  if (search.value.trim())
+    rows.push({
+      key: 'search',
+      label: `${messages.value.search}: “${search.value.trim()}”`,
+      // The debounced watcher on search performs the reload.
+      clear: () => (search.value = ''),
+    });
+  if (access.value !== 'all')
+    rows.push({
+      key: 'access',
+      label: `${messages.value.access}: ${
+        access.value === 'mine' ? messages.value.ownedByMe : messages.value.sharedWithMe
+      }`,
+      clear: () => {
+        access.value = 'all';
+        void load();
+      },
+    });
+  if (status.value !== 'active')
+    rows.push({
+      key: 'status',
+      label: `${messages.value.status}: ${
+        status.value === 'archived' ? messages.value.archived : messages.value.all
+      }`,
+      clear: () => {
+        status.value = 'active';
+        void load();
+      },
+    });
+  if (department.value)
+    rows.push({
+      key: 'department',
+      label: `${messages.value.department}: ${departmentName(department.value)}`,
+      clear: () => {
+        department.value = null;
+        void load();
+      },
+    });
+  return rows;
+});
+const anyPanelOpen = computed(
+  () =>
+    formOpen.value ||
+    !!detail.value ||
+    detailLoading.value ||
+    !!secretTarget.value ||
+    !!sharingTarget.value ||
+    !!archiveTarget.value ||
+    auditOpen.value,
+);
+function focusAccountSearch() {
+  focusFieldInput(searchField.value);
+}
+function closeTopmostPanel() {
+  if (busy.value) return;
+  if (archiveTarget.value) archiveTarget.value = null;
+  else if (formOpen.value) formOpen.value = false;
+  else if (detail.value || detailLoading.value) closeDetail();
+  else if (sharingTarget.value) sharingTarget.value = null;
+  else if (secretTarget.value) secretTarget.value = null;
+  else if (auditOpen.value) auditOpen.value = false;
+  else if (shortcutsOpen.value) shortcutsOpen.value = false;
+}
+useShortcuts(() => [
+  { key: '/', run: focusAccountSearch },
+  { key: 'n', when: () => canWrite.value && !anyPanelOpen.value, run: () => edit() },
+  { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
+  { key: 'Escape', allowInInputs: true, run: closeTopmostPanel },
+]);
+const shortcutRows = computed<ShortcutRow[]>(() => [
+  { keys: '/', label: messages.value.shortcutSearch },
+  ...(canWrite.value ? [{ keys: 'n', label: messages.value.shortcutNewAccount }] : []),
+  { keys: '?', label: messages.value.shortcuts },
+  { keys: 'Esc', label: messages.value.shortcutClose },
+]);
 watch([detail, formOpen, secretTarget, sharingTarget, auditOpen], () => {
   secretReset.value++;
 });
@@ -226,11 +335,18 @@ const lifetime = new AbortController();
 let controller: AbortController | undefined;
 onUnmounted(() => {
   ++request;
+  if (searchTimer) clearTimeout(searchTimer);
   lifetime.abort();
   controller?.abort();
   detailController?.abort();
 });
 async function load(more = false, preserve = false) {
+  // An explicit load (filter, refresh, retry) replaces any pending debounced search.
+  if (searchTimer) {
+    clearTimeout(searchTimer);
+    searchTimer = undefined;
+  }
+  searching.value = false;
   if (JSON.stringify(route.query) !== JSON.stringify(filterQuery())) {
     await router.replace({ query: filterQuery() });
     return;
@@ -241,14 +357,16 @@ async function load(more = false, preserve = false) {
   controller?.abort();
   controller = new AbortController();
   loading.value = true;
-  if (!more && !preserve) {
+  // Rows stay on screen while a new search runs, so the table never flashes empty.
+  // They are replaced only when the new result arrives, or cleared on failure.
+  if (!more && !preserve && !hadEntries.value) {
     entries.value = [];
     next.value = null;
   }
   failure.value = '';
   try {
     const targetCount = preserve ? Math.max(50, entries.value.length) : 50;
-    const rows: VaultEntry[] = [];
+    const found: VaultEntry[] = [];
     let cursor = more ? next.value : null;
     const cursors = new Set<string>();
     let pages = 0;
@@ -268,15 +386,18 @@ async function load(more = false, preserve = false) {
       );
       if (current !== request) return;
       if (!Array.isArray(result?.data)) throw Error('INVALID_RESPONSE');
-      rows.push(...parseEntries(result.data, hotelId.value));
+      found.push(...parseEntries(result.data, hotelId.value));
       cursor = typeof result.meta?.nextCursor === 'string' ? result.meta.nextCursor : null;
       if (cursor && cursors.has(cursor)) throw Error('INVALID_RESPONSE');
       if (cursor) cursors.add(cursor);
     } while (preserve && cursor && pages < Math.ceil(targetCount / 50));
-    entries.value = more ? [...entries.value, ...rows] : rows;
+    // Skeleton placeholders only replace the list on first paint. Later searches keep the
+    // current rows visible until the new result arrives, instead of blanking the table.
+    hadEntries.value ||= found.length > 0;
+    entries.value = more ? [...entries.value, ...found] : found;
     next.value = cursor;
   } catch (error) {
-    if (current === request) {
+    if (current === request && !controller.signal.aborted) {
       entries.value = [];
       next.value = null;
       showError(error);
@@ -359,14 +480,15 @@ async function changeStatus(entry: VaultEntry, action: 'archive' | 'restore') {
 const detailOpen = computed({
   get: () => !!detail.value || detailLoading.value,
   set: (value) => {
-    if (!value) {
-      detailController?.abort();
-      detailLoading.value = false;
-      detail.value = null;
-      void router.replace({ path: '/vault', query: filterQuery() });
-    }
+    if (!value) closeDetail();
   },
 });
+function closeDetail() {
+  detailController?.abort();
+  detailLoading.value = false;
+  detail.value = null;
+  void router.replace({ path: '/vault', query: filterQuery() });
+}
 const archiveOpen = computed({
   get: () => !!archiveTarget.value,
   set: (value) => {
@@ -398,9 +520,9 @@ onMounted(() => {
     ><ModulePage
       :title="messages.title"
       :description="`${visibleEntries.length} / ${entries.length} ${messages.loadedAccounts}`"
-      :loading="loading && !entries.length"
+      :loading="showSkeleton"
       :error="formOpen ? '' : failure"
-      :empty="!visibleEntries.length && !loading"
+      :empty="!visibleEntries.length && !loading && !searching"
       :empty-title="hasFilters ? messages.noResults : messages.emptyTitle"
       :empty-description="hasFilters ? messages.noResultsHint : messages.liveEmpty"
       :retry-label="messages.retry"
@@ -434,6 +556,7 @@ onMounted(() => {
           @submit.prevent="load()"
         >
           <v-text-field
+            ref="searchField"
             v-model="search"
             class="vault-compact-search"
             prepend-inner-icon="mdi-magnify"
@@ -448,7 +571,7 @@ onMounted(() => {
                 icon="mdi-arrow-right"
                 variant="text"
                 size="x-small"
-                :loading="loading"
+                :loading="loading || searching"
                 :aria-label="messages.searchAction"
                 @click="load()"
             /></template>
@@ -489,6 +612,13 @@ onMounted(() => {
             :title="messages.refresh"
             :loading="loading"
             @click="load(false, true)"
+          />
+          <v-btn
+            icon="mdi-keyboard-outline"
+            variant="text"
+            :aria-label="messages.shortcutHelp"
+            :title="messages.shortcutHelp"
+            @click="shortcutsOpen = true"
           />
         </v-form>
         <div
@@ -540,13 +670,30 @@ onMounted(() => {
         </p>
       </template>
       <template #empty-action>
-        <v-btn
-          v-if="hasFilters"
-          variant="text"
-          color="primary"
-          @click="resetFilters"
-          >{{ messages.reset }}</v-btn
+        <div
+          v-if="activeFilters.length"
+          class="vault-empty-filters"
         >
+          <span class="vault-field-hint">{{ messages.filteredOnlyLoaded }}</span>
+          <div class="vault-empty-chips">
+            <v-chip
+              v-for="filter in activeFilters"
+              :key="filter.key"
+              size="small"
+              variant="tonal"
+              closable
+              :aria-label="messages.reset + ': ' + filter.label"
+              @click:close="filter.clear"
+              >{{ filter.label }}</v-chip
+            >
+          </div>
+          <v-btn
+            variant="text"
+            color="primary"
+            @click="resetFilters"
+            >{{ messages.reset }}</v-btn
+          >
+        </div>
       </template>
       <VaultAccountList
         :entries="visibleEntries"
@@ -555,6 +702,7 @@ onMounted(() => {
         :reset-key="secretReset"
         :can-edit="canEdit"
         :can-archive="canArchive"
+        :department-name="departmentName"
         @detail="openDetail"
         @edit="edit($event)"
         @password="
@@ -766,5 +914,10 @@ onMounted(() => {
         ></template
       ></v-snackbar
     >
+    <KeyboardShortcuts
+      v-model="shortcutsOpen"
+      :rows="shortcutRows"
+      :title="messages.shortcutsTitle"
+    />
   </div>
 </template>

@@ -20,6 +20,26 @@ button:focus-visible {
   outline: 2px solid #0096c7;
   outline-offset: 3px;
 }
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 3000;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #007a9e;
+  font-size: 13px;
+  box-shadow:
+    0 3px 10px -2px #55555514,
+    0 2px 20px #5555550f;
+  transform: translateY(calc(-100% - 16px));
+}
+.skip-link:focus {
+  transform: none;
+  outline: 2px solid #0096c7;
+  outline-offset: 2px;
+}
 h1,
 h2,
 h3,
