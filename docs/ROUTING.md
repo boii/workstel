@@ -15,6 +15,7 @@ source of truth for navigation; no browser storage or global state store is used
 | Vault account drawer | `/vault/accounts/:accountId?hotel=:hotelId` |
 | Vehicle Checklist    | `/vehicle`                                  |
 | Bin Card             | `/bin-card`                                 |
+| Documents & SOPs     | `/documents`                                |
 
 `src/router.ts` installs browser history. `src/routes.ts` combines shell routes
 with module-owned routes. Shell content remains in App.vue to preserve the
