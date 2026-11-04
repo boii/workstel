@@ -89,7 +89,9 @@ p {
 .v-btn-toggle .v-btn--active.text-primary {
   color: var(--workstel-primary-text) !important;
 }
-/* Choice groups show each option as its own button with an 8px gap, never joined segments. */
+/* Choice groups show each option as its own button with an 8px gap, never joined segments.
+   Options look like the tonal row buttons; the chosen one is filled like the primary add
+   buttons (error-filled when the group is coloured as an error, such as a reported issue). */
 .choice-group.v-btn-toggle {
   gap: 8px;
   height: auto !important;
@@ -99,13 +101,30 @@ p {
   border-radius: 0 !important;
 }
 .choice-group.v-btn-toggle > .v-btn {
-  min-height: 40px;
-  border: 1px solid var(--workstel-border) !important;
+  min-height: 44px;
+  height: auto !important;
+  padding: 0 14px;
+  border: 0 !important;
   border-radius: 6px !important;
-  background: rgb(var(--v-theme-surface));
+  background: rgba(var(--v-theme-primary), 0.1) !important;
+  color: var(--workstel-primary-text) !important;
+  font-size: 14px;
+  font-weight: 700;
 }
 .choice-group.v-btn-toggle > .v-btn.v-btn--active {
-  border-color: currentColor !important;
+  background: rgb(var(--v-theme-primary)) !important;
+  color: #fff !important;
+}
+.choice-group.v-btn-toggle > .v-btn.v-btn--active.text-error,
+.choice-group.v-btn-toggle > .v-btn.v-btn--active.bg-error {
+  background: rgb(var(--v-theme-error)) !important;
+}
+.choice-group.v-btn-toggle > .v-btn.v-btn--active > .v-btn__overlay {
+  opacity: 0;
+}
+.choice-group.v-btn-toggle > .v-btn:focus-visible {
+  outline: 2px solid var(--workstel-primary-text);
+  outline-offset: 2px;
 }
 .v-alert--variant-tonal.text-info .v-alert__content {
   color: #0b4f6c;
@@ -852,7 +871,7 @@ footer small {
 
 @media (max-width: 680px) {
   .choice-group.v-btn-toggle > .v-btn {
-    min-height: 44px;
+    min-height: 48px;
   }
 }
 
