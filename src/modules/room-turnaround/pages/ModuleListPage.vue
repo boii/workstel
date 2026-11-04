@@ -18,15 +18,15 @@ import {
   taskIcons,
   taskKeys,
   taskStatusKeys,
-  useHousekeepingMessages,
+  useRoomTurnaroundMessages,
   useServerClock,
-} from '../composables/useHousekeepingMessages';
-import { createDemoHousekeepingApi, demoDepartments, demoHotelId } from '../demo-api';
-import { createLiveHousekeepingApi } from '../live-api';
+} from '../composables/useRoomTurnaroundMessages';
+import { createDemoRoomTurnaroundApi, demoDepartments, demoHotelId } from '../demo-api';
+import { createLiveRoomTurnaroundApi } from '../live-api';
 import { taskTypes } from '../types';
 import type {
   CleaningTask,
-  HousekeepingSummary,
+  TurnaroundSummary,
   Room,
   RoomInput,
   TaskAction,
@@ -37,14 +37,14 @@ import '../styles.css';
 
 const props = withDefaults(defineProps<{ access?: ModuleAssignment[] }>(), { access: () => [] });
 const emit = defineEmits<{ back: [] }>();
-const messages = useHousekeepingMessages();
-const api = runtime.demo ? createDemoHousekeepingApi() : createLiveHousekeepingApi();
+const messages = useRoomTurnaroundMessages();
+const api = runtime.demo ? createDemoRoomTurnaroundApi() : createLiveRoomTurnaroundApi();
 
 // Demo mode grants every capability on a sample department; production uses server grants.
 const scope = computed<ModuleAssignment[]>(() =>
   runtime.demo
     ? demoDepartments.map((d) => ({
-        moduleId: 'housekeeping',
+        moduleId: 'room-turnaround',
         hotelId: demoHotelId,
         hotelName: '',
         departmentId: d.id,
@@ -54,7 +54,7 @@ const scope = computed<ModuleAssignment[]>(() =>
         canWrite: true,
         canManage: true,
       }))
-    : props.access.filter((row) => row.moduleId === 'housekeeping' && row.canRead),
+    : props.access.filter((row) => row.moduleId === 'room-turnaround' && row.canRead),
 );
 const hotelId = computed(() => scope.value[0]?.hotelId ?? '');
 const hotelScope = computed(() => scope.value.filter((row) => row.hotelId === hotelId.value));
@@ -219,7 +219,7 @@ async function toggleArchive() {
 // History
 const day = ref(hotelToday());
 const history = ref<CleaningTask[]>([]);
-const summary = ref<HousekeepingSummary | null>(null);
+const summary = ref<TurnaroundSummary | null>(null);
 const historyCursor = ref<string | null>(null);
 const historyLoading = ref(false);
 const historyFailure = ref('');

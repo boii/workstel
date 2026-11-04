@@ -1,15 +1,15 @@
 import { defineModule } from '../../core/module';
 export default defineModule({
-  id: 'housekeeping',
+  id: 'room-turnaround',
   version: '1.0.0',
-  title: 'Housekeeping',
-  description: 'Cleaning time per room.',
+  title: 'Room Turnaround',
+  description: 'How long each room takes to get ready.',
   category: 'Operations',
-  icon: 'mdi-broom',
+  icon: 'mdi-timer-outline',
   color: 'mint',
   availability: 'available',
   access: 'module-grants',
-  permissions: ['housekeeping:read', 'housekeeping:write', 'housekeeping:manage'],
-  publishes: ['housekeeping.room-cleaned.v1'],
+  permissions: ['room-turnaround:read', 'room-turnaround:write', 'room-turnaround:manage'],
+  publishes: ['room-turnaround.room-cleaned.v1'],
   subscribes: [],
 });

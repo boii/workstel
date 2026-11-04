@@ -4,7 +4,7 @@ import { binCardRoutes } from './modules/bin-card/routes';
 import { vehicleRoutes } from './modules/vehicle/routes';
 import { documentsRoutes } from './modules/documents/routes';
 import { salesCrmRoutes } from './modules/sales-crm/routes';
-import { housekeepingRoutes } from './modules/housekeeping/routes';
+import { roomTurnaroundRoutes } from './modules/room-turnaround/routes';
 
 export const shellPaths: Record<string, string> = {
   Dashboard: '/',
@@ -27,7 +27,7 @@ export const routes: RouteRecordRaw[] = [
   ...vehicleRoutes,
   ...documentsRoutes,
   ...salesCrmRoutes,
-  ...housekeepingRoutes,
+  ...roomTurnaroundRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',

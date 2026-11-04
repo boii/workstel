@@ -1,10 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-export const housekeepingRoutes: RouteRecordRaw[] = [
+export const roomTurnaroundRoutes: RouteRecordRaw[] = [
   {
-    path: '/housekeeping',
-    name: 'housekeeping',
+    path: '/room-turnaround',
+    name: 'room-turnaround',
     component: () => import('./pages/ModuleListPage.vue'),
-    meta: { view: 'Housekeeping', moduleId: 'housekeeping' },
+    meta: { view: 'Room Turnaround', moduleId: 'room-turnaround' },
   },
 ];

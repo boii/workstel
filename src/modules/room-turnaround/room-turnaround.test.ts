@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ModuleRequestError } from '../../core/module-rpc';
-import { createDemoHousekeepingApi } from './demo-api';
+import { createDemoRoomTurnaroundApi } from './demo-api';
 import { parseRooms, parseSummary, parseTask } from './live-api';
 import type { CleaningTask } from './types';
 import { elapsedSeconds, formatDuration, parseRoomLines, validateRoom } from './validation';
@@ -82,7 +82,7 @@ test('responses are validated before they are shown', () => {
 });
 
 test('demo timer starts, pauses and finishes one room at a time', async () => {
-  const api = createDemoHousekeepingApi();
+  const api = createDemoRoomTurnaroundApi();
   const rooms = async () => (await api.listRooms('demo-hotel', null, false)).rooms;
   const free = (await rooms()).filter((r) => !r.openTask);
   await api.startTask('demo-hotel', free[0], 'departure');

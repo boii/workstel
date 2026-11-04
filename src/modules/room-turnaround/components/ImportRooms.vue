@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
-import { errorMessage, useHousekeepingMessages } from '../composables/useHousekeepingMessages';
+import { errorMessage, useRoomTurnaroundMessages } from '../composables/useRoomTurnaroundMessages';
 import type { RoomInput } from '../types';
 import { parseRoomLines } from '../validation';
 
@@ -10,7 +10,7 @@ const props = defineProps<{
   save: (rows: RoomInput[]) => Promise<{ added: number; skipped: number }>;
 }>();
 const emit = defineEmits<{ done: [text: string] }>();
-const messages = useHousekeepingMessages();
+const messages = useRoomTurnaroundMessages();
 const text = ref('');
 const saving = ref(false);
 const failure = ref('');

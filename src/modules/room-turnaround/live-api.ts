@@ -1,7 +1,7 @@
 import { ModuleRequestError, moduleRpc, parseCursor, uuidPattern } from '../../core/module-rpc';
-import type { HousekeepingApi } from './api';
+import type { RoomTurnaroundApi } from './api';
 import { taskStatuses, taskTypes } from './types';
-import type { CleaningTask, HousekeepingSummary, Room, TaskType } from './types';
+import type { CleaningTask, TurnaroundSummary, Room, TaskType } from './types';
 
 type Rpc = typeof moduleRpc;
 type Raw = Record<string, unknown>;
@@ -102,7 +102,7 @@ export function parseRooms(data: unknown, hotelId: string): Room[] {
   });
 }
 
-export function parseSummary(data: unknown, meta: Raw | undefined): HousekeepingSummary {
+export function parseSummary(data: unknown, meta: Raw | undefined): TurnaroundSummary {
   const raw = data as Raw | null;
   const totals = raw?.totals as Raw | undefined;
   const types = raw?.task_types as Record<string, Raw> | undefined;
@@ -158,11 +158,11 @@ export function parseSummary(data: unknown, meta: Raw | undefined): Housekeeping
   };
 }
 
-export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi {
+export function createLiveRoomTurnaroundApi(rpc: Rpc = moduleRpc): RoomTurnaroundApi {
   return {
     async listRooms(hotelId, departmentId, includeArchived, signal) {
       const result = await rpc(
-        'housekeeping_rooms_list',
+        'room_turnaround_rooms_list',
         { p_hotel_id: hotelId, p_department_id: departmentId, p_include_archived: includeArchived },
         signal,
       );
@@ -170,7 +170,7 @@ export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi
       return { rooms: parseRooms(result.data, hotelId), serverNow: String(result.meta.now) };
     },
     async saveRoom(hotelId, departmentId, input, existing) {
-      await rpc('housekeeping_room_save', {
+      await rpc('room_turnaround_room_save', {
         p_hotel_id: hotelId,
         p_department_id: departmentId,
         p_input: {
@@ -184,7 +184,7 @@ export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi
       });
     },
     async setRoomArchived(hotelId, room, archived) {
-      await rpc('housekeeping_room_save', {
+      await rpc('room_turnaround_room_save', {
         p_hotel_id: hotelId,
         p_department_id: room.departmentId,
         p_input: null,
@@ -194,7 +194,7 @@ export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi
       });
     },
     async importRooms(hotelId, departmentId, rows) {
-      const result = await rpc('housekeeping_rooms_import', {
+      const result = await rpc('room_turnaround_rooms_import', {
         p_hotel_id: hotelId,
         p_department_id: departmentId,
         p_rows: rows,
@@ -204,14 +204,14 @@ export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi
       return { added: data.added, skipped: data.skipped };
     },
     async startTask(hotelId, room, type) {
-      await rpc('housekeeping_task_start', {
+      await rpc('room_turnaround_task_start', {
         p_hotel_id: hotelId,
         p_room_id: room.id,
         p_task_type: type,
       });
     },
     async updateTask(hotelId, task, action) {
-      await rpc('housekeeping_task_update', {
+      await rpc('room_turnaround_task_update', {
         p_hotel_id: hotelId,
         p_task_id: task.id,
         p_action: action,
@@ -219,7 +219,7 @@ export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi
     },
     async listTasks(query, signal) {
       const result = await rpc(
-        'housekeeping_tasks_list',
+        'room_turnaround_tasks_list',
         {
           p_hotel_id: query.hotelId,
           p_department_id: query.departmentId,
@@ -238,7 +238,7 @@ export function createLiveHousekeepingApi(rpc: Rpc = moduleRpc): HousekeepingApi
     },
     async summary(hotelId, departmentId, day, signal) {
       const result = await rpc(
-        'housekeeping_summary',
+        'room_turnaround_summary',
         { p_hotel_id: hotelId, p_department_id: departmentId, p_day: day },
         signal,
       );

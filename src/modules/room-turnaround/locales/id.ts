@@ -1,7 +1,7 @@
 import type en from './en';
 export default {
-  title: 'Housekeeping',
-  description: 'Lama pembersihan per kamar.',
+  title: 'Waktu Siap Kamar',
+  description: 'Lama menyiapkan setiap kamar.',
   back: 'Dashboard',
   rooms: 'kamar',
   tabRooms: 'Kamar',
