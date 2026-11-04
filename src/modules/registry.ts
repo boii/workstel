@@ -3,11 +3,13 @@ import binCardModule from './bin-card/manifest';
 import vehicleModule from './vehicle/manifest';
 import documentsModule from './documents/manifest';
 import salesCrmModule from './sales-crm/manifest';
+import housekeepingModule from './housekeeping/manifest';
 import { defineModule } from '../core/module';
 export const modules = [
   vaultModule,
   binCardModule,
   vehicleModule,
+  housekeepingModule,
   salesCrmModule,
   defineModule({
     id: 'checklist',

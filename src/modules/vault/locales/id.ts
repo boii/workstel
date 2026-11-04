@@ -130,6 +130,7 @@ export default {
   accounting: 'Accounting',
   humanResource: 'Human Resource',
   adminGeneral: 'Admin and General',
+  housekeeping: 'Housekeeping',
   security: 'IT & Keamanan',
   history: 'Aktivitas',
   createdActivity: 'Akun dibuat',

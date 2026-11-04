@@ -40,6 +40,7 @@ const departmentKeys = {
   accounting: 'accounting',
   'human-resource': 'humanResource',
   'admin-general': 'adminGeneral',
+  housekeeping: 'housekeeping',
 } as const;
 watch(open, (value) => {
   if (!value) return;

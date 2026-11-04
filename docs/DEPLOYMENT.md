@@ -232,3 +232,7 @@ Migration `202611040009_documents.sql` adds `documents` to the module and grant 
 ## Sales CRM release — 4 November 2026
 
 Migration `202611040010_sales_crm.sql` adds `sales-crm` to the module and grant allowlists, the `sales_accounts`, `sales_deals` and append-only `sales_activities` tables, the scoped `sales_summary`, `sales_accounts_list`, `sales_account_save`, `sales_deals_list`, `sales_deal_save`, `sales_activities_list` and `sales_activity_log` RPCs, and registers the module as installed and enabled. Read lists and opens records, write adds and edits accounts and deals and logs activities, and manage also archives and restores accounts. No grants exist until a developer assigns levels on the Users page. Apply it with `infra/apply-operations-modules.sh`.
+
+## Housekeeping release — 4 November 2026
+
+Migration `202611040011_housekeeping.sql` adds the `housekeeping` department to every hotel, adds `housekeeping` to the module and grant allowlists, creates `housekeeping_rooms`, `housekeeping_tasks` and append-only `housekeeping_inspections`, the scoped room, task, inspection, history and summary RPCs, and registers the module as installed and enabled. Task times use the database clock. No memberships or grants are created; a developer adds Housekeeping memberships and levels on the Users page, and a supervisor imports the room list. Apply it with `infra/apply-operations-modules.sh`.
