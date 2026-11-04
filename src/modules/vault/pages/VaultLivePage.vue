@@ -729,6 +729,7 @@ onMounted(() => {
       <v-btn
         v-if="next"
         variant="text"
+        color="primary"
         :loading="loading"
         @click="load(true)"
         >{{ messages.loadMore }}</v-btn

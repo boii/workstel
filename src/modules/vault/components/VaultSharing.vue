@@ -287,7 +287,8 @@ onUnmounted(() => {
             hide-details
           />
           <v-btn
-            variant="outlined"
+            variant="tonal"
+            color="primary"
             prepend-icon="mdi-account-switch-outline"
             :disabled="busy || !newOwner.trim()"
             @click="confirmTransfer = true"

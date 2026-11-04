@@ -253,6 +253,13 @@ const departmentItems = computed(() => [
           color="primary"
           @click="resetFilters"
           >{{ messages.reset }}</v-btn
+        ><v-btn
+          v-else-if="writableDepartments.length"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="openForm()"
+          >{{ messages.add }}</v-btn
         >
       </template>
       <ul class="documents-list">

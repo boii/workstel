@@ -97,6 +97,10 @@ defineEmits<{ retry: [] }>();
   font-size: 18px;
   font-weight: 500;
 }
+/* Empty-state actions come from the module's slot, so they are reached with :deep(). */
+.module-empty :deep(.v-btn) {
+  margin-top: 12px;
+}
 @media (max-width: 680px) {
   .module-page-heading {
     align-items: flex-start;
