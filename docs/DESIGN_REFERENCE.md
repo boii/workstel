@@ -1,5 +1,8 @@
 # Workstel — acuan desain
 
+Detailed inspection evidence and route coverage: [Sentec UI audit](SENTEC_UI_AUDIT.md).
+Mobile EMS reference and combined recommendations: [EMS mobile audit](EMS_MOBILE_UI_AUDIT.md).
+
 Acuan disetujui pengguna: dashboard Sentec PMS https://apse1.pms.sentec.io/dashboard (pemeriksaan DOM/computed styles, 1 November 2026).
 Tidak menyimpan data akun, reservasi, token, atau aset privat Sentec.
 
