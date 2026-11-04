@@ -224,3 +224,7 @@ SMTP on the hotel stack still uses the template sender, so invitation and recove
 ## Vault ownership release — 4 November 2026
 
 Migration `202611040008_vault_ownership.sql` adds `vault_accounts.secret_owner_id` (backfilled from `owner_id`, set on insert and immutable), department shares, owner transfers and developer offboarding RPCs, and replaces `account_allowed_for` and `vault_secret_prepare` so reads include department shares and the encryption context uses `secret_owner_id`. The `workstel-vault` edge function is unchanged; existing ciphertext stays valid because `secret_owner_id` equals the previous owner for every row. Apply it with `infra/apply-operations-modules.sh`.
+
+## Documents & SOPs release — 4 November 2026
+
+Migration `202611040009_documents.sql` adds `documents` to the module and grant allowlists, a `documents_links` table (https links only, no files), the scoped `documents_list` / `documents_save` RPCs, and registers the module as installed and enabled. No grants exist until a developer assigns levels on the Users page. Apply it with `infra/apply-operations-modules.sh`.

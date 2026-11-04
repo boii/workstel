@@ -1,6 +1,7 @@
 import vaultModule from './vault/manifest';
 import binCardModule from './bin-card/manifest';
 import vehicleModule from './vehicle/manifest';
+import documentsModule from './documents/manifest';
 import { defineModule } from '../core/module';
 export const modules = [
   vaultModule,
@@ -30,16 +31,5 @@ export const modules = [
     publishes: ['checklist.completed.v1'],
     subscribes: ['vehicle.inspected.v1'],
   }),
-  defineModule({
-    id: 'documents',
-    icon: 'mdi-file-document-multiple-outline',
-    version: '1.0.0',
-    title: 'Documents & SOPs',
-    description: 'Hotel documents and operating procedures.',
-    category: 'Administration',
-    color: 'mint',
-    permissions: ['documents:read', 'documents:write'],
-    publishes: ['documents.published.v1'],
-    subscribes: [],
-  }),
+  documentsModule,
 ];
