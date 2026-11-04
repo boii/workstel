@@ -9,6 +9,7 @@ source of truth for navigation; no browser storage or global state store is used
 | Favorites            | `/favorites`                                |
 | Settings             | `/settings`                                 |
 | Help                 | `/help`                                     |
+| Users (developers)   | `/admin/users`                              |
 | Demo tasks           | `/tasks`                                    |
 | Vault list           | `/vault`                                    |
 | Vault account drawer | `/vault/accounts/:accountId?hotel=:hotelId` |

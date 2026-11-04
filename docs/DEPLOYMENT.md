@@ -212,3 +212,11 @@ Migration `202611040004_accounting_department.sql` adds `accounting` to the cano
 Migration `202611040005_hr_admin_departments.sql` adds `human-resource` (Human Resource) and `admin-general` (Admin and General) for every existing hotel, again without memberships or grants. The Vault frontend recognises both codes, and the operations installer applies the migration after `202611040004`.
 
 Migration `202611040006_module_switch.sql` adds the module switch (`installed_modules.enabled`, enforced in `module_allowed()`), the `platform_admins` developer role and the audited `workstel_list_modules()` / `workstel_set_module_enabled()` RPCs. Existing modules stay enabled. No developer exists until an operator runs `infra/grant-platform-admin.sql`. The frontend tolerates servers without this migration: the Modules panel stays hidden because `platformAdmin` is absent.
+
+## User management release — 4 November 2026
+
+Migration `202611040007_user_admin.sql` adds developer-only, audited RPCs to list users and set department membership with Vault flags, Vehicle Checklist and Bin Card levels and the developer role (a developer cannot remove their own role), plus a `must_change_password` flag reported by `workstel_module_access()`. Service-role-only helpers record audit events and set the flag.
+
+The `workstel-users` edge function (`backend/users`) creates accounts, resets passwords, blocks and unblocks sign-in through the GoTrue admin API, and changes the caller's own password after a sign-in within the last 10 minutes. Developer status is checked with the caller's own token. Temporary passwords are generated on the server, returned once with `no-store`, and never logged or stored; the user must replace them at the next sign-in. Developers cannot reset, block or change their own account through admin actions. Install it by copying `backend/users/handler.ts` and `index.ts` to `/opt/workstel/volumes/functions/workstel-users/`; it uses the existing function environment (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `WORKSTEL_FRONTEND_ORIGIN`).
+
+SMTP on the hotel stack still uses the template sender, so invitation and recovery emails are not used. Blocking ends sign-in and token refresh; an already issued access token remains valid until it expires.

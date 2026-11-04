@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { locale, t } from '../i18n';
 import type { MessageKey } from '../i18n';
 import type { StaffAssignment } from '../auth/useAuth';
 import type { ModuleManifest } from '../core/module';
 import ModuleSwitches from './module-switches.vue';
+import ModuleDialog from './module-dialog.vue';
+import ChangePassword from '../users/change-password.vue';
 
 const props = defineProps<{
   demo: boolean;
@@ -44,6 +46,12 @@ const permissions: [keyof StaffAssignment, MessageKey][] = [
   ['canArchive', 'permArchive'],
   ['canAudit', 'permAudit'],
 ];
+const passwordOpen = ref(false);
+const notice = ref('');
+function passwordChanged() {
+  passwordOpen.value = false;
+  notice.value = t('passwordChanged');
+}
 function granted(assignment: StaffAssignment) {
   return permissions.filter(([field]) => assignment[field] === true).map(([, key]) => t(key));
 }
@@ -169,7 +177,36 @@ function granted(assignment: StaffAssignment) {
           >{{ t('signOut') }}</v-btn
         >
       </div>
+      <div class="settings-row">
+        <span class="settings-label">{{ t('passwordSetting') }}</span>
+        <v-btn
+          variant="text"
+          color="primary"
+          prepend-icon="mdi-lock-reset"
+          @click="passwordOpen = true"
+          >{{ t('changePasswordTitle') }}</v-btn
+        >
+      </div>
     </v-card>
+    <ModuleDialog
+      v-model="passwordOpen"
+      :title="t('changePasswordTitle')"
+      :width="460"
+    >
+      <ChangePassword
+        v-if="passwordOpen"
+        :demo="demo"
+        @changed="passwordChanged"
+        @cancel="passwordOpen = false"
+        @sign-in-again="emit('signOut')"
+      />
+    </ModuleDialog>
+    <v-snackbar
+      :model-value="!!notice"
+      timeout="3000"
+      @update:model-value="notice = ''"
+      >{{ notice }}</v-snackbar
+    >
   </div>
 </template>
 <style scoped>

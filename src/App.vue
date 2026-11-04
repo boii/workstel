@@ -41,6 +41,8 @@ import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
 import SettingsPage from './shared/settings-page.vue';
 import HelpPage from './shared/help-page.vue';
+import UsersPage from './users/users-page.vue';
+import ChangePassword from './users/change-password.vue';
 const appVersion = import.meta.env.VITE_APP_VERSION;
 const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
 const copyrightYear = new Date().getFullYear();
@@ -199,6 +201,14 @@ const moduleOpen = computed(
     (currentModule.value.access !== 'module-grants' || canOpenModule(currentModule.value)),
 );
 const switchableModules = modules.filter((m) => m.access === 'module-grants');
+const isDeveloper = computed(() => runtime.demo || auth.moduleAccess.value.platformAdmin);
+// A temporary password must be replaced before the workspace opens (production only).
+const mustChangePassword = computed(
+  () => session.value && !runtime.demo && auth.moduleAccess.value.mustChangePassword,
+);
+async function passwordChanged() {
+  await auth.reloadModuleAccess();
+}
 function toggleFavorite(id: string) {
   favorites.value = favorites.value.includes(id)
     ? favorites.value.filter((x) => x !== id)
@@ -348,6 +358,27 @@ function logout() {
         <p class="login-support">{{ t('support') }}</p>
       </main></template
     >
+    <main
+      v-else-if="mustChangePassword"
+      class="login-main"
+    >
+      <v-card class="login-panel">
+        <span
+          class="wordmark"
+          aria-label="Workstel"
+        >
+          <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span>
+        </span>
+        <h1 class="mt-6">{{ t('changePasswordTitle') }}</h1>
+        <p class="mb-2">{{ auth.email.value }}</p>
+        <ChangePassword
+          :demo="runtime.demo"
+          required
+          @changed="passwordChanged"
+          @sign-in-again="logout"
+        />
+      </v-card>
+    </main>
     <template v-else
       ><v-app-bar
         :height="headerHeight"
@@ -476,6 +507,10 @@ function logout() {
                   prepend-icon="mdi-cog-outline"
                   :title="t('accountSettings')"
                   @click="nav('Settings')" /><v-list-item
+                  v-if="isDeveloper"
+                  prepend-icon="mdi-account-multiple-outline"
+                  :title="t('usersTitle')"
+                  @click="nav('Users')" /><v-list-item
                   prepend-icon="mdi-help-circle-outline"
                   :title="t('help')"
                   @click="nav('Help')" /><v-list-item
@@ -504,7 +539,9 @@ function logout() {
                         ? 'mdi-cog-outline'
                         : view === 'Help'
                           ? 'mdi-help-circle-outline'
-                          : 'mdi-view-dashboard-outline'
+                          : view === 'Users'
+                            ? 'mdi-account-multiple-outline'
+                            : 'mdi-view-dashboard-outline'
                 "
                 size="28"
               />{{ view === 'Not found' ? t('pageNotFound') : translate(view) }}
@@ -687,11 +724,16 @@ function logout() {
             :email="auth.email.value"
             :hotel-name="hotelName"
             :assignments="auth.assignments.value"
-            :platform-admin="runtime.demo || auth.moduleAccess.value.platformAdmin"
+            :platform-admin="isDeveloper"
             :switchable-modules="switchableModules"
             @modules-changed="auth.reloadModuleAccess()"
             @sign-out="logout"
             @open-shortcuts="shortcutsOpen = true"
+          />
+          <UsersPage
+            v-else-if="view === 'Users' && isDeveloper"
+            :demo="runtime.demo"
+            :self-email="auth.email.value"
           />
           <HelpPage
             v-else-if="view === 'Help'"

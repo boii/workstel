@@ -16,11 +16,14 @@ export interface ModuleAccess {
   assignments: ModuleAssignment[];
   /** True for platform developers, who may switch modules on and off. */
   platformAdmin: boolean;
+  /** True while the user still signs in with a temporary password. */
+  mustChangePassword: boolean;
 }
 export const noModuleAccess: ModuleAccess = Object.freeze({
   installed: [],
   assignments: [],
   platformAdmin: false,
+  mustChangePassword: false,
 });
 
 const textFields = [
@@ -38,7 +41,7 @@ export function parseModuleAccess(response: unknown): ModuleAccess {
   if (!response || typeof response !== 'object') return noModuleAccess;
   const { data, meta } = response as {
     data?: unknown;
-    meta?: { installedModules?: unknown; platformAdmin?: unknown };
+    meta?: { installedModules?: unknown; platformAdmin?: unknown; mustChangePassword?: unknown };
   };
   const reported = meta?.installedModules;
   if (
@@ -63,6 +66,7 @@ export function parseModuleAccess(response: unknown): ModuleAccess {
     installed: [...installed],
     assignments: (data as ModuleAssignment[]).filter((row) => row.canRead),
     platformAdmin: meta?.platformAdmin === true,
+    mustChangePassword: meta?.mustChangePassword === true,
   };
 }
 
