@@ -56,6 +56,7 @@ defineEmits<{ retry: [] }>();
 <style scoped>
 .module-page-heading {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
@@ -66,7 +67,7 @@ defineEmits<{ retry: [] }>();
   min-width: 0;
 }
 .module-page-title {
-  flex: 1;
+  flex: 1 1 240px;
   overflow-wrap: anywhere;
 }
 .module-page-actions {
@@ -77,7 +78,7 @@ defineEmits<{ retry: [] }>();
   gap: 8px;
 }
 .module-page h1 {
-  font-size: 26px;
+  font-size: clamp(23px, 2vw, 26px);
   font-weight: 400;
 }
 .module-page p {
@@ -88,6 +89,9 @@ defineEmits<{ retry: [] }>();
 }
 .module-page-toolbar {
   margin: 20px 0;
+}
+.module-page {
+  container-type: inline-size;
 }
 .module-empty {
   padding: 30px;

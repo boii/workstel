@@ -1,0 +1,110 @@
+/* Keep the PMS material while allowing EMS-style vertical mobile flows. */
+:root {
+  --workstel-page-gutter: clamp(12px, 3vw, 30px);
+}
+.workspace-content {
+  width: 100%;
+  padding-inline: var(--workstel-page-gutter);
+}
+.page-heading h1 {
+  font-size: clamp(24px, 2.5vw, 30px);
+  overflow-wrap: anywhere;
+}
+.module-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+.module-page .v-input,
+.v-dialog .v-input {
+  min-width: 0;
+  max-width: 100%;
+}
+.module-page-actions .v-btn,
+.v-card-actions .v-btn {
+  max-width: 100%;
+  white-space: normal;
+  height: auto;
+  min-height: 36px;
+}
+.module-page-actions .v-btn__content,
+.v-card-actions .v-btn__content {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.v-dialog:not(.v-dialog--fullscreen) > .v-overlay__content {
+  max-width: calc(100% - 24px);
+  max-height: calc(100dvh - 24px);
+}
+.v-dialog .v-card {
+  min-width: 0;
+}
+/* Module layouts respond to available content width, including split views. */
+@container (max-width: 720px) {
+  .module-page
+    .module-page-toolbar
+    :is(.vehicle-toolbar, .bin-toolbar, .documents-toolbar, .sales-toolbar, .hk-toolbar) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .module-page :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search) {
+    grid-column: 1 / -1;
+  }
+  .module-page :is(.vehicle-row, .bin-row, .documents-row, .sales-row) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px;
+  }
+  .module-page :is(.vehicle-actions, .bin-actions, .documents-actions, .sales-actions) {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+@container (max-width: 400px) {
+  .module-page
+    .module-page-toolbar
+    :is(.vehicle-toolbar, .bin-toolbar, .documents-toolbar, .sales-toolbar, .hk-toolbar) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .module-page .vault-compact-search {
+    flex-basis: 100%;
+  }
+  .module-page .vault-compact-toolbar {
+    flex-wrap: wrap;
+  }
+  .module-page .vault-access-filter {
+    flex: 1 1 140px;
+  }
+}
+@media (max-width: 680px), (pointer: coarse) {
+  .v-btn:not(.v-btn--icon) {
+    min-height: 44px;
+  }
+  .v-btn--icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .v-field__input {
+    font-size: 16px;
+  }
+  .v-selection-control {
+    min-height: 44px;
+  }
+}
+@media (max-width: 680px) {
+  .workspace-content {
+    padding-inline: var(--workstel-page-gutter);
+  }
+  .module-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .module-page .module-page-title {
+    flex-basis: auto;
+  }
+  .module-page .module-page-actions {
+    gap: 8px;
+  }
+  .module-page-actions > .v-btn:not(.v-btn--icon) {
+    flex: 1 1 auto;
+  }
+  .v-dialog:not(.v-dialog--fullscreen) > .v-overlay__content {
+    margin: 12px;
+  }
+}

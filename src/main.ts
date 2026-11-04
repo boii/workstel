@@ -10,6 +10,7 @@ import '@fontsource/quicksand/600.css';
 import '@fontsource/quicksand/700.css';
 import '@fontsource/noto-sans/400.css';
 import './styles.css';
+import './responsive.css';
 import App from './App.vue';
 import { router } from './router';
 const vuetify = createVuetify({
