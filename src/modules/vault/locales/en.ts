@@ -127,6 +127,7 @@ export default {
   accounting: 'Accounting',
   humanResource: 'Human Resource',
   adminGeneral: 'Admin and General',
+  housekeeping: 'Housekeeping',
   security: 'IT & Security',
   history: 'Activity',
   createdActivity: 'Account created',

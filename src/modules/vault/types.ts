@@ -7,6 +7,7 @@ export const departmentIds = [
   'accounting',
   'human-resource',
   'admin-general',
+  'housekeeping',
 ] as const;
 export type DepartmentId = (typeof departmentIds)[number];
 export type VaultStatus = 'active' | 'archived';
