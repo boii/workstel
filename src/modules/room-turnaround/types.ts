@@ -57,7 +57,7 @@ export interface AttendantTotals {
   avgSeconds: number;
   totalSeconds: number;
 }
-export interface HousekeepingSummary {
+export interface TurnaroundSummary {
   totals: { done: number; rooms: number; avgSeconds: number };
   taskTypes: Partial<Record<TaskType, TypeTotals>>;
   attendants: AttendantTotals[];

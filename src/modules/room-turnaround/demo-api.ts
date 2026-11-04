@@ -1,15 +1,15 @@
 import { ModuleRequestError } from '../../core/module-rpc';
-import type { HousekeepingApi } from './api';
-import type { CleaningTask, HousekeepingSummary, Room, TaskType, TypeTotals } from './types';
+import type { RoomTurnaroundApi } from './api';
+import type { CleaningTask, TurnaroundSummary, Room, TaskType, TypeTotals } from './types';
 import { hotelToday, isFloor, isRoomNumber } from './validation';
 
 export const demoHotelId = 'demo-hotel';
-export const demoDepartments = [{ id: 'housekeeping', name: 'Housekeeping' }];
+export const demoDepartments = [{ id: 'room-turnaround', name: 'Housekeeping' }];
 const me = 'demo@example.com';
 const isOpen = (task: CleaningTask) => task.status === 'active' || task.status === 'paused';
 
 /** In-memory demo that mirrors the server rules; it resets on reload. */
-export function createDemoHousekeepingApi(): HousekeepingApi {
+export function createDemoRoomTurnaroundApi(): RoomTurnaroundApi {
   const department = demoDepartments[0];
   const now = () => new Date().toISOString();
   const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60000).toISOString();
@@ -212,7 +212,7 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
           ...(people.get(task.attendantEmail) ?? []),
           task.durationSeconds ?? 0,
         ]);
-      const summary: HousekeepingSummary = {
+      const summary: TurnaroundSummary = {
         totals: {
           done: done.length,
           rooms: new Set(done.map((t) => t.roomId)).size,

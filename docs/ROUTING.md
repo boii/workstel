@@ -17,7 +17,7 @@ source of truth for navigation; no browser storage or global state store is used
 | Bin Card             | `/bin-card`                                 |
 | Documents & SOPs     | `/documents`                                |
 | Sales CRM            | `/sales-crm`                                |
-| Housekeeping         | `/housekeeping`                             |
+| Room Turnaround      | `/room-turnaround`                          |
 
 `src/router.ts` installs browser history. `src/routes.ts` combines shell routes
 with module-owned routes. Shell content remains in App.vue to preserve the

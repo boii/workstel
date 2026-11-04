@@ -1,6 +1,6 @@
 export default {
-  title: 'Housekeeping',
-  description: 'Cleaning time per room.',
+  title: 'Room Turnaround',
+  description: 'How long each room takes to get ready.',
   back: 'Dashboard',
   rooms: 'rooms',
   tabRooms: 'Rooms',

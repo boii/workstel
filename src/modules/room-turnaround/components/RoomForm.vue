@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
-import { errorMessage, useHousekeepingMessages } from '../composables/useHousekeepingMessages';
+import { errorMessage, useRoomTurnaroundMessages } from '../composables/useRoomTurnaroundMessages';
 import type { Room, RoomInput } from '../types';
 import { validateRoom } from '../validation';
 import type { ValidationError } from '../validation';
@@ -11,7 +11,7 @@ const props = defineProps<{
   room: Room | null;
   save: (input: RoomInput) => Promise<void>;
 }>();
-const messages = useHousekeepingMessages();
+const messages = useRoomTurnaroundMessages();
 const draft = ref<RoomInput>({ roomNumber: '', floor: '', roomType: '' });
 const errors = ref<Partial<Record<keyof RoomInput, ValidationError>>>({});
 const saving = ref(false);

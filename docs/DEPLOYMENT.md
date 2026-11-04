@@ -240,3 +240,7 @@ Migration `202611040011_housekeeping.sql` adds the `housekeeping` department to 
 ## Housekeeping timer release — 4 November 2026
 
 Migration `202611040012_housekeeping_timer.sql` narrows Housekeeping to timing each room cleaning. It drops room status, inspections, declined service and task notes, keeps the task types check-out (`departure`), make-up room and other, and replaces the task RPCs with `housekeeping_task_start(hotel, room, type)` and `housekeeping_task_update(hotel, task, action)`. It stops without changes if inspections or the removed task types hold data. Apply it with `infra/apply-operations-modules.sh`.
+
+## Room Turnaround release — 4 November 2026
+
+Migration `202611040013_room_turnaround.sql` renames the Housekeeping timer module to **Room Turnaround** (Indonesian: Waktu Siap Kamar): module ID `room-turnaround`, route `/room-turnaround`, tables `room_turnaround_rooms` and `room_turnaround_tasks`, RPCs `room_turnaround_*` and audit actions `room-turnaround.*`. Existing grants and the module switch move to the new ID. The Housekeeping department keeps its name and code, and earlier `housekeeping.*` audit events stay as recorded. Apply it with `infra/apply-operations-modules.sh`, then deploy the frontend right away, because the old frontend calls the removed `housekeeping_*` RPCs.

@@ -1,6 +1,6 @@
 import type {
   CleaningTask,
-  HousekeepingSummary,
+  TurnaroundSummary,
   Page,
   Room,
   RoomInput,
@@ -10,10 +10,10 @@ import type {
   TaskType,
 } from './types';
 
-/** Housekeeping service contract. The server derives the actor from the session, takes all
- * times from its own clock and checks housekeeping:read, :write and :manage per hotel
+/** Room Turnaround service contract. The server derives the actor from the session, takes all
+ * times from its own clock and checks room-turnaround:read, :write and :manage per hotel
  * department. */
-export interface HousekeepingApi {
+export interface RoomTurnaroundApi {
   listRooms(
     hotelId: string,
     departmentId: string | null,
@@ -40,5 +40,5 @@ export interface HousekeepingApi {
     departmentId: string | null,
     day: string | null,
     signal?: AbortSignal,
-  ): Promise<HousekeepingSummary>;
+  ): Promise<TurnaroundSummary>;
 }

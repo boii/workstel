@@ -9,8 +9,8 @@ import {
   taskIcons,
   taskKeys,
   taskStatusKeys,
-  useHousekeepingMessages,
-} from '../composables/useHousekeepingMessages';
+  useRoomTurnaroundMessages,
+} from '../composables/useRoomTurnaroundMessages';
 import { taskTypes } from '../types';
 import type { CleaningTask, Page, Room, TaskAction, TaskType } from '../types';
 import { elapsedSeconds, formatDuration } from '../validation';
@@ -26,7 +26,7 @@ const props = defineProps<{
   update: (task: CleaningTask, action: TaskAction) => Promise<void>;
 }>();
 const emit = defineEmits<{ edit: []; archive: [] }>();
-const messages = useHousekeepingMessages();
+const messages = useRoomTurnaroundMessages();
 const busy = ref(false);
 const failure = ref('');
 const recent = ref<CleaningTask[]>([]);

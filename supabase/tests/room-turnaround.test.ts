@@ -6,7 +6,7 @@ import { PGlite } from '@electric-sql/pglite';
 type Row = Record<string, unknown>;
 type RpcResult = { data?: Row & Row[]; error?: string; meta?: Row };
 
-test('Housekeeping times each room cleaning per module grants', async (t) => {
+test('Room Turnaround times each room cleaning per module grants', async (t) => {
   const db = new PGlite();
   const supervisor = '11111111-1111-4111-8111-111111111111',
     attendant = '22222222-2222-4222-8222-222222222222',
@@ -64,6 +64,8 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
     await grant(second, hk, true, false);
     await grant(reader, hk, false, false);
     await grant(outsider, frontOffice, true, true);
+    // Grants made under the old module ID move with the 0013 rename.
+    await db.exec(await readFile('supabase/migrations/202611040013_room_turnaround.sql', 'utf8'));
     async function as(user: string) {
       await db.exec('reset role');
       await db.query("select set_config('request.jwt.claim.sub',$1,false)", [user]);
@@ -77,7 +79,9 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
       return result.rows[0].r;
     }
     const room = async (number: string) =>
-      (await rpc('housekeeping_rooms_list', [hotel])).data!.find((r) => r.room_number === number)!;
+      (await rpc('room_turnaround_rooms_list', [hotel])).data!.find(
+        (r) => r.room_number === number,
+      )!;
     const backdate = async (
       taskId: string,
       startedMinutesAgo: number,
@@ -85,7 +89,7 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
     ) => {
       await db.exec('reset role');
       await db.query(
-        'update public.housekeeping_tasks set started_at=clock_timestamp()-make_interval(mins=>$2::int), paused_at=case when $3::int is null then paused_at else clock_timestamp()-make_interval(mins=>$3::int) end where id=$1',
+        'update public.room_turnaround_tasks set started_at=clock_timestamp()-make_interval(mins=>$2::int), paused_at=case when $3::int is null then paused_at else clock_timestamp()-make_interval(mins=>$3::int) end where id=$1',
         [taskId, startedMinutesAgo, pausedMinutesAgo ?? null],
       );
     };
@@ -95,10 +99,26 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
       )
     ).rows[0].d;
 
+    await t.test('the module, grants and tables carry the new name', async () => {
+      await db.exec('reset role');
+      const ids = await db.query<{ id: string }>(
+        "select distinct module_id as id from workstel_private.module_access union select module_id from workstel_private.installed_modules where module_id like '%turnaround%' or module_id='housekeeping'",
+      );
+      assert.deepEqual(
+        ids.rows.map((row) => row.id),
+        ['room-turnaround'],
+      );
+      const old = await db.query(
+        "select 1 from pg_proc where proname like 'housekeeping_%' union all select 1 from information_schema.tables where table_name like 'housekeeping_%'",
+      );
+      assert.equal(old.rows.length, 0);
+      assert.ok((await department('housekeeping')).length);
+    });
+
     await t.test('the room status and inspection parts are gone', async () => {
       await db.exec('reset role');
       const leftovers = await db.query<{ name: string }>(
-        "select proname as name from pg_proc where proname in ('housekeeping_inspect','housekeeping_room_set_status') union all select table_name from information_schema.tables where table_name='housekeeping_inspections' union all select column_name from information_schema.columns where table_name='housekeeping_rooms' and column_name like 'status%'",
+        "select proname as name from pg_proc where proname in ('housekeeping_inspect','housekeeping_room_set_status') union all select table_name from information_schema.tables where table_name='housekeeping_inspections' union all select column_name from information_schema.columns where table_name='room_turnaround_rooms' and column_name like 'status%'",
       );
       assert.deepEqual(leftovers.rows, []);
     });
@@ -107,7 +127,7 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
       await as(attendant);
       assert.equal(
         (
-          await rpc('housekeeping_rooms_import', [
+          await rpc('room_turnaround_rooms_import', [
             hotel,
             hk,
             JSON.stringify([{ roomNumber: '101' }]),
@@ -116,7 +136,7 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
         'ACCESS_DENIED',
       );
       await as(supervisor);
-      const imported = await rpc('housekeeping_rooms_import', [
+      const imported = await rpc('room_turnaround_rooms_import', [
         hotel,
         hk,
         JSON.stringify([
@@ -128,12 +148,12 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
       ]);
       assert.deepEqual(imported.data, { added: 3, skipped: 1 });
       assert.equal(
-        (await rpc('housekeeping_room_save', [hotel, hk, JSON.stringify({ roomNumber: '102' })]))
+        (await rpc('room_turnaround_room_save', [hotel, hk, JSON.stringify({ roomNumber: '102' })]))
           .error,
         'DUPLICATE_ROOM',
       );
       await as(reader);
-      const list = await rpc('housekeeping_rooms_list', [hotel]);
+      const list = await rpc('room_turnaround_rooms_list', [hotel]);
       assert.deepEqual(
         list.data!.map((r) => r.room_number),
         ['101', '102', '201'],
@@ -146,15 +166,17 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
     await t.test('a cleaning is timed on the server, excluding pauses', async () => {
       await as(reader);
       assert.equal(
-        (await rpc('housekeeping_task_start', [hotel, (await room('101')).id, 'departure'])).error,
+        (await rpc('room_turnaround_task_start', [hotel, (await room('101')).id, 'departure']))
+          .error,
         'ACCESS_DENIED',
       );
       await as(attendant);
       assert.equal(
-        (await rpc('housekeeping_task_start', [hotel, (await room('101')).id, 'turndown'])).error,
+        (await rpc('room_turnaround_task_start', [hotel, (await room('101')).id, 'turndown']))
+          .error,
         'INVALID_INPUT',
       );
-      const started = await rpc('housekeeping_task_start', [
+      const started = await rpc('room_turnaround_task_start', [
         hotel,
         (await room('101')).id,
         'departure',
@@ -162,29 +184,29 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
       const taskId = String(started.data?.id);
       assert.equal(started.data?.mine, true);
       assert.equal(
-        (await rpc('housekeeping_task_start', [hotel, (await room('102')).id, 'make-up'])).error,
+        (await rpc('room_turnaround_task_start', [hotel, (await room('102')).id, 'make-up'])).error,
         'ATTENDANT_BUSY',
       );
       await as(second);
       assert.equal(
-        (await rpc('housekeeping_task_start', [hotel, (await room('101')).id, 'other'])).error,
+        (await rpc('room_turnaround_task_start', [hotel, (await room('101')).id, 'other'])).error,
         'ROOM_BUSY',
       );
       assert.equal(
-        (await rpc('housekeeping_task_update', [hotel, taskId, 'finish'])).error,
+        (await rpc('room_turnaround_task_update', [hotel, taskId, 'finish'])).error,
         'ACCESS_DENIED',
       );
       await as(attendant);
-      assert.ok((await rpc('housekeeping_task_update', [hotel, taskId, 'pause'])).data);
+      assert.ok((await rpc('room_turnaround_task_update', [hotel, taskId, 'pause'])).data);
       assert.equal(
-        (await rpc('housekeeping_task_update', [hotel, taskId, 'pause'])).error,
+        (await rpc('room_turnaround_task_update', [hotel, taskId, 'pause'])).error,
         'TASK_CLOSED',
       );
       // 30 minutes since start, of which the last 10 were paused.
       await backdate(taskId, 30, 10);
       await as(attendant);
-      assert.ok((await rpc('housekeeping_task_update', [hotel, taskId, 'resume'])).data);
-      const finished = await rpc('housekeeping_task_update', [hotel, taskId, 'finish']);
+      assert.ok((await rpc('room_turnaround_task_update', [hotel, taskId, 'resume'])).data);
+      const finished = await rpc('room_turnaround_task_update', [hotel, taskId, 'finish']);
       assert.equal(finished.data?.status, 'done');
       const seconds = Number(finished.data?.duration_seconds);
       assert.ok(seconds >= 1195 && seconds <= 1205, String(seconds));
@@ -196,29 +218,33 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
 
     await t.test('supervisors can close anyone’s task; cancel keeps no duration', async () => {
       await as(second);
-      const task = await rpc('housekeeping_task_start', [hotel, (await room('102')).id, 'make-up']);
+      const task = await rpc('room_turnaround_task_start', [
+        hotel,
+        (await room('102')).id,
+        'make-up',
+      ]);
       await as(supervisor);
-      const cancelled = await rpc('housekeeping_task_update', [hotel, task.data?.id, 'cancel']);
+      const cancelled = await rpc('room_turnaround_task_update', [hotel, task.data?.id, 'cancel']);
       assert.equal(cancelled.data?.status, 'cancelled');
       assert.equal(cancelled.data?.duration_seconds, null);
       await as(second);
-      const again = await rpc('housekeeping_task_start', [
+      const again = await rpc('room_turnaround_task_start', [
         hotel,
         (await room('102')).id,
         'make-up',
       ]);
       await backdate(String(again.data?.id), 15);
       await as(second);
-      await rpc('housekeeping_task_update', [hotel, again.data?.id, 'finish']);
+      await rpc('room_turnaround_task_update', [hotel, again.data?.id, 'finish']);
     });
 
     await t.test('history per day and per room, and the daily summary', async () => {
       await as(reader);
-      const history = await rpc('housekeeping_tasks_list', [hotel, null, today]);
+      const history = await rpc('room_turnaround_tasks_list', [hotel, null, today]);
       assert.equal(history.data!.length, 3);
       assert.ok(history.data!.every((row) => typeof row.room_number === 'string'));
-      const page = await rpc('housekeeping_tasks_list', [hotel, null, today, null, null, 2]);
-      const rest = await rpc('housekeeping_tasks_list', [
+      const page = await rpc('room_turnaround_tasks_list', [hotel, null, today, null, null, 2]);
+      const rest = await rpc('room_turnaround_tasks_list', [
         hotel,
         null,
         today,
@@ -227,7 +253,7 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
         2,
       ]);
       assert.equal(page.data!.length + rest.data!.length, 3);
-      const perRoom = await rpc('housekeeping_tasks_list', [
+      const perRoom = await rpc('room_turnaround_tasks_list', [
         hotel,
         null,
         null,
@@ -235,10 +261,10 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
       ]);
       assert.equal(perRoom.data!.length, 1);
       assert.equal(
-        (await rpc('housekeeping_tasks_list', [hotel, null, '2000-01-01'])).data!.length,
+        (await rpc('room_turnaround_tasks_list', [hotel, null, '2000-01-01'])).data!.length,
         0,
       );
-      const summary = (await rpc('housekeeping_summary', [hotel, null, today])).data!;
+      const summary = (await rpc('room_turnaround_summary', [hotel, null, today])).data!;
       assert.deepEqual(summary.totals, {
         done: 2,
         rooms: 2,
@@ -257,37 +283,37 @@ test('Housekeeping times each room cleaning per module grants', async (t) => {
 
     await t.test('other departments and switched-off modules see nothing', async () => {
       await as(outsider);
-      assert.deepEqual((await rpc('housekeeping_rooms_list', [hotel])).data, []);
-      assert.equal((await rpc('housekeeping_summary', [hotel, hk])).error, 'ACCESS_DENIED');
+      assert.deepEqual((await rpc('room_turnaround_rooms_list', [hotel])).data, []);
+      assert.equal((await rpc('room_turnaround_summary', [hotel, hk])).error, 'ACCESS_DENIED');
       await db.exec('reset role');
       await db.exec(
-        "update workstel_private.installed_modules set enabled=false where module_id='housekeeping'",
+        "update workstel_private.installed_modules set enabled=false where module_id='room-turnaround'",
       );
       await as(reader);
-      assert.equal((await rpc('housekeeping_rooms_list', [hotel])).error, 'ACCESS_DENIED');
+      assert.equal((await rpc('room_turnaround_rooms_list', [hotel])).error, 'ACCESS_DENIED');
     });
 
     await t.test('tables stay closed to clients and changes are audited', async () => {
       await as(reader);
       await assert.rejects(
-        db.query('select * from public.housekeeping_tasks'),
+        db.query('select * from public.room_turnaround_tasks'),
         /permission denied/,
       );
       await db.exec('reset role');
       const actions = (
         await db.query<{ action: string }>(
-          "select distinct action||':'||outcome as action from workstel_private.audit_events where action like 'housekeeping.%'",
+          "select distinct action||':'||outcome as action from workstel_private.audit_events where action like 'room-turnaround.%'",
         )
       ).rows.map((row) => row.action);
       for (const expected of [
-        'housekeeping.room.import:success',
-        'housekeeping.task.start:success',
-        'housekeeping.task.pause:success',
-        'housekeeping.task.resume:success',
-        'housekeeping.task.done:success',
-        'housekeeping.task.cancel:success',
-        'housekeeping.write:denied',
-        'housekeeping.rooms.list:denied',
+        'room-turnaround.room.import:success',
+        'room-turnaround.task.start:success',
+        'room-turnaround.task.pause:success',
+        'room-turnaround.task.resume:success',
+        'room-turnaround.task.done:success',
+        'room-turnaround.task.cancel:success',
+        'room-turnaround.write:denied',
+        'room-turnaround.rooms.list:denied',
       ])
         assert.ok(actions.includes(expected), expected);
     });

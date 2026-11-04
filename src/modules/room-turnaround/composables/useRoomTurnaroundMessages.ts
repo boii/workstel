@@ -5,11 +5,11 @@ import en from '../locales/en';
 import id from '../locales/id';
 import type { TaskStatus, TaskType } from '../types';
 
-export type HousekeepingMessages = Record<keyof typeof en, string>;
+export type RoomTurnaroundMessages = Record<keyof typeof en, string>;
 type Key = keyof typeof en;
 
-export function useHousekeepingMessages() {
-  return computed<HousekeepingMessages>(() => (locale.value === 'id' ? id : en));
+export function useRoomTurnaroundMessages() {
+  return computed<RoomTurnaroundMessages>(() => (locale.value === 'id' ? id : en));
 }
 
 export const taskKeys: Record<TaskType, Key> = {
@@ -39,7 +39,7 @@ const errorKeys: Record<string, Key> = {
   DUPLICATE_ROOM: 'duplicateRoom',
 };
 /** Map a server error code to safe, localized copy; unknown failures stay generic. */
-export function errorMessage(messages: HousekeepingMessages, error: unknown) {
+export function errorMessage(messages: RoomTurnaroundMessages, error: unknown) {
   const code = error instanceof ModuleRequestError ? error.code : '';
   return messages[errorKeys[code] ?? 'loadError'];
 }

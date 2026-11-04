@@ -44,6 +44,6 @@ test('metadata preview supports edit/archive/restore without persisting secret v
 test('only implemented modules can be opened while the rest stay disabled', () => {
   assert.deepEqual(
     modules.filter(isModuleEnabled).map((module) => module.id),
-    ['vault', 'bin-card', 'vehicle', 'housekeeping', 'sales-crm', 'documents'],
+    ['vault', 'bin-card', 'vehicle', 'room-turnaround', 'sales-crm', 'documents'],
   );
 });
