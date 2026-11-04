@@ -228,3 +228,7 @@ Migration `202611040008_vault_ownership.sql` adds `vault_accounts.secret_owner_i
 ## Documents & SOPs release — 4 November 2026
 
 Migration `202611040009_documents.sql` adds `documents` to the module and grant allowlists, a `documents_links` table (https links only, no files), the scoped `documents_list` / `documents_save` RPCs, and registers the module as installed and enabled. No grants exist until a developer assigns levels on the Users page. Apply it with `infra/apply-operations-modules.sh`.
+
+## Sales CRM release — 4 November 2026
+
+Migration `202611040010_sales_crm.sql` adds `sales-crm` to the module and grant allowlists, the `sales_accounts`, `sales_deals` and append-only `sales_activities` tables, the scoped `sales_summary`, `sales_accounts_list`, `sales_account_save`, `sales_deals_list`, `sales_deal_save`, `sales_activities_list` and `sales_activity_log` RPCs, and registers the module as installed and enabled. Read lists and opens records, write adds and edits accounts and deals and logs activities, and manage also archives and restores accounts. No grants exist until a developer assigns levels on the Users page. Apply it with `infra/apply-operations-modules.sh`.

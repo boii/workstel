@@ -3,6 +3,7 @@ import { vaultRoutes } from './modules/vault/routes';
 import { binCardRoutes } from './modules/bin-card/routes';
 import { vehicleRoutes } from './modules/vehicle/routes';
 import { documentsRoutes } from './modules/documents/routes';
+import { salesCrmRoutes } from './modules/sales-crm/routes';
 
 export const shellPaths: Record<string, string> = {
   Dashboard: '/',
@@ -24,6 +25,7 @@ export const routes: RouteRecordRaw[] = [
   ...binCardRoutes,
   ...vehicleRoutes,
   ...documentsRoutes,
+  ...salesCrmRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
