@@ -1,20 +1,10 @@
-export const roomStatuses = [
-  'vacant-dirty',
-  'vacant-clean',
-  'vacant-ready',
-  'occupied',
-  'out-of-order',
-] as const;
-export type RoomStatus = (typeof roomStatuses)[number];
-export const taskTypes = ['departure', 'make-up', 'turndown', 'pre-arrival', 'deep-clean'] as const;
+export const taskTypes = ['departure', 'make-up', 'other'] as const;
 export type TaskType = (typeof taskTypes)[number];
-export const taskStatuses = ['active', 'paused', 'done', 'dnd', 'refused', 'cancelled'] as const;
+export const taskStatuses = ['active', 'paused', 'done', 'cancelled'] as const;
 export type TaskStatus = (typeof taskStatuses)[number];
 export type TaskAction = 'pause' | 'resume' | 'finish' | 'cancel';
-export type TaskOutcome = 'done' | 'dnd' | 'refused';
-export type InspectionResult = 'pass' | 'redo';
 
-/** A timed cleaning task. Times come from the server clock. */
+/** One timed cleaning of a room. Times come from the server clock. */
 export interface CleaningTask {
   id: string;
   roomId: string;
@@ -28,7 +18,11 @@ export interface CleaningTask {
   pausedSeconds: number;
   finishedAt: string | null;
   durationSeconds: number | null;
-  notes: string;
+}
+export interface LastCleaning {
+  type: TaskType;
+  finishedAt: string;
+  durationSeconds: number;
 }
 export interface Room {
   id: string;
@@ -38,23 +32,24 @@ export interface Room {
   number: string;
   floor: string;
   roomType: string;
-  status: RoomStatus;
-  statusNote: string;
-  statusChangedAt: string;
   archived: boolean;
   version: number;
   openTask: CleaningTask | null;
-  lastCleanedAt: string | null;
+  lastDone: LastCleaning | null;
 }
 export interface RoomInput {
   roomNumber: string;
   floor: string;
   roomType: string;
 }
+export interface RoomList {
+  rooms: Room[];
+  serverNow: string;
+}
 export interface TypeTotals {
   done: number;
   avgSeconds: number;
-  declined: number;
+  maxSeconds: number;
 }
 export interface AttendantTotals {
   email: string;
@@ -63,12 +58,10 @@ export interface AttendantTotals {
   totalSeconds: number;
 }
 export interface HousekeepingSummary {
-  statuses: Record<RoomStatus | 'in-progress', number>;
+  totals: { done: number; rooms: number; avgSeconds: number };
   taskTypes: Partial<Record<TaskType, TypeTotals>>;
   attendants: AttendantTotals[];
-  inspections: { pass: number; redo: number };
   day: string;
-  serverNow: string;
 }
 export interface Page<T> {
   data: T[];
@@ -82,12 +75,3 @@ export interface TaskQuery {
   after: string | null;
   limit?: number;
 }
-
-/** One action from the room dialog; the page runs it and refreshes the board. */
-export type RoomAction =
-  | { kind: 'start'; type: TaskType }
-  | { kind: 'decline'; outcome: 'dnd' | 'refused' }
-  | { kind: 'task'; task: CleaningTask; action: TaskAction; outcome?: TaskOutcome; notes?: string }
-  | { kind: 'status'; status: RoomStatus; note: string }
-  | { kind: 'inspect'; result: InspectionResult; reason: string }
-  | { kind: 'archive'; archived: boolean };

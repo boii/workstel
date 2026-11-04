@@ -1,28 +1,18 @@
 import { ModuleRequestError } from '../../core/module-rpc';
 import type { HousekeepingApi } from './api';
 import type { CleaningTask, HousekeepingSummary, Room, TaskType, TypeTotals } from './types';
-import { allowedTasks, hotelToday, isFloor, isRoomNumber } from './validation';
+import { hotelToday, isFloor, isRoomNumber } from './validation';
 
 export const demoHotelId = 'demo-hotel';
 export const demoDepartments = [{ id: 'housekeeping', name: 'Housekeeping' }];
 const me = 'demo@example.com';
 const isOpen = (task: CleaningTask) => task.status === 'active' || task.status === 'paused';
 
-/** In-memory demo board that mirrors the server rules; it resets on reload. */
+/** In-memory demo that mirrors the server rules; it resets on reload. */
 export function createDemoHousekeepingApi(): HousekeepingApi {
   const department = demoDepartments[0];
   const now = () => new Date().toISOString();
   const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60000).toISOString();
-  const statuses: Room['status'][] = [
-    'vacant-ready',
-    'occupied',
-    'vacant-dirty',
-    'vacant-clean',
-    'occupied',
-    'vacant-dirty',
-    'out-of-order',
-    'occupied',
-  ];
   const rooms: Room[] = [];
   for (const floor of ['1', '2'])
     for (let index = 1; index <= 8; index++)
@@ -34,18 +24,14 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
         number: floor + '0' + index,
         floor,
         roomType: index > 6 ? 'Suite' : index % 2 ? 'Deluxe' : 'Superior',
-        status: statuses[(index + Number(floor)) % statuses.length],
-        statusNote: '',
-        statusChangedAt: minutesAgo(90),
         archived: false,
         version: 1,
         openTask: null,
-        lastCleanedAt: null,
+        lastDone: null,
       });
-  for (const room of rooms) if (room.status === 'out-of-order') room.statusNote = 'AC leaking';
   const tasks: CleaningTask[] = [];
   const add = (room: Room, type: TaskType, minutes: number, email: string, done: number | null) => {
-    const task: CleaningTask = {
+    tasks.push({
       id: crypto.randomUUID(),
       roomId: room.id,
       roomNumber: room.number,
@@ -57,46 +43,49 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
       pausedAt: null,
       pausedSeconds: 0,
       finishedAt: done === null ? null : minutesAgo(minutes - done),
-      durationSeconds: done === null ? null : done * 60,
-      notes: '',
-    };
-    tasks.push(task);
-    if (done !== null) room.lastCleanedAt = task.finishedAt;
+      durationSeconds: done === null ? null : done * 60 + 17,
+    });
   };
-  const dirty = rooms.filter((r) => r.status === 'vacant-dirty');
-  add(dirty[0], 'departure', 12, 'siti@example.com', null);
-  for (const [index, room] of rooms.filter((r) => r.status === 'vacant-ready').entries())
-    add(
-      room,
-      'departure',
-      180 - index * 20,
-      index % 2 ? 'siti@example.com' : 'budi@example.com',
-      28 + index * 3,
-    );
-  for (const room of rooms.filter((r) => r.status === 'vacant-clean'))
-    add(room, 'departure', 70, 'budi@example.com', 34);
-  add(rooms.filter((r) => r.status === 'occupied')[0], 'make-up', 120, 'siti@example.com', 17);
-  const inspections = { pass: 2, redo: 1 };
+  add(rooms[0], 'departure', 12, 'siti@example.com', null);
+  add(rooms[9], 'make-up', 6, 'budi@example.com', null);
+  (
+    [
+      [1, 'departure', 200, 'siti@example.com', 31],
+      [2, 'make-up', 170, 'siti@example.com', 18],
+      [4, 'departure', 150, 'budi@example.com', 27],
+      [5, 'make-up', 120, 'budi@example.com', 16],
+      [8, 'departure', 100, 'siti@example.com', 35],
+      [11, 'make-up', 80, 'budi@example.com', 21],
+      [13, 'other', 60, 'siti@example.com', 45],
+    ] as const
+  ).forEach(([index, type, minutes, email, done]) => add(rooms[index], type, minutes, email, done));
 
   const room = (id: string) => {
     const found = rooms.find((r) => r.id === id);
     if (!found) throw new ModuleRequestError('ACCESS_DENIED');
     return found;
   };
-  const bump = (target: Room) => {
-    target.version += 1;
-    target.statusChangedAt = now();
+  const view = (target: Room): Room => {
+    const last = tasks
+      .filter((t) => t.roomId === target.id && t.status === 'done')
+      .sort((a, b) => b.finishedAt!.localeCompare(a.finishedAt!))[0];
+    return {
+      ...target,
+      openTask: tasks.find((t) => t.roomId === target.id && isOpen(t)) ?? null,
+      lastDone: last
+        ? { type: last.type, finishedAt: last.finishedAt!, durationSeconds: last.durationSeconds! }
+        : null,
+    };
   };
-  const withTasks = (target: Room): Room => ({
-    ...target,
-    openTask: tasks.find((t) => t.roomId === target.id && isOpen(t)) ?? null,
-  });
   return {
     async listRooms(_hotelId, _departmentId, includeArchived) {
-      return rooms
-        .filter((r) => includeArchived || !r.archived)
-        .sort((a, b) => a.floor.localeCompare(b.floor) || a.number.localeCompare(b.number))
-        .map(withTasks);
+      return {
+        rooms: rooms
+          .filter((r) => includeArchived || !r.archived)
+          .sort((a, b) => a.floor.localeCompare(b.floor) || a.number.localeCompare(b.number))
+          .map(view),
+        serverNow: now(),
+      };
     },
     async saveRoom(_hotelId, _departmentId, input, existing) {
       const number = input.roomNumber.trim().toUpperCase();
@@ -112,13 +101,10 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
           hotelId: demoHotelId,
           departmentId: department.id,
           departmentName: department.name,
-          status: 'vacant-dirty',
-          statusNote: '',
-          statusChangedAt: now(),
           archived: false,
           version: 1,
           openTask: null,
-          lastCleanedAt: null,
+          lastDone: null,
         });
         return;
       }
@@ -142,48 +128,35 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
       }
       return { added, skipped: rows.length - added };
     },
-    async setStatus(_hotelId, entry, status, note) {
+    async startTask(_hotelId, entry, type) {
       const target = room(entry.id);
-      if (target.version !== entry.version) throw new ModuleRequestError('VERSION_CONFLICT');
-      if (status === 'out-of-order' && !note.trim()) throw new ModuleRequestError('NOTE_REQUIRED');
+      if (target.archived) throw new ModuleRequestError('INVALID_INPUT');
       if (tasks.some((t) => t.roomId === target.id && isOpen(t)))
-        throw new ModuleRequestError('TASK_OPEN');
-      Object.assign(target, { status, statusNote: note.trim() });
-      bump(target);
-    },
-    async startTask(_hotelId, entry, type, outcome, notes = '') {
-      const target = room(entry.id);
-      if (!allowedTasks(target.status).includes(type))
-        throw new ModuleRequestError('WRONG_ROOM_STATUS');
-      const base = {
+        throw new ModuleRequestError('ROOM_BUSY');
+      if (tasks.some((t) => t.mine && isOpen(t))) throw new ModuleRequestError('ATTENDANT_BUSY');
+      tasks.push({
         id: crypto.randomUUID(),
         roomId: target.id,
         roomNumber: target.number,
         type,
+        status: 'active',
         attendantEmail: me,
         mine: true,
         startedAt: now(),
         pausedAt: null,
         pausedSeconds: 0,
-        notes: notes.trim(),
-      };
-      if (outcome) {
-        if (type !== 'make-up' && type !== 'turndown')
-          throw new ModuleRequestError('INVALID_INPUT');
-        tasks.push({ ...base, status: outcome, finishedAt: now(), durationSeconds: 0 });
-        return;
-      }
-      if (tasks.some((t) => t.roomId === target.id && isOpen(t)))
-        throw new ModuleRequestError('ROOM_BUSY');
-      if (tasks.some((t) => t.mine && isOpen(t))) throw new ModuleRequestError('ATTENDANT_BUSY');
-      tasks.push({ ...base, status: 'active', finishedAt: null, durationSeconds: null });
+        finishedAt: null,
+        durationSeconds: null,
+      });
     },
-    async updateTask(_hotelId, entry, action, outcome = 'done', notes) {
+    async updateTask(_hotelId, entry, action) {
       const task = tasks.find((t) => t.id === entry.id);
       if (!task) throw new ModuleRequestError('ACCESS_DENIED');
-      if (!isOpen(task) || (action === 'pause' && task.status !== 'active'))
-        throw new ModuleRequestError('TASK_CLOSED');
-      if (action === 'resume' && task.status !== 'paused')
+      if (
+        !isOpen(task) ||
+        (action === 'pause' && task.status !== 'active') ||
+        (action === 'resume' && task.status !== 'paused')
+      )
         throw new ModuleRequestError('TASK_CLOSED');
       const at = Date.now();
       const paused =
@@ -192,9 +165,9 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
       if (action === 'pause') Object.assign(task, { status: 'paused', pausedAt: now() });
       else if (action === 'resume')
         Object.assign(task, { status: 'active', pausedAt: null, pausedSeconds: paused });
-      else {
+      else
         Object.assign(task, {
-          status: action === 'cancel' ? 'cancelled' : outcome,
+          status: action === 'cancel' ? 'cancelled' : 'done',
           pausedAt: null,
           pausedSeconds: paused,
           finishedAt: now(),
@@ -202,30 +175,7 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
             action === 'cancel'
               ? null
               : Math.max(0, Math.floor((at - Date.parse(task.startedAt)) / 1000) - paused),
-          notes: notes === undefined ? task.notes : notes.trim(),
         });
-        const target = room(task.roomId);
-        if (task.status === 'done') target.lastCleanedAt = task.finishedAt;
-        if (
-          task.status === 'done' &&
-          (task.type === 'departure' || task.type === 'deep-clean') &&
-          target.status.startsWith('vacant')
-        ) {
-          target.status = 'vacant-clean';
-          target.statusNote = '';
-          bump(target);
-        }
-      }
-    },
-    async inspect(_hotelId, entry, result, reason) {
-      const target = room(entry.id);
-      if (target.version !== entry.version) throw new ModuleRequestError('VERSION_CONFLICT');
-      if (result === 'redo' && !reason.trim()) throw new ModuleRequestError('NOTE_REQUIRED');
-      if (target.status !== 'vacant-clean') throw new ModuleRequestError('WRONG_ROOM_STATUS');
-      inspections[result]++;
-      target.status = result === 'pass' ? 'vacant-ready' : 'vacant-dirty';
-      target.statusNote = result === 'pass' ? '' : reason.trim();
-      bump(target);
     },
     async listTasks(query) {
       const data = tasks
@@ -241,49 +191,43 @@ export function createDemoHousekeepingApi(): HousekeepingApi {
     },
     async summary(_hotelId, _departmentId, day) {
       const target = day ?? hotelToday();
-      const live = rooms.filter((r) => !r.archived);
-      const count = (status: Room['status']) => live.filter((r) => r.status === status).length;
-      const ofDay = tasks.filter((t) => hotelToday(new Date(t.startedAt)) === target);
+      const done = tasks.filter(
+        (t) => t.status === 'done' && hotelToday(new Date(t.startedAt)) === target,
+      );
+      const seconds = (list: CleaningTask[]) => list.map((t) => t.durationSeconds ?? 0);
+      const avg = (values: number[]) =>
+        values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0;
       const taskTypes: Partial<Record<TaskType, TypeTotals>> = {};
-      for (const task of ofDay) {
-        const totals = (taskTypes[task.type] ??= { done: 0, avgSeconds: 0, declined: 0 });
-        if (task.status === 'dnd' || task.status === 'refused') totals.declined++;
-      }
-      for (const [type, totals] of Object.entries(taskTypes)) {
-        const done = ofDay.filter((t) => t.type === type && t.status === 'done');
-        totals.done = done.length;
-        totals.avgSeconds = done.length
-          ? Math.round(done.reduce((sum, t) => sum + (t.durationSeconds ?? 0), 0) / done.length)
-          : 0;
+      for (const type of new Set(done.map((t) => t.type))) {
+        const values = seconds(done.filter((t) => t.type === type));
+        taskTypes[type] = {
+          done: values.length,
+          avgSeconds: avg(values),
+          maxSeconds: Math.max(...values),
+        };
       }
       const people = new Map<string, number[]>();
-      for (const task of ofDay.filter((t) => t.status === 'done'))
+      for (const task of done)
         people.set(task.attendantEmail, [
           ...(people.get(task.attendantEmail) ?? []),
           task.durationSeconds ?? 0,
         ]);
       const summary: HousekeepingSummary = {
-        statuses: {
-          'vacant-dirty': count('vacant-dirty'),
-          'vacant-clean': count('vacant-clean'),
-          'vacant-ready': count('vacant-ready'),
-          occupied: count('occupied'),
-          'out-of-order': count('out-of-order'),
-          'in-progress': live.filter((r) => tasks.some((t) => t.roomId === r.id && isOpen(t)))
-            .length,
+        totals: {
+          done: done.length,
+          rooms: new Set(done.map((t) => t.roomId)).size,
+          avgSeconds: avg(seconds(done)),
         },
         taskTypes,
         attendants: [...people.entries()]
-          .map(([email, durations]) => ({
+          .map(([email, values]) => ({
             email,
-            done: durations.length,
-            avgSeconds: Math.round(durations.reduce((a, b) => a + b, 0) / durations.length),
-            totalSeconds: durations.reduce((a, b) => a + b, 0),
+            done: values.length,
+            avgSeconds: avg(values),
+            totalSeconds: values.reduce((a, b) => a + b, 0),
           }))
           .sort((a, b) => b.done - a.done || a.email.localeCompare(b.email)),
-        inspections: { ...inspections },
         day: target,
-        serverNow: now(),
       };
       return summary;
     },

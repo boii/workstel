@@ -3,7 +3,7 @@ import { locale } from '../../../i18n';
 import { ModuleRequestError } from '../../../core/module-rpc';
 import en from '../locales/en';
 import id from '../locales/id';
-import type { RoomStatus, TaskStatus, TaskType } from '../types';
+import type { TaskStatus, TaskType } from '../types';
 
 export type HousekeepingMessages = Record<keyof typeof en, string>;
 type Key = keyof typeof en;
@@ -12,41 +12,21 @@ export function useHousekeepingMessages() {
   return computed<HousekeepingMessages>(() => (locale.value === 'id' ? id : en));
 }
 
-export const statusKeys: Record<RoomStatus, Key> = {
-  'vacant-dirty': 'statusVacantDirty',
-  'vacant-clean': 'statusVacantClean',
-  'vacant-ready': 'statusVacantReady',
-  occupied: 'statusOccupied',
-  'out-of-order': 'statusOutOfOrder',
-};
-export const statusCodeKeys: Record<RoomStatus, Key> = {
-  'vacant-dirty': 'codeVacantDirty',
-  'vacant-clean': 'codeVacantClean',
-  'vacant-ready': 'codeVacantReady',
-  occupied: 'codeOccupied',
-  'out-of-order': 'codeOutOfOrder',
-};
 export const taskKeys: Record<TaskType, Key> = {
   departure: 'taskDeparture',
   'make-up': 'taskMakeUp',
-  turndown: 'taskTurndown',
-  'pre-arrival': 'taskPreArrival',
-  'deep-clean': 'taskDeepClean',
+  other: 'taskOther',
 };
 export const taskIcons: Record<TaskType, string> = {
   departure: 'mdi-bed-empty',
   'make-up': 'mdi-spray-bottle',
-  turndown: 'mdi-weather-night',
-  'pre-arrival': 'mdi-star-outline',
-  'deep-clean': 'mdi-vacuum-outline',
+  other: 'mdi-broom',
 };
 export const taskStatusKeys: Record<TaskStatus, Key> = {
-  active: 'taskActive',
-  paused: 'taskPaused',
-  done: 'taskDone',
-  dnd: 'taskDnd',
-  refused: 'taskRefused',
-  cancelled: 'taskCancelled',
+  active: 'inProgress',
+  paused: 'paused',
+  done: 'done',
+  cancelled: 'cancelled',
 };
 
 const errorKeys: Record<string, Key> = {
@@ -54,11 +34,9 @@ const errorKeys: Record<string, Key> = {
   VERSION_CONFLICT: 'versionConflict',
   ROOM_BUSY: 'roomBusy',
   ATTENDANT_BUSY: 'attendantBusy',
-  WRONG_ROOM_STATUS: 'wrongRoomStatus',
   TASK_OPEN: 'taskOpen',
   TASK_CLOSED: 'taskClosed',
   DUPLICATE_ROOM: 'duplicateRoom',
-  NOTE_REQUIRED: 'noteRequired',
 };
 /** Map a server error code to safe, localized copy; unknown failures stay generic. */
 export function errorMessage(messages: HousekeepingMessages, error: unknown) {

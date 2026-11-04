@@ -106,8 +106,6 @@ const fieldError = (field: keyof RoomInput) =>
         :disabled="saving"
         maxlength="50"
         :placeholder="messages.roomTypePlaceholder"
-        :hint="room ? '' : messages.newRoomHint"
-        :persistent-hint="!room"
         :error-messages="fieldError('roomType')"
       />
     </v-form>
