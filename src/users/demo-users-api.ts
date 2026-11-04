@@ -44,6 +44,17 @@ export function createDemoUsersApi(): UsersApi {
           ? [{ moduleId: 'bin-card', departmentId: departments[2].id, level: 'manage' }]
           : [],
   }));
+  const vaultOwners = [
+    ['Booking extranet', 'Front Office', 1],
+    ['Guest Wi-Fi portal', 'Front Office', 1],
+    ['Supplier portal', 'Accounting', 2],
+  ].map(([name, departmentName, owner], index) => ({
+    id: '00000000-0000-4000-8000-00000000020' + index,
+    name: String(name),
+    status: 'active' as const,
+    departmentName: String(departmentName),
+    ownerId: users[Number(owner)].id,
+  }));
   const find = (id: string) => {
     const user = users.find((entry) => entry.id === id);
     if (!user) throw new ModuleRequestError('NOT_FOUND');
@@ -105,6 +116,37 @@ export function createDemoUsersApi(): UsersApi {
     async setBlocked(userId, blocked) {
       if (userId === demoSelf) throw new ModuleRequestError('SELF_ACTION');
       find(userId).blocked = blocked;
+    },
+    async ownedVaultAccounts(userId) {
+      find(userId);
+      return vaultOwners
+        .filter((account) => account.ownerId === userId)
+        .map(({ id, name, status, departmentName }) => ({ id, name, status, departmentName }));
+    },
+    async transferVaultAccounts(fromUserId, toUserId) {
+      const target = find(toUserId);
+      const result = {
+        transferred: 0,
+        skipped: [] as { id: string; name: string; departmentName: string }[],
+      };
+      for (const account of vaultOwners.filter((entry) => entry.ownerId === fromUserId)) {
+        // Mirrors the server: the new owner needs edit access in the account's department.
+        const department = departments.find((d) => d.name === account.departmentName);
+        if (
+          target.memberships.some(
+            (m) => m.departmentId === department?.id && m.enabled && m.canWrite,
+          )
+        ) {
+          account.ownerId = toUserId;
+          result.transferred++;
+        } else
+          result.skipped.push({
+            id: account.id,
+            name: account.name,
+            departmentName: account.departmentName,
+          });
+      }
+      return result;
     },
   };
 }

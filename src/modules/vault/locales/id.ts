@@ -155,4 +155,19 @@ export default {
   clearStatus: 'Tampilkan hanya akun aktif',
   clearDepartment: 'Hapus filter departemen',
   scopeHint: 'Khusus akun kerja hotel, misalnya portal booking atau supplier. Bukan akun pribadi.',
+  departmentShare: 'Bagikan ke departemen',
+  departmentShareHint:
+    'Semua anggota aktif departemen yang dipilih bisa melihat akun ini dan password-nya.',
+  transferTitle: 'Pindahkan kepemilikan',
+  transferHint:
+    'Pemilik baru harus punya akses ubah di departemen akun ini. Anda kehilangan hak ubah dan berbagi.',
+  newOwnerEmail: 'Email pemilik baru',
+  keepReadAccess: 'Tetap beri saya akses baca',
+  transfer: 'Pindahkan',
+  transferConfirm: 'Pindahkan akun ini?',
+  transferConfirmBody:
+    'Pemilik baru bisa mengubah, membagikan, dan mengarsipkannya. Anda tidak bisa membatalkannya sendiri.',
+  transferDone: 'Kepemilikan dipindahkan.',
+  transferUnavailable:
+    'Orang ini tidak bisa menjadi pemilik akun. Ia perlu akses ubah di departemen akun ini.',
 } satisfies Record<keyof typeof en, string>;

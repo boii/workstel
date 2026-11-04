@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import { t, translate } from '../i18n';
 import type { MessageKey } from '../i18n';
 import { modules as registry } from '../modules/registry';
 import { moduleLevels } from './users-api';
-import type { DepartmentRef, Membership, ModuleLevel, UserRecord, UsersApi } from './users-api';
+import type {
+  DepartmentRef,
+  Membership,
+  ModuleLevel,
+  OwnedVaultAccount,
+  UserRecord,
+  UsersApi,
+  VaultTransferResult,
+} from './users-api';
 import { userErrorKey } from './user-errors';
 
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{
   user: UserRecord | null;
+  users: UserRecord[];
   departments: DepartmentRef[];
   modules: string[];
   selfId: string;
@@ -23,7 +32,52 @@ const emit = defineEmits<{
 }>();
 
 const busy = ref(false);
-const confirm = ref<'block' | 'reset' | null>(null);
+const confirm = ref<'block' | 'reset' | 'vault' | null>(null);
+// Vault offboarding: what the user owns, and where it should go.
+const owned = ref<OwnedVaultAccount[] | null>(null);
+const vaultTarget = ref<string | null>(null);
+const vaultResult = ref<VaultTransferResult | null>(null);
+async function loadOwned() {
+  owned.value = null;
+  vaultResult.value = null;
+  vaultTarget.value = null;
+  const user = props.user;
+  if (!user) return;
+  try {
+    const accounts = await props.api.ownedVaultAccounts(user.id);
+    if (props.user?.id === user.id) owned.value = accounts;
+  } catch {
+    if (props.user?.id === user.id) owned.value = null;
+  }
+}
+// Separate sources compare by value, so a list refresh for the same user keeps the result shown.
+watch(
+  [() => open.value, () => props.user?.id],
+  ([isOpen]) => {
+    if (isOpen) void loadOwned();
+  },
+  { immediate: true },
+);
+const targets = computed(() =>
+  props.users
+    .filter((u) => u.id !== props.user?.id && !u.blocked)
+    .map((u) => ({ value: u.id, title: u.email })),
+);
+async function transferVault() {
+  const user = props.user;
+  const target = vaultTarget.value;
+  if (!user || !target || busy.value) return;
+  busy.value = true;
+  try {
+    vaultResult.value = await props.api.transferVaultAccounts(user.id, target);
+    owned.value = await props.api.ownedVaultAccounts(user.id);
+    emit('changed', 'userSaved');
+  } catch (error) {
+    emit('failed', userErrorKey(error));
+  } finally {
+    busy.value = false;
+  }
+}
 const isSelf = computed(() => props.user?.id === props.selfId);
 const multiHotel = computed(() => new Set(props.departments.map((d) => d.hotelId)).size > 1);
 const levelKeys: Record<ModuleLevel, MessageKey> = {
@@ -109,6 +163,10 @@ async function confirmAction() {
   confirm.value = null;
   const user = props.user;
   if (!user || !action) return;
+  if (action === 'vault') {
+    await transferVault();
+    return;
+  }
   if (action === 'block') {
     await run(() => props.api.setBlocked(user.id, !user.blocked));
     return;
@@ -182,6 +240,72 @@ async function confirmAction() {
       </section>
 
       <section
+        v-if="owned"
+        class="user-section"
+        aria-labelledby="user-vault"
+      >
+        <h3 id="user-vault">{{ t('userVaultTitle') }}</h3>
+        <p
+          v-if="!owned.length"
+          class="user-note"
+        >
+          {{ t('userVaultNone') }}
+        </p>
+        <template v-else>
+          <p class="user-vault-count">
+            {{ t('userVaultCount') }} <strong>{{ owned.length }}</strong>
+          </p>
+          <ul class="user-vault-list">
+            <li
+              v-for="account in owned.slice(0, 5)"
+              :key="account.id"
+            >
+              {{ account.name }} <small>· {{ account.departmentName }}</small>
+            </li>
+            <li v-if="owned.length > 5">
+              <small>+{{ owned.length - 5 }} {{ t('userVaultMore') }}</small>
+            </li>
+          </ul>
+          <p class="user-note">{{ t('userVaultTransferHint') }}</p>
+          <div class="user-vault-transfer">
+            <v-select
+              v-model="vaultTarget"
+              :items="targets"
+              :label="t('userVaultTransferTo')"
+              :disabled="busy"
+            />
+            <v-btn
+              variant="outlined"
+              prepend-icon="mdi-account-switch-outline"
+              :disabled="busy || !vaultTarget"
+              @click="confirm = 'vault'"
+              >{{ t('userVaultTransfer') }}</v-btn
+            >
+          </div>
+        </template>
+        <div
+          v-if="vaultResult"
+          class="user-vault-result"
+          role="status"
+        >
+          <p>
+            {{ t('userVaultTransferred') }} <strong>{{ vaultResult.transferred }}</strong>
+          </p>
+          <template v-if="vaultResult.skipped.length">
+            <p>{{ t('userVaultSkipped') }}</p>
+            <ul>
+              <li
+                v-for="item in vaultResult.skipped"
+                :key="item.id"
+              >
+                {{ item.name }} <small>· {{ item.departmentName }}</small>
+              </li>
+            </ul>
+          </template>
+        </div>
+      </section>
+
+      <section
         class="user-section"
         aria-labelledby="user-departments"
       >
@@ -252,10 +376,34 @@ async function confirmAction() {
       @update:model-value="confirm = null"
     >
       <v-card class="user-confirm">
-        <h2>{{ t(confirm === 'block' ? 'userConfirmBlockTitle' : 'userConfirmResetTitle') }}</h2>
+        <h2>
+          {{
+            t(
+              confirm === 'block'
+                ? 'userConfirmBlockTitle'
+                : confirm === 'vault'
+                  ? 'userVaultConfirmTitle'
+                  : 'userConfirmResetTitle',
+            )
+          }}
+        </h2>
         <p>
           <strong>{{ user?.email }}</strong> —
-          {{ t(confirm === 'block' ? 'userConfirmBlockBody' : 'userConfirmResetBody') }}
+          {{
+            t(
+              confirm === 'block'
+                ? 'userConfirmBlockBody'
+                : confirm === 'vault'
+                  ? 'userVaultConfirmBody'
+                  : 'userConfirmResetBody',
+            )
+          }}
+        </p>
+        <p
+          v-if="confirm === 'block' && owned && owned.length"
+          class="user-confirm-warning"
+        >
+          {{ t('userVaultBlockWarning') }} <strong>{{ owned.length }}</strong>
         </p>
         <div class="user-confirm-actions">
           <v-btn
@@ -266,7 +414,15 @@ async function confirmAction() {
             :color="confirm === 'block' ? 'error' : 'primary'"
             variant="flat"
             @click="confirmAction"
-            >{{ t(confirm === 'block' ? 'userBlock' : 'userResetPassword') }}</v-btn
+            >{{
+              t(
+                confirm === 'block'
+                  ? 'userBlock'
+                  : confirm === 'vault'
+                    ? 'userVaultTransfer'
+                    : 'userResetPassword',
+              )
+            }}</v-btn
           >
         </div>
       </v-card>
@@ -373,6 +529,37 @@ async function confirmAction() {
 .user-departments :deep(.v-label) {
   font-size: 13px;
 }
+.user-vault-count {
+  font-size: 13px;
+}
+.user-vault-list,
+.user-vault-result ul {
+  list-style: none;
+  margin: 6px 0 8px;
+  padding: 0;
+  font-size: 13px;
+}
+.user-vault-list small,
+.user-vault-result small {
+  color: var(--workstel-text-secondary);
+}
+.user-vault-transfer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.user-vault-result {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #f7f9fa;
+  font-size: 12px;
+}
+.user-confirm-warning {
+  color: #7a4a10 !important;
+}
 .user-confirm {
   padding: 22px;
 }
@@ -396,8 +583,12 @@ async function confirmAction() {
 }
 @media (max-width: 680px) {
   .user-actions .v-btn,
-  .user-confirm-actions .v-btn {
+  .user-confirm-actions .v-btn,
+  .user-vault-transfer .v-btn {
     min-height: 44px;
+  }
+  .user-vault-transfer {
+    grid-template-columns: minmax(0, 1fr);
   }
   .user-departments :deep(.v-selection-control),
   .user-row :deep(.v-selection-control) {

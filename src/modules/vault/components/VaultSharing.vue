@@ -6,7 +6,7 @@ import type { VaultEntry } from '../types';
 import { useVaultMessages } from '../composables/useVaultMessages';
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{ entry: VaultEntry }>();
-const emit = defineEmits<{ changed: [] }>();
+const emit = defineEmits<{ changed: []; transferred: [] }>();
 const messages = useVaultMessages();
 const shares = ref<{ email: string; grantedAt: string }[]>([]),
   email = ref(''),
@@ -14,6 +14,12 @@ const shares = ref<{ email: string; grantedAt: string }[]>([]),
   loading = ref(true),
   failure = ref('');
 const version = ref(props.entry.version);
+const departments = ref<{ departmentId: string; name: string }[]>([]);
+const sharedDepartments = ref<string[]>([]);
+const newOwner = ref('');
+const keepAccess = ref(true);
+const confirmTransfer = ref(false);
+const isText = (value: unknown) => typeof value === 'string';
 let disposed = false;
 let controller: AbortController | undefined;
 async function load() {
@@ -38,6 +44,25 @@ async function load() {
       !Number.isSafeInteger(result.meta?.version)
     )
       throw Error('INVALID_RESPONSE');
+    const available = result.meta.availableDepartments;
+    const granted = result.meta.departments;
+    // Older servers do not report department shares; the section then stays hidden.
+    if (available !== undefined || granted !== undefined) {
+      if (
+        !Array.isArray(available) ||
+        !Array.isArray(granted) ||
+        !available.every(
+          (d: Record<string, unknown>) => isText(d?.departmentId) && isText(d?.name),
+        ) ||
+        !granted.every((d: Record<string, unknown>) => isText(d?.departmentId))
+      )
+        throw Error('INVALID_RESPONSE');
+      departments.value = available.map((d: { departmentId: string; name: string }) => ({
+        departmentId: d.departmentId,
+        name: d.name,
+      }));
+      sharedDepartments.value = granted.map((d: { departmentId: string }) => d.departmentId);
+    }
     shares.value = result.data.map((s: { email: string; grantedAt: string }) => ({
       email: s.email,
       grantedAt: s.grantedAt,
@@ -71,6 +96,60 @@ async function change(recipient: string, action: 'grant' | 'revoke') {
         error instanceof Error && error.message === 'VERSION_CONFLICT'
           ? messages.value.conflict
           : messages.value.shareError;
+  } finally {
+    if (!disposed) busy.value = false;
+  }
+}
+async function shareDepartment(departmentId: string, shared: boolean) {
+  if (busy.value || loading.value) return;
+  busy.value = true;
+  failure.value = '';
+  try {
+    await vaultRpc('vault_set_department_share', {
+      p_hotel_id: props.entry.hotelId,
+      p_account_id: props.entry.id,
+      p_department_id: departmentId,
+      p_expected_version: version.value,
+      p_action: shared ? 'grant' : 'revoke',
+    });
+    if (disposed) return;
+    await load();
+    emit('changed');
+  } catch (error) {
+    if (!disposed)
+      failure.value =
+        error instanceof Error && error.message === 'VERSION_CONFLICT'
+          ? messages.value.conflict
+          : messages.value.shareError;
+  } finally {
+    if (!disposed) busy.value = false;
+  }
+}
+async function transfer() {
+  confirmTransfer.value = false;
+  if (busy.value || loading.value || !newOwner.value.trim()) return;
+  busy.value = true;
+  failure.value = '';
+  try {
+    await vaultRpc('vault_transfer_owner', {
+      p_hotel_id: props.entry.hotelId,
+      p_account_id: props.entry.id,
+      p_email: newOwner.value.trim(),
+      p_expected_version: version.value,
+      p_keep_reader: keepAccess.value,
+    });
+    if (disposed) return;
+    // The caller is no longer the owner, so the sharing dialog has nothing left to manage.
+    emit('transferred');
+    open.value = false;
+  } catch (error) {
+    if (!disposed)
+      failure.value =
+        error instanceof Error && error.message === 'VERSION_CONFLICT'
+          ? messages.value.conflict
+          : error instanceof Error && error.message === 'RECIPIENT_UNAVAILABLE'
+            ? messages.value.transferUnavailable
+            : messages.value.shareError;
   } finally {
     if (!disposed) busy.value = false;
   }
@@ -156,7 +235,91 @@ onUnmounted(() => {
           /></template>
         </v-list-item>
       </v-list>
+      <section
+        v-if="departments.length"
+        class="vault-share-section"
+        aria-labelledby="vault-share-departments"
+      >
+        <h3 id="vault-share-departments">{{ messages.departmentShare }}</h3>
+        <p class="vault-field-hint vault-share-warning">
+          <v-icon
+            icon="mdi-alert-outline"
+            size="14"
+          />{{ messages.departmentShareHint }}
+        </p>
+        <div class="vault-share-departments">
+          <v-checkbox
+            v-for="department in departments"
+            :key="department.departmentId"
+            :model-value="sharedDepartments.includes(department.departmentId)"
+            :label="department.name"
+            :disabled="busy"
+            color="primary"
+            density="compact"
+            hide-details
+            @update:model-value="(value) => shareDepartment(department.departmentId, !!value)"
+          />
+        </div>
+      </section>
+      <section
+        class="vault-share-section"
+        aria-labelledby="vault-transfer"
+      >
+        <h3 id="vault-transfer">{{ messages.transferTitle }}</h3>
+        <p class="vault-field-hint">{{ messages.transferHint }}</p>
+        <v-text-field
+          v-model="newOwner"
+          type="email"
+          :label="messages.newOwnerEmail"
+          autocomplete="off"
+          maxlength="254"
+          :disabled="busy"
+          hide-details="auto"
+          density="compact"
+        />
+        <div class="vault-transfer-actions">
+          <v-checkbox
+            v-model="keepAccess"
+            :label="messages.keepReadAccess"
+            :disabled="busy"
+            color="primary"
+            density="compact"
+            hide-details
+          />
+          <v-btn
+            variant="outlined"
+            prepend-icon="mdi-account-switch-outline"
+            :disabled="busy || !newOwner.trim()"
+            @click="confirmTransfer = true"
+            >{{ messages.transfer }}</v-btn
+          >
+        </div>
+      </section>
     </template>
+    <v-dialog
+      v-model="confirmTransfer"
+      max-width="420"
+    >
+      <v-card class="vault-transfer-confirm">
+        <h2>{{ messages.transferConfirm }}</h2>
+        <p>
+          <strong>{{ entry.name }}</strong> → <strong>{{ newOwner.trim() }}</strong>
+        </p>
+        <p>{{ messages.transferConfirmBody }}</p>
+        <div class="vault-transfer-confirm-actions">
+          <v-btn
+            variant="text"
+            @click="confirmTransfer = false"
+            >{{ messages.cancel }}</v-btn
+          ><v-btn
+            color="primary"
+            variant="flat"
+            @click="transfer"
+            >{{ messages.transfer }}</v-btn
+          >
+        </div>
+      </v-card>
+    </v-dialog>
     <template #actions>
       <v-btn
         variant="text"
@@ -175,3 +338,71 @@ onUnmounted(() => {
     </template>
   </VaultDialog>
 </template>
+<style scoped>
+.vault-share-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--workstel-border);
+}
+.vault-share-section h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.vault-share-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: #7a4a10 !important;
+}
+.vault-share-warning .v-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.vault-share-departments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+.vault-share-departments :deep(.v-label),
+.vault-transfer-actions :deep(.v-label) {
+  font-size: 13px;
+}
+.vault-transfer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.vault-transfer-confirm {
+  padding: 22px;
+}
+.vault-transfer-confirm h2 {
+  font-size: 18px;
+  font-weight: 500;
+}
+.vault-transfer-confirm p {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--workstel-text-secondary);
+  overflow-wrap: anywhere;
+}
+.vault-transfer-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+@media (max-width: 680px) {
+  .vault-transfer-actions .v-btn,
+  .vault-transfer-confirm-actions .v-btn {
+    min-height: 44px;
+  }
+  .vault-share-section :deep(.v-selection-control) {
+    min-height: 44px;
+  }
+}
+</style>

@@ -33,7 +33,7 @@ const messages = useVaultMessages(),
   editing = ref<VaultEntry | null>(null),
   detail = ref<VaultEntry | null>(null),
   busy = ref(false),
-  feedbackMessage = ref<'saved' | 'archiveDone' | 'restoreDone'>('saved'),
+  feedbackMessage = ref<'saved' | 'archiveDone' | 'restoreDone' | 'transferDone'>('saved'),
   feedback = ref(false),
   next = ref<string | null>(null),
   archiveTarget = ref<VaultEntry | null>(null);
@@ -483,6 +483,13 @@ const detailOpen = computed({
     if (!value) closeDetail();
   },
 });
+// After a transfer the caller may no longer see the account, so details close and the list reloads.
+async function transferred() {
+  closeDetail();
+  await load(false, true);
+  feedbackMessage.value = 'transferDone';
+  feedback.value = true;
+}
 function closeDetail() {
   detailController?.abort();
   detailLoading.value = false;
@@ -897,6 +904,7 @@ onMounted(() => {
       v-model="sharingOpen"
       :entry="sharingTarget"
       @changed="load(false, true)"
+      @transferred="transferred"
     />
     <VaultAudit
       v-if="auditOpen"

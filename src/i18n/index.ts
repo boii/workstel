@@ -228,6 +228,20 @@ export const english = {
   savePassword: 'Save password',
   passwordSetting: 'Password',
   signInAgain: 'Sign in again',
+  userVaultTitle: 'Vault accounts',
+  userVaultNone: 'Owns no Vault accounts.',
+  userVaultCount: 'Vault accounts owned:',
+  userVaultTransferTo: 'Transfer all to',
+  userVaultTransfer: 'Transfer accounts',
+  userVaultTransferHint:
+    "The new owner needs edit access in each account's department. Accounts they cannot own stay with this user. Developers never gain access to the accounts.",
+  userVaultTransferred: 'Vault accounts transferred:',
+  userVaultSkipped: 'Not transferred (no edit access in the department):',
+  userVaultBlockWarning: 'Vault accounts still owned by this user:',
+  userVaultConfirmTitle: 'Transfer all Vault accounts?',
+  userVaultConfirmBody:
+    'Ownership moves to the selected user, who can then edit, share and archive them.',
+  userVaultMore: 'more',
 } as const;
 export type English = typeof english;
 export type MessageKey = keyof typeof english;
@@ -462,6 +476,20 @@ const indonesian: Record<MessageKey, string> = {
   savePassword: 'Simpan password',
   passwordSetting: 'Password',
   signInAgain: 'Login ulang',
+  userVaultTitle: 'Akun Vault',
+  userVaultNone: 'Tidak memiliki akun Vault.',
+  userVaultCount: 'Akun Vault yang dimiliki:',
+  userVaultTransferTo: 'Pindahkan semua ke',
+  userVaultTransfer: 'Pindahkan akun',
+  userVaultTransferHint:
+    'Pemilik baru perlu akses ubah di departemen setiap akun. Akun yang tidak bisa ia miliki tetap pada user ini. Developer tidak pernah mendapat akses ke akun tersebut.',
+  userVaultTransferred: 'Akun Vault dipindahkan:',
+  userVaultSkipped: 'Tidak dipindahkan (tanpa akses ubah di departemen):',
+  userVaultBlockWarning: 'Akun Vault yang masih dimiliki user ini:',
+  userVaultConfirmTitle: 'Pindahkan semua akun Vault?',
+  userVaultConfirmBody:
+    'Kepemilikan pindah ke user yang dipilih, yang kemudian bisa mengubah, membagikan, dan mengarsipkannya.',
+  userVaultMore: 'lainnya',
 };
 export type Locale = 'en' | 'id';
 const saved = (() => {

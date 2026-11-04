@@ -152,4 +152,19 @@ export default {
   clearStatus: 'Show active accounts only',
   clearDepartment: 'Clear department filter',
   scopeHint: 'Hotel work accounts only, such as booking or supplier portals. No personal accounts.',
+  departmentShare: 'Share with a department',
+  departmentShareHint:
+    'Every active member of a selected department can view this account and reveal its password.',
+  transferTitle: 'Transfer ownership',
+  transferHint:
+    "The new owner must be able to edit in this account's department. You lose edit and sharing rights.",
+  newOwnerEmail: 'New owner email',
+  keepReadAccess: 'Keep read-only access for me',
+  transfer: 'Transfer',
+  transferConfirm: 'Transfer this account?',
+  transferConfirmBody:
+    'The new owner can edit, share and archive it. This cannot be undone by you.',
+  transferDone: 'Ownership transferred.',
+  transferUnavailable:
+    'That person cannot own this account. They need edit access in its department.',
 } as const;
