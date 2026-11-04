@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
   entryKeys,
@@ -9,6 +10,15 @@ import {
 } from '../composables/useBinCardMessages';
 import { entryTypes } from '../types';
 import type { EntryType, StockEntryInput, StockItem } from '../types';
+
+const entryIcons: Record<EntryType, string> = {
+  receipt: 'mdi-tray-arrow-down',
+  issue: 'mdi-tray-arrow-up',
+  adjustment: 'mdi-clipboard-check-outline',
+};
+// Three options do not fit side by side on a phone, so icons stack above the labels there.
+const { width: viewport } = useDisplay();
+const compact = computed(() => viewport.value <= 680);
 import { entryDelta, parseQuantity, validateEntry } from '../validation';
 import type { EntryField, ValidationError } from '../validation';
 
@@ -121,7 +131,6 @@ const unit = computed(() => props.item?.unit ?? '');
       ><v-btn-toggle
         v-model="type"
         mandatory
-        variant="outlined"
         color="primary"
         class="choice-group entry-types"
         aria-labelledby="bin-entry-type"
@@ -130,6 +139,8 @@ const unit = computed(() => props.item?.unit ?? '');
           v-for="entryType in entryTypes"
           :key="entryType"
           :value="entryType"
+          :prepend-icon="entryIcons[entryType]"
+          :stacked="compact"
           >{{ messages[entryKeys[entryType]] }}</v-btn
         ></v-btn-toggle
       >
@@ -222,6 +233,12 @@ const unit = computed(() => props.item?.unit ?? '');
 .entry-types .v-btn {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
+}
+.entry-types .v-btn--stacked {
+  min-height: 64px;
+  padding: 8px 4px;
+  font-size: 13px;
+  line-height: 1.2;
+  white-space: normal;
 }
 </style>

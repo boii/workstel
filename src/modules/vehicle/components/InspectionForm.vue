@@ -124,9 +124,7 @@ const fieldError = (field: InspectionField) => {
           ><v-btn-toggle
             v-model="fuelLevel"
             mandatory
-            variant="outlined"
             color="primary"
-            density="comfortable"
             class="choice-group inspection-fuel"
             role="radiogroup"
             aria-labelledby="inspection-fuel-label"
@@ -149,9 +147,9 @@ const fieldError = (field: InspectionField) => {
           tabindex="-1"
           >{{ messages.checklist }}</span
         ><v-btn
-          variant="text"
+          variant="tonal"
           color="primary"
-          size="small"
+          prepend-icon="mdi-check-all"
           :disabled="saving"
           @click="markAllOk"
           >{{ messages.markAllOk }}</v-btn
@@ -173,9 +171,7 @@ const fieldError = (field: InspectionField) => {
           <span :id="'inspection-item-' + item">{{ messages[itemKeys[item]] }}</span>
           <v-btn-toggle
             v-model="items[item]"
-            variant="outlined"
-            density="comfortable"
-            class="choice-group"
+            class="choice-group inspection-result"
             :color="items[item] === 'issue' ? 'error' : 'primary'"
             :aria-labelledby="'inspection-item-' + item"
             :disabled="saving"
@@ -241,16 +237,16 @@ const fieldError = (field: InspectionField) => {
   flex: 1;
   min-width: 0;
   padding: 0 4px;
-  font-size: 12px;
 }
 .inspection-checklist-heading {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
+  margin-top: 20px;
 }
 .inspection-checklist-heading .field-label {
-  margin-bottom: 0;
+  margin: 0;
 }
 .inspection-hint {
   margin: 2px 0 12px;
@@ -286,8 +282,7 @@ const fieldError = (field: InspectionField) => {
   flex-shrink: 0;
 }
 .inspection-items .v-btn {
-  font-size: 12px;
-  padding: 0 10px;
+  padding: 0 12px;
 }
 @media (max-width: 680px) {
   .inspection-row {
@@ -298,8 +293,25 @@ const fieldError = (field: InspectionField) => {
   .inspection-row > div + div .inspection-first-label {
     margin-top: 20px;
   }
+  .inspection-checklist-heading {
+    flex-wrap: wrap;
+  }
   .inspection-checklist-heading .v-btn {
     min-height: 44px;
+  }
+  /* On a phone the item name sits above two full-width result buttons. */
+  .inspection-items li {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px;
+  }
+  .inspection-result {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  .inspection-result .v-btn {
+    flex: 1;
   }
 }
 </style>
