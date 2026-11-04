@@ -9,6 +9,7 @@ export const shellPaths: Record<string, string> = {
   Favorites: '/favorites',
   Settings: '/settings',
   Help: '/help',
+  Users: '/admin/users',
 };
 
 export const routes: RouteRecordRaw[] = [
