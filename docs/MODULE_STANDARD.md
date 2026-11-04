@@ -129,3 +129,7 @@ The demo Vault activity display is held in memory. Production uses server audit 
 ## Private-by-default Vault policy — 1 November 2026
 
 The user selected private accounts by default with explicit owner sharing. This replaces inherited department visibility for Vault account records. Recipients get read-only access to specifically shared accounts, cannot reshare, and must remain enabled at the same hotel. Only owners may edit/archive/share, subject to staff capabilities. Server permission checks are mandatory; UI hiding is not enforcement. Audit capability must not confer account or secret read access. Database/server operators remain trusted administrators; application privacy is not end-to-end encryption against them.
+
+## Vault ownership continuity — 4 November 2026
+
+Owners may transfer an account to a colleague who can edit in the account's department, optionally keeping read-only access, and may share it read-only with whole departments at the same hotel (every enabled reader of that department can view and reveal it). Platform developers may list and transfer the accounts a user owns for offboarding; this does not give developers read access, and accounts the new owner cannot edit are reported and left in place. All transfers and department shares are audited as `vault.ownership.*` and `vault.share.department.*`. The encryption context keeps the owner recorded when the account was created (`secret_owner_id`), so transfers never re-encrypt or lose passwords.

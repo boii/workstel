@@ -200,6 +200,7 @@ function forgetPassword() {
     <UserDialog
       v-model="accessOpen"
       :user="selected"
+      :users="directory.users"
       :departments="directory.departments"
       :modules="directory.modules"
       :self-id="selfId"

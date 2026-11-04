@@ -40,6 +40,16 @@ export interface UserDirectory {
   modules: string[];
 }
 export type MembershipInput = Omit<Membership, 'departmentId'>;
+export interface OwnedVaultAccount {
+  id: string;
+  name: string;
+  status: 'active' | 'archived';
+  departmentName: string;
+}
+export interface VaultTransferResult {
+  transferred: number;
+  skipped: { id: string; name: string; departmentName: string }[];
+}
 export interface UsersApi {
   list(): Promise<UserDirectory>;
   setMembership(userId: string, departmentId: string, input: MembershipInput): Promise<void>;
@@ -53,6 +63,9 @@ export interface UsersApi {
   create(email: string): Promise<{ userId: string; email: string; temporaryPassword: string }>;
   resetPassword(userId: string): Promise<{ temporaryPassword: string }>;
   setBlocked(userId: string, blocked: boolean): Promise<void>;
+  /** Vault accounts the user owns; null when the server has no ownership support yet. */
+  ownedVaultAccounts(userId: string): Promise<OwnedVaultAccount[] | null>;
+  transferVaultAccounts(fromUserId: string, toUserId: string): Promise<VaultTransferResult>;
 }
 
 const invalid = () => new ModuleRequestError('INVALID_RESPONSE');
@@ -204,6 +217,44 @@ export function createLiveUsersApi(rpc = moduleRpc, call = usersFunction): Users
     },
     async setBlocked(userId, blocked) {
       await call(blocked ? 'block' : 'unblock', { userId });
+    },
+    async ownedVaultAccounts(userId) {
+      let result;
+      try {
+        result = await rpc('vault_admin_owned_accounts', { p_user_id: userId });
+      } catch (error) {
+        if (error instanceof ModuleRequestError && error.code === 'REQUEST_FAILED') return null;
+        throw error;
+      }
+      if (!Array.isArray(result.data) || result.data.length > 1000) throw invalid();
+      return result.data.map((raw: Record<string, unknown>) => {
+        if (
+          !raw ||
+          !isText(raw.id) ||
+          !isText(raw.name) ||
+          !isText(raw.departmentName) ||
+          !['active', 'archived'].includes(String(raw.status))
+        )
+          throw invalid();
+        return raw as unknown as OwnedVaultAccount;
+      });
+    },
+    async transferVaultAccounts(fromUserId, toUserId) {
+      const result = await rpc('vault_admin_transfer_accounts', {
+        p_from: fromUserId,
+        p_to: toUserId,
+      });
+      const data = result.data as Record<string, unknown> | null;
+      if (!data || !Number.isSafeInteger(data.transferred) || !Array.isArray(data.skipped))
+        throw invalid();
+      return {
+        transferred: Number(data.transferred),
+        skipped: (data.skipped as Record<string, unknown>[]).map((row) => {
+          if (!row || !isText(row.id) || !isText(row.name) || !isText(row.departmentName))
+            throw invalid();
+          return { id: row.id, name: row.name, departmentName: row.departmentName };
+        }),
+      };
     },
   };
 }
