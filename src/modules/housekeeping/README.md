@@ -1,46 +1,38 @@
 # Housekeeping
 
-Room board and cleaning log for the Housekeeping department: live room status, timed cleaning tasks taken from the server clock, guest-declined service (DND or refused) and supervisor inspections.
+Times how long each room takes to clean. A room attendant taps a room, picks the kind of cleaning and the timer starts; pause, resume and finish are one tap each. Supervisors see who is cleaning which room and the average time per room, per kind of cleaning and per attendant.
 
 ## Capabilities
 
-| Permission            | Server flag  | Allows                                                                                         |
-| --------------------- | ------------ | ---------------------------------------------------------------------------------------------- |
-| `housekeeping:read`   | `can_read`   | View the room board, history and daily summary                                                 |
-| `housekeeping:write`  | `can_write`  | Start, pause, resume and finish own tasks; record DND or refused; check-out, check-in, OOO     |
-| `housekeeping:manage` | `can_manage` | Inspect rooms, act on anyone's task, override room status, add, edit, import and archive rooms |
+| Permission            | Server flag  | Allows                                                     |
+| --------------------- | ------------ | ---------------------------------------------------------- |
+| `housekeeping:read`   | `can_read`   | View rooms, running timers, history and the daily summary  |
+| `housekeeping:write`  | `can_write`  | Start, pause, resume, finish and cancel own timers         |
+| `housekeeping:manage` | `can_manage` | Act on anyone's timer; add, edit, import and archive rooms |
 
-Grants live in `workstel_private.module_access` with `module_id = 'housekeeping'` and apply only while the matching `staff_access` membership is enabled and the module switch is on. Rooms belong to the Housekeeping department, so Front Office staff who should see ready rooms (or mark check-out and check-in) need a Housekeeping membership with read or write.
+Grants live in `workstel_private.module_access` with `module_id = 'housekeeping'` and apply only while the matching `staff_access` membership in the Housekeeping department is enabled and the module switch is on.
 
-## Room status
+## Rules
 
-| Status         | Code | Becomes                                                         |
-| -------------- | ---- | --------------------------------------------------------------- |
-| `vacant-dirty` | VD   | VC after a departure clean or deep clean is finished            |
-| `vacant-clean` | VC   | VR when a supervisor passes it, VD when sent back with a reason |
-| `vacant-ready` | VR   | OC on check-in                                                  |
-| `occupied`     | OC   | VD on check-out; make-up room and turndown keep it occupied     |
-| `out-of-order` | OOO  | Needs a reason; back in service returns it to VD                |
-
-Task types and the room status they start from: departure (VD), make-up room and turndown (OC), pre-arrival preparation (VC or VR) and deep clean (any vacant status). Each attendant has at most one open task and each room at most one open task.
+- Kinds of cleaning: check-out (`departure`), make-up room (`make-up`) and other (`other`).
+- One running timer per room and per attendant (`ROOM_BUSY`, `ATTENDANT_BUSY`).
+- Start, pause and finish times come from the database clock (`clock_timestamp()`); the duration excludes pauses. A cancelled timer has no duration and is not counted.
 
 ## Server contract
 
-Migration `supabase/migrations/202611040011_housekeeping.sql` (requires `202611040001_module_access.sql`, `202611040006_module_switch.sql` and `202611040010_sales_crm.sql`). It also adds the `housekeeping` department to every hotel.
+Migrations `202611040011_housekeeping.sql` (department, rooms, tasks) and `202611040012_housekeeping_timer.sql` (narrowed to the timer).
 
-- `housekeeping_rooms_list(hotel, department?, includeArchived)`: the whole board (up to 1000 rooms) with each room's open task.
+- `housekeeping_rooms_list(hotel, department?, includeArchived)`: rooms with the running timer and the last finished cleaning; `meta.now` gives the server time for live timers.
 - `housekeeping_room_save(hotel, department, input, room?, expectedVersion?, action)` and `housekeeping_rooms_import(hotel, department, rows≤500)` (manage).
-- `housekeeping_room_set_status(hotel, room, status, expectedVersion, note)`: write sets occupied, dirty and out of order; manage may set any status.
-- `housekeeping_task_start(hotel, room, type, outcome?, notes)` and `housekeeping_task_update(hotel, task, action, outcome, notes?)`: start, pause, resume, finish (`done`, `dnd`, `refused`) and cancel. Durations exclude pauses and use `clock_timestamp()`.
-- `housekeeping_inspect(hotel, room, result, expectedVersion, reason)` (manage): append-only inspections.
-- `housekeeping_tasks_list(hotel, department?, day?, room?, after?, limit≤100)` and `housekeeping_summary(hotel, department?, day?)`: one hotel calendar day in `Asia/Jakarta`.
+- `housekeeping_task_start(hotel, room, type)` and `housekeeping_task_update(hotel, task, action)` with `pause`, `resume`, `finish` or `cancel`.
+- `housekeeping_tasks_list(hotel, department?, day?, room?, after?, limit≤100)` and `housekeeping_summary(hotel, department?, day?)`: one hotel calendar day in `Asia/Jakarta`, or one room.
 
-Every list, write and denial is audited as `housekeeping.*`. Error codes: `ACCESS_DENIED`, `INVALID_INPUT`, `VERSION_CONFLICT`, `DUPLICATE_ROOM`, `WRONG_ROOM_STATUS`, `ROOM_BUSY`, `ATTENDANT_BUSY`, `TASK_OPEN`, `TASK_CLOSED`, `NOTE_REQUIRED`.
+Every list, write and denial is audited as `housekeeping.*`. Error codes: `ACCESS_DENIED`, `INVALID_INPUT`, `VERSION_CONFLICT`, `DUPLICATE_ROOM`, `ROOM_BUSY`, `ATTENDANT_BUSY`, `TASK_OPEN`, `TASK_CLOSED`.
 
 ## Frontend
 
-`pages/ModuleListPage.vue` shows status tiles that filter the board, the caller's current task with a live timer, a room board grouped by floor, a room dialog with the actions the caller may take, and a history tab with per-task and per-attendant times. The board refreshes every 30 seconds while the page is visible. Timers use the server time offset from the summary. It uses `live-api.ts` in production and `demo-api.ts` (in memory) in demo mode.
+`pages/ModuleListPage.vue` shows the caller's running timer at the top, a room grid by floor (running timers and the last cleaning time), a room dialog with three start buttons and recent times for that room, and a history tab with average and longest time per kind of cleaning and per attendant. The list refreshes every 30 seconds while visible. It uses `live-api.ts` in production and `demo-api.ts` (in memory) in demo mode.
 
 ## Not implemented
 
-PMS integration (check-in and check-out are marked by hand), shift assignments, reports to Engineering, time targets and notifications are out of scope for this version. The manifest declares `housekeeping.room-ready.v1`, but no event delivery exists.
+Room status, inspections, PMS integration, shift assignments, time targets and exports are out of scope. The manifest declares `housekeeping.room-cleaned.v1`, but no event delivery exists.

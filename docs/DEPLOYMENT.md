@@ -236,3 +236,7 @@ Migration `202611040010_sales_crm.sql` adds `sales-crm` to the module and grant 
 ## Housekeeping release — 4 November 2026
 
 Migration `202611040011_housekeeping.sql` adds the `housekeeping` department to every hotel, adds `housekeeping` to the module and grant allowlists, creates `housekeeping_rooms`, `housekeeping_tasks` and append-only `housekeeping_inspections`, the scoped room, task, inspection, history and summary RPCs, and registers the module as installed and enabled. Task times use the database clock. No memberships or grants are created; a developer adds Housekeeping memberships and levels on the Users page, and a supervisor imports the room list. Apply it with `infra/apply-operations-modules.sh`.
+
+## Housekeeping timer release — 4 November 2026
+
+Migration `202611040012_housekeeping_timer.sql` narrows Housekeeping to timing each room cleaning. It drops room status, inspections, declined service and task notes, keeps the task types check-out (`departure`), make-up room and other, and replaces the task RPCs with `housekeeping_task_start(hotel, room, type)` and `housekeeping_task_update(hotel, task, action)`. It stops without changes if inspections or the removed task types hold data. Apply it with `infra/apply-operations-modules.sh`.

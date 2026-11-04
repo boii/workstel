@@ -5,19 +5,16 @@ import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
-import { ModuleRequestError } from '../../../core/module-rpc';
 import { useShortcuts } from '../../../core/use-shortcuts';
 import { focusFieldInput } from '../../../core/focus-field';
 import type { FocusableField } from '../../../core/focus-field';
 import ImportRooms from '../components/ImportRooms.vue';
-import RoomDialog from '../components/RoomDialog.vue';
 import RoomForm from '../components/RoomForm.vue';
+import RoomTimer from '../components/RoomTimer.vue';
 import {
   errorMessage,
   formatTime,
   shortName,
-  statusCodeKeys,
-  statusKeys,
   taskIcons,
   taskKeys,
   taskStatusKeys,
@@ -31,9 +28,9 @@ import type {
   CleaningTask,
   HousekeepingSummary,
   Room,
-  RoomAction,
   RoomInput,
-  RoomStatus,
+  TaskAction,
+  TaskType,
 } from '../types';
 import { elapsedSeconds, formatDuration, hotelToday } from '../validation';
 import '../styles.css';
@@ -66,24 +63,22 @@ const can = (departmentId: string, flag: 'canWrite' | 'canManage') =>
 const managedDepartments = computed(() => hotelScope.value.filter((row) => row.canManage));
 const canManageAny = computed(() => managedDepartments.value.length > 0);
 
-type Tab = 'board' | 'history';
-type Filter = RoomStatus | 'in-progress' | null;
-const tab = ref<Tab>('board');
+const tab = ref<'rooms' | 'history'>('rooms');
 const search = ref('');
 const floor = ref<string | null>(null);
 const departmentId = ref<string | null>(null);
-const filter = ref<Filter>(null);
 const showArchived = ref(false);
 
 const rooms = ref<Room[]>([]);
-const summary = ref<HousekeepingSummary | null>(null);
 const loading = ref(true);
 const failure = ref('');
 const notice = ref('');
 const offset = ref(0);
 const now = useServerClock(() => offset.value);
 const selected = ref<Room | null>(null);
-const dialogOpen = ref(false);
+const timerOpen = ref(false);
+const formOpen = ref(false);
+const importOpen = ref(false);
 let controller: AbortController | null = null;
 let poll: number | undefined;
 
@@ -94,15 +89,12 @@ async function load(quiet = false) {
   const signal = controller.signal;
   if (!quiet) loading.value = true;
   try {
-    const [list, figures] = await Promise.all([
-      api.listRooms(hotelId.value, departmentId.value, showArchived.value, signal),
-      api.summary(hotelId.value, departmentId.value, null, signal),
-    ]);
-    rooms.value = list;
-    summary.value = figures;
-    offset.value = Date.parse(figures.serverNow) - Date.now();
+    const list = await api.listRooms(hotelId.value, departmentId.value, showArchived.value, signal);
+    rooms.value = list.rooms;
+    offset.value = Date.parse(list.serverNow) - Date.now();
     failure.value = '';
-    if (selected.value) selected.value = list.find((r) => r.id === selected.value!.id) ?? null;
+    if (selected.value)
+      selected.value = list.rooms.find((r) => r.id === selected.value!.id) ?? null;
   } catch (error) {
     if (!signal.aborted && !quiet) failure.value = errorMessage(messages.value, error);
   } finally {
@@ -111,10 +103,11 @@ async function load(quiet = false) {
 }
 watch([departmentId, showArchived], () => void load());
 watch(hotelId, () => void load(), { immediate: true });
-// The board refreshes every 30 seconds while visible so supervisors see live progress.
+// The list refreshes every 30 seconds while visible so supervisors see who is cleaning.
 onMounted(() => {
   poll = window.setInterval(() => {
-    if (document.visibilityState === 'visible' && !busyDialog.value) void load(true);
+    if (document.visibilityState === 'visible' && !formOpen.value && !importOpen.value)
+      void load(true);
   }, 30000);
 });
 onBeforeUnmount(() => {
@@ -128,142 +121,79 @@ const floors = computed(() =>
     a.localeCompare(b, undefined, { numeric: true }),
   ),
 );
-const visibleRooms = computed(() => {
-  const text = search.value?.trim().toUpperCase() ?? '';
-  return rooms.value.filter(
-    (r) =>
-      (!text || r.number.includes(text)) &&
-      (floor.value === null || r.floor === floor.value) &&
-      (filter.value === null ||
-        (filter.value === 'in-progress' ? !!r.openTask : r.status === filter.value)),
-  );
-});
 const groups = computed(() => {
+  const text = search.value?.trim().toUpperCase() ?? '';
   const map = new Map<string, Room[]>();
-  for (const room of visibleRooms.value)
-    map.set(room.floor, [...(map.get(room.floor) ?? []), room]);
+  for (const room of rooms.value)
+    if (
+      (!text || room.number.includes(text)) &&
+      (floor.value === null || room.floor === floor.value)
+    )
+      map.set(room.floor, [...(map.get(room.floor) ?? []), room]);
   return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }));
 });
-const myTask = computed(() => rooms.value.find((r) => r.openTask?.mine) ?? null);
-const hasFilters = computed(
-  () => !!search.value || floor.value !== null || filter.value !== null || !!departmentId.value,
-);
+const visibleCount = computed(() => groups.value.reduce((sum, [, list]) => sum + list.length, 0));
+const myRoom = computed(() => rooms.value.find((r) => r.openTask?.mine) ?? null);
+const hasFilters = computed(() => !!search.value || floor.value !== null || !!departmentId.value);
 function resetFilters() {
   search.value = '';
   floor.value = null;
-  filter.value = null;
   departmentId.value = null;
 }
-const tiles = computed(() => {
-  const s = summary.value?.statuses;
-  if (!s) return [];
-  return (
-    [
-      ['vacant-ready', 'statusVacantReady'],
-      ['vacant-clean', 'statusVacantClean'],
-      ['vacant-dirty', 'statusVacantDirty'],
-      ['in-progress', 'statusInProgress'],
-      ['occupied', 'statusOccupied'],
-      ['out-of-order', 'statusOutOfOrder'],
-    ] as const
-  ).map(([key, label]) => ({ key, label: messages.value[label], count: s[key] }));
-});
 
-// Room dialog and actions
-const refreshKey = ref(0);
-const busyDialog = computed(() => dialogOpen.value || formOpen.value || importOpen.value);
 function openRoom(room: Room) {
   selected.value = room;
-  dialogOpen.value = true;
+  timerOpen.value = true;
 }
 const loadRoomTasks = (roomId: string, signal: AbortSignal) =>
   api.listTasks(
     { hotelId: hotelId.value, departmentId: null, day: null, roomId, after: null, limit: 10 },
     signal,
   );
-async function run(action: RoomAction) {
-  const room = selected.value;
-  if (!room) return;
+async function startTimer(room: Room, type: TaskType) {
   try {
-    switch (action.kind) {
-      case 'start':
-        await api.startTask(hotelId.value, room, action.type);
-        notice.value = messages.value.taskStarted;
-        break;
-      case 'decline':
-        await api.startTask(hotelId.value, room, 'make-up', action.outcome);
-        notice.value = messages.value.declinedDone;
-        break;
-      case 'task':
-        await api.updateTask(
-          hotelId.value,
-          action.task,
-          action.action,
-          action.outcome,
-          action.notes,
-        );
-        notice.value =
-          action.action === 'pause'
-            ? messages.value.taskPausedDone
-            : action.action === 'resume'
-              ? messages.value.taskResumed
-              : action.action === 'cancel'
-                ? messages.value.taskCancelledDone
-                : action.outcome === 'done'
-                  ? messages.value.taskFinished
-                  : messages.value.declinedDone;
-        break;
-      case 'status':
-        await api.setStatus(hotelId.value, room, action.status, action.note);
-        notice.value = messages.value.statusDone;
-        break;
-      case 'inspect':
-        await api.inspect(hotelId.value, room, action.result, action.reason);
-        notice.value = messages.value.inspected;
-        break;
-      case 'archive':
-        await api.setRoomArchived(hotelId.value, room, action.archived);
-        notice.value = action.archived ? messages.value.archivedDone : messages.value.restoredDone;
-        break;
-    }
-  } catch (error) {
-    // Someone else changed the room: show the current board before reporting the error.
-    if (error instanceof ModuleRequestError && error.code !== 'ACCESS_DENIED') await load(true);
-    throw error;
+    await api.startTask(hotelId.value, room, type);
+    notice.value = messages.value.started;
+  } finally {
+    await load(true);
   }
-  await load(true);
-  refreshKey.value++;
-  if (action.kind === 'archive' && action.archived && !showArchived.value) dialogOpen.value = false;
 }
-async function myTaskAction(action: 'pause' | 'resume' | 'finish') {
-  const room = myTask.value;
-  if (!room?.openTask) return;
+async function updateTimer(task: CleaningTask, action: TaskAction) {
+  // The server measures the final time; this only shows the time seen at the moment of finishing.
+  const seen = elapsedSeconds(task, now.value);
   try {
-    await api.updateTask(hotelId.value, room.openTask, action, 'done');
+    await api.updateTask(hotelId.value, task, action);
     notice.value =
-      action === 'pause'
-        ? messages.value.taskPausedDone
-        : action === 'resume'
-          ? messages.value.taskResumed
-          : messages.value.taskFinished;
+      action === 'finish'
+        ? messages.value.finished.replace('{time}', formatDuration(seen))
+        : action === 'pause'
+          ? messages.value.pausedDone
+          : action === 'resume'
+            ? messages.value.resumed
+            : messages.value.cancelledDone;
+  } finally {
+    await load(true);
+    if (tab.value === 'history') void loadHistory();
+  }
+}
+async function quickAction(action: TaskAction) {
+  if (!myRoom.value?.openTask) return;
+  try {
+    await updateTimer(myRoom.value.openTask, action);
   } catch (error) {
     notice.value = errorMessage(messages.value, error);
   }
-  await load(true);
 }
 
-// Room master
-const formOpen = ref(false);
-const importOpen = ref(false);
+// Room list (manage)
 const editing = ref<Room | null>(null);
 function openForm(room: Room | null = null) {
   editing.value = room;
   formOpen.value = true;
 }
-const masterDepartment = () =>
-  editing.value?.departmentId ?? managedDepartments.value[0].departmentId;
 async function saveRoom(input: RoomInput) {
-  await api.saveRoom(hotelId.value, masterDepartment(), input, editing.value ?? undefined);
+  const department = editing.value?.departmentId ?? managedDepartments.value[0].departmentId;
+  await api.saveRoom(hotelId.value, department, input, editing.value ?? undefined);
   notice.value = messages.value.saved;
   await load(true);
 }
@@ -273,11 +203,23 @@ async function imported(text: string) {
   notice.value = text;
   await load(true);
 }
+async function toggleArchive() {
+  const room = selected.value;
+  if (!room) return;
+  try {
+    await api.setRoomArchived(hotelId.value, room, !room.archived);
+    notice.value = room.archived ? messages.value.restoredDone : messages.value.archivedDone;
+    if (!room.archived && !showArchived.value) timerOpen.value = false;
+  } catch (error) {
+    notice.value = errorMessage(messages.value, error);
+  }
+  await load(true);
+}
 
 // History
 const day = ref(hotelToday());
 const history = ref<CleaningTask[]>([]);
-const historySummary = ref<HousekeepingSummary | null>(null);
+const summary = ref<HousekeepingSummary | null>(null);
 const historyCursor = ref<string | null>(null);
 const historyLoading = ref(false);
 const historyFailure = ref('');
@@ -290,24 +232,22 @@ async function loadHistory(after: string | null = null) {
   historyLoading.value = true;
   historyFailure.value = '';
   try {
+    const query = {
+      hotelId: hotelId.value,
+      departmentId: departmentId.value,
+      day: day.value,
+      roomId: null,
+      after,
+    };
     const [page, figures] = await Promise.all([
-      api.listTasks(
-        {
-          hotelId: hotelId.value,
-          departmentId: departmentId.value,
-          day: day.value,
-          roomId: null,
-          after,
-        },
-        signal,
-      ),
+      api.listTasks(query, signal),
       after
-        ? Promise.resolve(historySummary.value)
+        ? Promise.resolve(summary.value)
         : api.summary(hotelId.value, departmentId.value, day.value, signal),
     ]);
     history.value = after ? [...history.value, ...page.data] : page.data;
     historyCursor.value = page.nextCursor;
-    historySummary.value = figures;
+    summary.value = figures;
   } catch (error) {
     if (!signal.aborted) historyFailure.value = errorMessage(messages.value, error);
   } finally {
@@ -317,10 +257,10 @@ async function loadHistory(after: string | null = null) {
 watch([tab, day, departmentId], () => {
   if (tab.value === 'history') void loadHistory();
 });
-const typeRows = computed(() =>
+const typeTiles = computed(() =>
   taskTypes
-    .map((type) => ({ type, totals: historySummary.value?.taskTypes[type] }))
-    .filter((row) => row.totals && (row.totals.done || row.totals.declined)),
+    .map((type) => ({ type, totals: summary.value?.taskTypes[type] }))
+    .filter((row) => row.totals?.done),
 );
 
 const searchField = ref<FocusableField | null>(null);
@@ -359,7 +299,7 @@ const departmentItems = computed(() => [
       :description="rooms.length + ' ' + messages.rooms"
       :loading="loading"
       :error="failure"
-      :empty="tab === 'board' && !visibleRooms.length"
+      :empty="tab === 'rooms' && !visibleCount"
       :empty-title="hasFilters ? messages.noResults : messages.emptyTitle"
       :empty-description="
         hasFilters
@@ -406,72 +346,44 @@ const departmentItems = computed(() => [
           >{{ messages.demoNotice }}</v-alert
         >
         <div
-          v-if="myTask?.openTask"
-          class="hk-my-task"
+          v-if="myRoom?.openTask"
+          class="hk-mine"
           role="status"
         >
-          <div>
+          <div class="hk-mine-text">
             <small>{{ messages.myTask }}</small>
             <strong
-              >{{ messages.room }} {{ myTask.number }} ·
-              {{ messages[taskKeys[myTask.openTask.type]] }}</strong
-            >
-            <span class="hk-my-timer"
-              >{{ formatDuration(elapsedSeconds(myTask.openTask, now)) }}
-              <small v-if="myTask.openTask.status === 'paused'">{{
-                messages.taskPaused
-              }}</small></span
+              >{{ messages.room }} {{ myRoom.number }} ·
+              {{ messages[taskKeys[myRoom.openTask.type]] }}</strong
             >
           </div>
-          <div class="hk-button-row">
+          <span
+            class="hk-mine-time"
+            :class="{ 'hk-mine-time--paused': myRoom.openTask.status === 'paused' }"
+            >{{ formatDuration(elapsedSeconds(myRoom.openTask, now)) }}</span
+          >
+          <div class="hk-mine-actions">
             <v-btn
               color="primary"
               prepend-icon="mdi-check"
-              @click="myTaskAction('finish')"
+              @click="quickAction('finish')"
               >{{ messages.finish }}</v-btn
             ><v-btn
-              v-if="myTask.openTask.status === 'active'"
+              v-if="myRoom.openTask.status === 'active'"
               variant="tonal"
               color="primary"
               prepend-icon="mdi-pause"
-              @click="myTaskAction('pause')"
+              @click="quickAction('pause')"
               >{{ messages.pause }}</v-btn
             ><v-btn
               v-else
               variant="tonal"
               color="primary"
               prepend-icon="mdi-play"
-              @click="myTaskAction('resume')"
+              @click="quickAction('resume')"
               >{{ messages.resume }}</v-btn
-            ><v-btn
-              variant="text"
-              color="primary"
-              @click="openRoom(myTask)"
-              >{{ messages.moreActions }}</v-btn
             >
           </div>
-        </div>
-        <div
-          v-if="tiles.length"
-          class="hk-tiles"
-          role="group"
-          :aria-label="messages.roomActions"
-        >
-          <button
-            v-for="tile in tiles"
-            :key="tile.key"
-            type="button"
-            class="hk-tile"
-            :class="'hk-tile--' + tile.key"
-            :aria-pressed="filter === tile.key"
-            @click="
-              filter = filter === tile.key ? null : tile.key;
-              tab = 'board';
-            "
-          >
-            <strong>{{ tile.count }}</strong>
-            <span>{{ tile.label }}</span>
-          </button>
         </div>
         <v-tabs
           v-model="tab"
@@ -480,9 +392,9 @@ const departmentItems = computed(() => [
           class="hk-tabs"
         >
           <v-tab
-            value="board"
-            prepend-icon="mdi-view-grid-outline"
-            >{{ messages.tabBoard }}</v-tab
+            value="rooms"
+            prepend-icon="mdi-door"
+            >{{ messages.tabRooms }}</v-tab
           >
           <v-tab
             value="history"
@@ -491,7 +403,7 @@ const departmentItems = computed(() => [
           >
         </v-tabs>
         <div
-          v-if="tab === 'board'"
+          v-if="tab === 'rooms'"
           class="hk-toolbar"
         >
           <v-text-field
@@ -506,6 +418,7 @@ const departmentItems = computed(() => [
             maxlength="10"
           />
           <v-select
+            v-if="floors.length > 1"
             v-model="floor"
             :items="floorItems"
             :label="messages.floor"
@@ -547,68 +460,58 @@ const departmentItems = computed(() => [
         >
       </template>
 
-      <div v-if="tab === 'board'">
+      <div v-if="tab === 'rooms'">
         <section
           v-for="[floorName, list] in groups"
           :key="floorName"
           class="hk-floor"
-          :aria-label="messages.floor + ' ' + (floorName || '—')"
         >
-          <h2 v-if="floors.length > 1 || floorName">{{ messages.floor }} {{ floorName || '—' }}</h2>
+          <h2 v-if="floors.length > 1">{{ messages.floor }} {{ floorName || '—' }}</h2>
           <div class="hk-grid">
             <button
               v-for="room in list"
               :key="room.id"
               type="button"
               class="hk-card"
-              :class="[
-                'hk-card--' + room.status,
-                { 'hk-card--busy': !!room.openTask, 'hk-card--archived': room.archived },
-              ]"
+              :class="{
+                'hk-card--busy': !!room.openTask,
+                'hk-card--paused': room.openTask?.status === 'paused',
+                'hk-card--archived': room.archived,
+              }"
               :aria-label="
                 messages.room +
                 ' ' +
                 room.number +
-                ', ' +
-                messages[statusKeys[room.status]] +
-                (room.openTask ? ', ' + messages[taskKeys[room.openTask.type]] : '')
+                (room.openTask
+                  ? ', ' +
+                    messages[taskKeys[room.openTask.type]] +
+                    ' ' +
+                    formatDuration(elapsedSeconds(room.openTask, now))
+                  : '')
               "
               @click="openRoom(room)"
             >
-              <span class="hk-card-head">
-                <strong>{{ room.number }}</strong>
-                <span
-                  class="hk-status"
-                  :class="'hk-status--' + room.status"
-                  >{{ messages[statusCodeKeys[room.status]] }}</span
+              <strong class="hk-card-number">{{ room.number }}</strong>
+              <template v-if="room.openTask">
+                <span class="hk-card-time"
+                  ><v-icon
+                    :icon="
+                      room.openTask.status === 'paused'
+                        ? 'mdi-pause-circle-outline'
+                        : taskIcons[room.openTask.type]
+                    "
+                    size="14"
+                  />{{ formatDuration(elapsedSeconds(room.openTask, now)) }}</span
                 >
-              </span>
-              <small class="hk-card-type">{{
-                room.roomType || messages[statusKeys[room.status]]
-              }}</small>
-              <span
-                v-if="room.openTask"
-                class="hk-card-task"
-                ><v-icon
-                  :icon="
-                    room.openTask.status === 'paused'
-                      ? 'mdi-pause-circle-outline'
-                      : taskIcons[room.openTask.type]
-                  "
-                  size="14"
-                />{{ formatDuration(elapsedSeconds(room.openTask, now)) }} ·
-                {{ shortName(room.openTask.attendantEmail) }}</span
-              >
-              <small
-                v-else-if="room.statusNote"
-                class="hk-card-note"
-                >{{ room.statusNote }}</small
-              >
-              <small
-                v-else
-                class="hk-card-type"
-                >{{ messages[statusKeys[room.status]] }}</small
-              >
+                <small>{{ shortName(room.openTask.attendantEmail) }}</small>
+              </template>
+              <template v-else-if="room.lastDone">
+                <span class="hk-card-last"
+                  >{{ messages.last }} {{ formatDuration(room.lastDone.durationSeconds) }}</span
+                >
+                <small>{{ messages[taskKeys[room.lastDone.type]] }}</small>
+              </template>
+              <small v-else>{{ room.roomType || messages.notCleaned }}</small>
             </button>
           </div>
         </section>
@@ -633,112 +536,69 @@ const departmentItems = computed(() => [
         />
         <template v-else>
           <div
-            v-if="historySummary"
-            class="hk-history-summary"
+            v-if="summary && summary.totals.done"
+            class="hk-stats"
           >
-            <section class="hk-panel">
-              <h2>{{ messages.byType }}</h2>
-              <p
-                v-if="!typeRows.length"
-                class="hk-muted"
+            <div class="hk-stat">
+              <span>{{ messages.roomsCleaned }}</span>
+              <strong>{{ summary.totals.rooms }}</strong>
+              <small>{{ messages.average }} {{ formatDuration(summary.totals.avgSeconds) }}</small>
+            </div>
+            <div
+              v-for="tile in typeTiles"
+              :key="tile.type"
+              class="hk-stat"
+            >
+              <span>{{ messages[taskKeys[tile.type]] }} · {{ messages.average }}</span>
+              <strong>{{ formatDuration(tile.totals!.avgSeconds) }}</strong>
+              <small
+                >{{ tile.totals!.done }} {{ messages.rooms }} · {{ messages.longest }}
+                {{ formatDuration(tile.totals!.maxSeconds) }}</small
               >
-                {{ messages.noHistory }}
-              </p>
-              <table
-                v-else
-                class="hk-table"
-              >
-                <thead>
-                  <tr>
-                    <th scope="col">{{ messages.taskColumn }}</th>
-                    <th
-                      scope="col"
-                      class="hk-number"
-                    >
-                      {{ messages.cleaned }}
-                    </th>
-                    <th
-                      scope="col"
-                      class="hk-number"
-                    >
-                      {{ messages.avgTime }}
-                    </th>
-                    <th
-                      scope="col"
-                      class="hk-number"
-                    >
-                      {{ messages.declined }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="row in typeRows"
-                    :key="row.type"
-                  >
-                    <td>{{ messages[taskKeys[row.type]] }}</td>
-                    <td class="hk-number">{{ row.totals!.done }}</td>
-                    <td class="hk-number">
-                      {{ row.totals!.done ? formatDuration(row.totals!.avgSeconds) : '—' }}
-                    </td>
-                    <td class="hk-number">{{ row.totals!.declined }}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <p class="hk-muted mt-2">
-                {{ messages.inspectionsLabel }}: {{ historySummary.inspections.pass }}
-                {{ messages.passed }} · {{ historySummary.inspections.redo }} {{ messages.redone }}
-              </p>
-            </section>
-            <section class="hk-panel">
-              <h2>{{ messages.attendants }}</h2>
-              <p
-                v-if="!historySummary.attendants.length"
-                class="hk-muted"
-              >
-                {{ messages.noHistory }}
-              </p>
-              <table
-                v-else
-                class="hk-table"
-              >
-                <thead>
-                  <tr>
-                    <th scope="col">{{ messages.attendant }}</th>
-                    <th
-                      scope="col"
-                      class="hk-number"
-                    >
-                      {{ messages.cleaned }}
-                    </th>
-                    <th
-                      scope="col"
-                      class="hk-number"
-                    >
-                      {{ messages.avgTime }}
-                    </th>
-                    <th
-                      scope="col"
-                      class="hk-number"
-                    >
-                      {{ messages.totalTime }}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="person in historySummary.attendants"
-                    :key="person.email"
-                  >
-                    <td :title="person.email">{{ shortName(person.email) }}</td>
-                    <td class="hk-number">{{ person.done }}</td>
-                    <td class="hk-number">{{ formatDuration(person.avgSeconds) }}</td>
-                    <td class="hk-number">{{ formatDuration(person.totalSeconds) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </section>
+            </div>
           </div>
+          <section
+            v-if="summary && summary.attendants.length"
+            class="hk-panel"
+          >
+            <h2>{{ messages.attendants }}</h2>
+            <table class="hk-table">
+              <thead>
+                <tr>
+                  <th scope="col">{{ messages.attendant }}</th>
+                  <th
+                    scope="col"
+                    class="hk-number"
+                  >
+                    {{ messages.cleaned }}
+                  </th>
+                  <th
+                    scope="col"
+                    class="hk-number"
+                  >
+                    {{ messages.average }}
+                  </th>
+                  <th
+                    scope="col"
+                    class="hk-number"
+                  >
+                    {{ messages.totalTime }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="person in summary.attendants"
+                  :key="person.email"
+                >
+                  <td :title="person.email">{{ shortName(person.email) }}</td>
+                  <td class="hk-number">{{ person.done }}</td>
+                  <td class="hk-number">{{ formatDuration(person.avgSeconds) }}</td>
+                  <td class="hk-number">{{ formatDuration(person.totalSeconds) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
           <p
             v-if="!history.length"
             class="hk-muted"
@@ -752,6 +612,7 @@ const departmentItems = computed(() => [
             <li
               v-for="entry in history"
               :key="entry.id"
+              :class="{ 'hk-history--cancelled': entry.status === 'cancelled' }"
             >
               <strong class="hk-history-room">{{ entry.roomNumber }}</strong>
               <div>
@@ -768,19 +629,12 @@ const departmentItems = computed(() => [
                   >
                   · {{ shortName(entry.attendantEmail) }}</small
                 >
-                <small v-if="entry.notes">{{ entry.notes }}</small>
               </div>
-              <span
-                class="hk-history-result"
-                :class="'hk-history-result--' + entry.status"
-                >{{
-                  entry.status === 'done' && entry.durationSeconds !== null
-                    ? formatDuration(entry.durationSeconds)
-                    : entry.status === 'active' || entry.status === 'paused'
-                      ? formatDuration(elapsedSeconds(entry, now))
-                      : messages[taskStatusKeys[entry.status]]
-                }}</span
-              >
+              <span class="hk-history-time">{{
+                entry.status === 'cancelled'
+                  ? messages[taskStatusKeys[entry.status]]
+                  : formatDuration(elapsedSeconds(entry, now))
+              }}</span>
             </li>
           </ul>
           <v-btn
@@ -796,16 +650,17 @@ const departmentItems = computed(() => [
       </div>
     </ModulePage>
 
-    <RoomDialog
-      v-model="dialogOpen"
+    <RoomTimer
+      v-model="timerOpen"
       :room="selected"
       :can-write="!!selected && can(selected.departmentId, 'canWrite')"
       :can-manage="!!selected && can(selected.departmentId, 'canManage')"
       :now="now"
-      :refresh-key="refreshKey"
       :load-tasks="loadRoomTasks"
-      :run="run"
+      :start="startTimer"
+      :update="updateTimer"
       @edit="openForm(selected)"
+      @archive="toggleArchive"
     />
     <RoomForm
       v-model="formOpen"

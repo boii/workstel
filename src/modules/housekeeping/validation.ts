@@ -1,4 +1,4 @@
-import type { CleaningTask, RoomInput, RoomStatus, TaskType } from './types';
+import type { CleaningTask, RoomInput } from './types';
 
 export type ValidationError = 'required' | 'tooLong' | 'invalidRoomNumber' | 'invalidFloor';
 
@@ -27,21 +27,6 @@ export function parseRoomLines(text: string) {
     else rows.push({ ...row, roomNumber: roomNumber.toUpperCase() });
   });
   return { rows, invalid };
-}
-
-/** Which task types can start from a room status, as enforced by the server. */
-export function allowedTasks(status: RoomStatus): TaskType[] {
-  switch (status) {
-    case 'vacant-dirty':
-      return ['departure', 'deep-clean'];
-    case 'vacant-clean':
-    case 'vacant-ready':
-      return ['pre-arrival', 'deep-clean'];
-    case 'occupied':
-      return ['make-up', 'turndown'];
-    default:
-      return [];
-  }
 }
 
 /** Working seconds of a task at a moment: elapsed time minus pauses. */
