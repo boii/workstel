@@ -611,7 +611,29 @@ function logout() {
                   :value="c"
                   >{{ translate(c) }}</v-btn
                 ></v-btn-toggle
-              >
+              ><v-menu location="bottom end">
+                <template #activator="{ props: menuProps }">
+                  <v-btn
+                    v-bind="menuProps"
+                    class="mobile-category-filter"
+                    icon="mdi-filter-variant"
+                    variant="tonal"
+                    :color="category !== 'All modules' ? 'primary' : undefined"
+                    :aria-label="t('filterModules')"
+                    :aria-pressed="category !== 'All modules'"
+                    :title="t('filterModules')"
+                  />
+                </template>
+                <v-list density="compact">
+                  <v-list-item
+                    v-for="c in ['All modules', 'Operations', 'Commercial', 'Administration']"
+                    :key="c"
+                    :active="category === c"
+                    @click="category = c"
+                    >{{ translate(c) }}</v-list-item
+                  >
+                </v-list>
+              </v-menu>
             </div>
             <div class="module-grid">
               <v-card
