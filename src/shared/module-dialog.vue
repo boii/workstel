@@ -74,14 +74,14 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   min-width: 0;
 }
 .module-dialog-title h2 {
-  font-size: 20px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
 .module-dialog-title p {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
@@ -90,7 +90,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  font-size: 13px !important;
+  font-size: var(--workstel-font-sm) !important;
   line-height: 1.5 !important;
 }
 .module-dialog-actions {

@@ -7,7 +7,7 @@
   padding-inline: var(--workstel-page-gutter);
 }
 .page-heading h1 {
-  font-size: clamp(24px, 2.5vw, 30px);
+  font-size: var(--workstel-font-xl);
   overflow-wrap: anywhere;
 }
 .module-grid {

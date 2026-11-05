@@ -58,7 +58,7 @@ function close() {
 </template>
 <style scoped>
 .temp-hint {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }
@@ -71,7 +71,7 @@ function close() {
   padding: 10px 6px 10px 14px;
   border: 1px solid var(--workstel-border);
   border-radius: 6px;
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .temp-box code {
   font:

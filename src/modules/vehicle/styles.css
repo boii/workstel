@@ -4,13 +4,13 @@
   gap: 7px;
   border: 0;
   background: transparent;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   margin-bottom: 10px;
   padding: 4px 0;
 }
 .vehicle-notice {
-  font-size: 11px !important;
+  font-size: var(--workstel-font-xs) !important;
   line-height: 1.5;
   margin-bottom: 12px;
 }
@@ -46,7 +46,7 @@
   border-top: 1px solid var(--workstel-border);
 }
 .vehicle-row--archived {
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .vehicle-identity {
   display: flex;
@@ -66,42 +66,42 @@
   min-width: 0;
 }
 .vehicle-identity strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .vehicle-plate {
   font:
-    12px 'Noto Sans',
+    var(--workstel-font-sm) 'Noto Sans',
     sans-serif;
   letter-spacing: 0.5px;
 }
 .vehicle-identity small,
 .vehicle-last small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .vehicle-last {
   align-items: flex-start;
 }
 .vehicle-time {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 .vehicle-result {
   display: inline-block;
   padding: 1px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }
 .vehicle-result--pass {
-  background: #e2f0ec;
-  color: #1f5f4f;
+  background: var(--workstel-success-bg);
+  color: var(--workstel-success-text);
 }
 .vehicle-result--attention {
-  background: #fdf3e7;
-  color: #7a4a10;
+  background: var(--workstel-warning-bg);
+  color: var(--workstel-warning-text);
 }
 .vehicle-actions {
   display: flex;

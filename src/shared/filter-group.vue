@@ -99,7 +99,7 @@ const label = computed(() =>
   margin-bottom: 6px;
 }
 .filter-group-panel h2 {
-  font-size: 16px;
+  font-size: var(--workstel-font-md);
   font-weight: 500;
 }
 .filter-group-fields {

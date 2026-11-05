@@ -169,22 +169,22 @@ function changedLabel(state: ModuleState) {
   gap: 8px;
 }
 .switches-heading h2 {
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 600;
   line-height: 1.4;
 }
 .switches-badge {
   padding: 1px 8px;
   border-radius: 4px;
-  background: #edf1f4;
+  background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }
 .switches-hint {
   margin-top: 6px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }
@@ -213,25 +213,25 @@ function changedLabel(state: ModuleState) {
   min-width: 0;
 }
 .switches-text strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .switches-text small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
 .switches-state {
   padding: 1px 8px;
   border-radius: 4px;
-  background: #e2f0ec;
-  color: #1f5f4f;
-  font-size: 11px;
+  background: var(--workstel-success-bg);
+  color: var(--workstel-success-text);
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }
 .switches-state--off {
-  background: #edf1f4;
+  background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
 }
 .switches-list .v-switch {
@@ -241,12 +241,12 @@ function changedLabel(state: ModuleState) {
   padding: 22px;
 }
 .switches-confirm h2 {
-  font-size: 18px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
 }
 .switches-confirm p {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }

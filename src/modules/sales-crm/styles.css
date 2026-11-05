@@ -4,7 +4,7 @@
   gap: 7px;
   border: 0;
   background: transparent;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   margin-bottom: 10px;
   padding: 4px 0;
@@ -18,7 +18,7 @@
   white-space: nowrap;
 }
 .sales-notice {
-  font-size: 11px !important;
+  font-size: var(--workstel-font-xs) !important;
   line-height: 1.5;
   margin-bottom: 12px;
 }
@@ -42,17 +42,17 @@
   color: inherit;
 }
 .sales-tile > span {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .sales-tile > strong {
-  font-size: 20px;
+  font-size: var(--workstel-font-lg);
   font-weight: 600;
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
 .sales-tile > small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .sales-tile--action {
@@ -70,7 +70,7 @@
   box-shadow: inset 0 0 0 1px var(--workstel-primary-text);
 }
 .sales-tile--alert > strong {
-  color: #9b2c2c;
+  color: var(--workstel-danger-text);
 }
 .sales-pipeline-bar {
   display: flex;
@@ -91,7 +91,7 @@
   background: #0096c7;
 }
 .sales-stage-fill--negotiation {
-  background: #b7791f;
+  background: var(--workstel-info-text);
 }
 .sales-tabs {
   margin-bottom: 12px;
@@ -129,7 +129,7 @@
   border-top: 1px solid var(--workstel-border);
 }
 .sales-row--archived {
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .sales-identity {
   display: flex;
@@ -145,12 +145,12 @@
   min-width: 0;
 }
 .sales-identity strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .sales-identity small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .sales-type-icon {
@@ -163,7 +163,7 @@
   padding: 0;
   background: transparent;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-primary-text);
   text-align: left;
   overflow-wrap: anywhere;
@@ -173,7 +173,7 @@
   text-decoration: underline;
 }
 .sales-contact-line {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: rgba(0, 0, 0, 0.7);
   overflow-wrap: anywhere;
 }
@@ -185,7 +185,7 @@
   margin-right: 4px;
   padding: 0 6px;
   border-radius: 4px;
-  background: #edf1f4;
+  background: var(--workstel-surface-subtle);
   font-weight: 700;
 }
 .sales-stage {
@@ -194,30 +194,33 @@
   margin-top: 1px;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   text-align: center;
   white-space: nowrap;
 }
 .sales-stage--lead {
-  background: #edf1f4;
-  color: #3d4d59;
+  background: var(--workstel-neutral-bg);
+  color: var(--workstel-neutral-text);
 }
 .sales-stage--proposal {
-  background: #e3f4fa;
-  color: #005a75;
+  background: var(--workstel-info-bg);
+  color: var(--workstel-info-text);
 }
+/* Open stages read as progress (neutral, then info), not as warnings. */
 .sales-stage--negotiation {
-  background: #fdf3e1;
-  color: #7a4f0e;
+  background: var(--workstel-info-bg);
+  color: var(--workstel-info-text);
+  box-shadow: inset 0 0 0 1px var(--workstel-info-text);
 }
 .sales-stage--won {
-  background: #e3f3ec;
-  color: #1f5f4f;
+  background: var(--workstel-success-bg);
+  color: var(--workstel-success-text);
 }
+/* A lost deal is closed, not an error. */
 .sales-stage--lost {
-  background: #fbeaea;
-  color: #8a2424;
+  background: var(--workstel-neutral-bg);
+  color: var(--workstel-text-secondary);
 }
 .sales-actions {
   display: flex;
@@ -229,16 +232,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   white-space: nowrap;
 }
 .sales-follow-up--overdue {
-  color: #9b2c2c;
+  color: var(--workstel-danger-text);
   font-weight: 700;
 }
 .sales-follow-up--today {
-  color: #7a4f0e;
+  color: var(--workstel-warning-text);
   font-weight: 700;
 }
 /* Forms and the account detail dialog */
@@ -254,7 +257,7 @@
   margin: 20px 0 8px;
   padding-top: 14px;
   border-top: 1px solid var(--workstel-border);
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .sales-detail-section + .sales-detail-section {
@@ -263,7 +266,7 @@
   border-top: 1px solid var(--workstel-border);
 }
 .sales-detail-section h3 {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -326,7 +329,7 @@
   overflow-wrap: anywhere;
 }
 .sales-mini-list small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .sales-timeline {
@@ -352,7 +355,7 @@
 }
 .sales-timeline small {
   display: block;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .sales-timeline p {
@@ -390,7 +393,7 @@
     margin-left: auto;
   }
   .sales-tile > strong {
-    font-size: 17px;
+    font-size: var(--workstel-font-lg);
   }
 }
 @media (max-width: 680px) {

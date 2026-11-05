@@ -4,13 +4,13 @@
   gap: 7px;
   border: 0;
   background: transparent;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   margin-bottom: 10px;
   padding: 4px 0;
 }
 .bin-notice {
-  font-size: 11px !important;
+  font-size: var(--workstel-font-xs) !important;
   line-height: 1.5;
   margin-bottom: 12px;
 }
@@ -29,7 +29,7 @@
   margin-top: 4px;
 }
 .bin-low-filter .v-label {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .bin-list {
   list-style: none;
@@ -52,7 +52,7 @@
   border-top: 1px solid var(--workstel-border);
 }
 .bin-row--archived {
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .bin-identity,
 .bin-balance {
@@ -66,42 +66,42 @@
 }
 .bin-code {
   font:
-    11px 'Noto Sans',
+    var(--workstel-font-xs) 'Noto Sans',
     sans-serif;
   letter-spacing: 0.5px;
   color: var(--workstel-text-secondary);
 }
 .bin-identity strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .bin-identity small,
 .bin-balance small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
 .bin-balance strong {
   font:
-    600 14px 'Noto Sans',
+    600 var(--workstel-font-md) 'Noto Sans',
     sans-serif;
 }
 .bin-level {
   display: inline-block;
   padding: 1px 8px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }
 .bin-level--low {
-  background: #fdf3e7;
-  color: #7a4a10;
+  background: var(--workstel-warning-bg);
+  color: var(--workstel-warning-text);
 }
 .bin-level--out {
-  background: #fbeaea;
-  color: #8a2424;
+  background: var(--workstel-danger-bg);
+  color: var(--workstel-danger-text);
 }
 .bin-actions {
   display: flex;

@@ -345,14 +345,14 @@ onUnmounted(() => {
   border-top: 1px solid var(--workstel-border);
 }
 .vault-share-section h3 {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .vault-share-warning {
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  color: #7a4a10 !important;
+  color: var(--workstel-warning-text) !important;
 }
 .vault-share-warning .v-icon {
   flex-shrink: 0;
@@ -365,7 +365,7 @@ onUnmounted(() => {
 }
 .vault-share-departments :deep(.v-label),
 .vault-transfer-actions :deep(.v-label) {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .vault-transfer-actions {
   display: flex;
@@ -379,12 +379,12 @@ onUnmounted(() => {
   padding: 22px;
 }
 .vault-transfer-confirm h2 {
-  font-size: 18px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
 }
 .vault-transfer-confirm p {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;

@@ -436,7 +436,7 @@ async function confirmAction() {
   border-top: 1px solid var(--workstel-border);
 }
 .user-section h3 {
-  font-size: 14px;
+  font-size: var(--workstel-font-md);
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -452,12 +452,12 @@ async function confirmAction() {
   gap: 2px;
 }
 .user-row-text strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .user-row-text small,
 .user-note {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .user-actions {
@@ -483,7 +483,7 @@ async function confirmAction() {
   border-top: 1px solid var(--workstel-border);
 }
 .user-department--off {
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .user-department-head {
   display: flex;
@@ -493,12 +493,12 @@ async function confirmAction() {
   min-height: 40px;
 }
 .user-department-head strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .user-department-head small {
   display: block;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 400;
   color: var(--workstel-text-secondary);
 }
@@ -517,7 +517,7 @@ async function confirmAction() {
   gap: 0 12px;
 }
 .user-label {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   margin-right: 4px;
 }
@@ -527,17 +527,17 @@ async function confirmAction() {
   gap: 8px;
 }
 .user-departments :deep(.v-label) {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .user-vault-count {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .user-vault-list,
 .user-vault-result ul {
   list-style: none;
   margin: 6px 0 8px;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .user-vault-list small,
 .user-vault-result small {
@@ -554,22 +554,22 @@ async function confirmAction() {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 6px;
-  background: #f7f9fa;
-  font-size: 12px;
+  background: var(--workstel-surface-muted);
+  font-size: var(--workstel-font-sm);
 }
 .user-confirm-warning {
-  color: #7a4a10 !important;
+  color: var(--workstel-warning-text) !important;
 }
 .user-confirm {
   padding: 22px;
 }
 .user-confirm h2 {
-  font-size: 18px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
 }
 .user-confirm p {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;

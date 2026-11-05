@@ -197,7 +197,7 @@ const unit = computed(() => props.item?.unit ?? '');
   gap: 16px;
   padding: 12px 14px;
   border-radius: 6px;
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .entry-balances > div {
   display: flex;
@@ -205,12 +205,12 @@ const unit = computed(() => props.item?.unit ?? '');
   gap: 2px;
 }
 .entry-balances small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .entry-balances strong {
   font:
-    600 15px 'Noto Sans',
+    600 var(--workstel-font-md) 'Noto Sans',
     sans-serif;
 }
 .entry-balances .v-icon {
@@ -223,6 +223,6 @@ const unit = computed(() => props.item?.unit ?? '');
 .entry-types .v-btn {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 </style>

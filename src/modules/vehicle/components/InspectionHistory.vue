@@ -152,7 +152,7 @@ const issues = (entry: Inspection) =>
   gap: 8px;
 }
 .history-heading strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .history-details {
@@ -160,7 +160,7 @@ const issues = (entry: Inspection) =>
   grid-template-columns: 120px minmax(0, 1fr);
   gap: 4px 12px;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 .history-details dt {
   color: var(--workstel-text-secondary);

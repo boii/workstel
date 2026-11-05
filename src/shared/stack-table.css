@@ -46,14 +46,14 @@
     content: attr(data-label);
     display: block;
     margin-bottom: 1px;
-    font-size: 11px;
+    font-size: var(--workstel-font-xs);
     font-weight: 400;
     color: var(--workstel-text-secondary);
   }
   .stack-table-container .stack-table td.stack-table-primary {
     order: -1;
     grid-column: 1 / -1;
-    font-size: 14px;
+    font-size: var(--workstel-font-md);
     font-weight: 600;
   }
   .stack-table-container .stack-table td.stack-table-primary::before {

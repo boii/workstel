@@ -289,7 +289,7 @@ function forgetPassword() {
   margin-left: auto;
 }
 .users-count {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   margin-bottom: 8px;
 }
@@ -320,12 +320,12 @@ function forgetPassword() {
   min-width: 0;
 }
 .users-identity strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .users-identity small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .users-badges {
@@ -337,22 +337,22 @@ function forgetPassword() {
 .users-badge {
   padding: 1px 8px;
   border-radius: 4px;
-  background: #edf1f4;
+  background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }
 .users-badge--developer {
-  background: #e4eef3;
+  background: var(--workstel-info-bg);
   color: var(--workstel-primary-text);
 }
 .users-badge--blocked {
-  background: #fbeaea;
-  color: #8a2424;
+  background: var(--workstel-danger-bg);
+  color: var(--workstel-danger-text);
 }
 .users-hint {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }

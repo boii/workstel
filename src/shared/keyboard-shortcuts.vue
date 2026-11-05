@@ -47,7 +47,7 @@ const heading = computed(() => props.title ?? t('shortcuts'));
   margin-bottom: 8px;
 }
 .shortcut-panel-heading h2 {
-  font-size: 17px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
 }
 .shortcut-list {
@@ -62,7 +62,7 @@ const heading = computed(() => props.title ?? t('shortcuts'));
   gap: 20px;
   padding: 10px 0;
   border-top: 1px solid var(--workstel-border);
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .shortcut-list li:first-child {
   border-top: 0;
@@ -70,14 +70,14 @@ const heading = computed(() => props.title ?? t('shortcuts'));
 kbd {
   flex-shrink: 0;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   min-width: 30px;
   padding: 3px 7px;
   text-align: center;
   border: 1px solid var(--workstel-border);
   border-bottom-width: 2px;
   border-radius: 4px;
-  background: var(--workstel-background, #f7f9fa);
+  background: var(--workstel-surface-muted);
   color: var(--workstel-text-secondary);
 }
 </style>

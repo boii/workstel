@@ -226,7 +226,7 @@ onUnmounted(() => {
 </template>
 <style scoped>
 .vault-audit-hint {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   margin: 0 0 12px;
   line-height: 1.5;
@@ -276,7 +276,7 @@ onUnmounted(() => {
   outline-offset: -2px;
 }
 .vault-audit-action {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
@@ -284,12 +284,12 @@ onUnmounted(() => {
 .vault-audit-scope,
 .vault-audit-actor {
   color: var(--workstel-text-secondary);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   overflow-wrap: anywhere;
 }
 .vault-audit-time {
   font-family: 'Noto Sans', sans-serif;
-  font-size: 10px;
+  font-size: var(--workstel-font-xs);
 }
 .vault-audit-actor {
   overflow: hidden;
@@ -300,7 +300,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .vault-audit-outcome > span {
@@ -325,7 +325,7 @@ onUnmounted(() => {
   padding: 12px 20px 16px;
   background: rgba(var(--v-theme-primary), 0.025);
   border-top: 1px solid var(--workstel-border);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
 }
 .vault-audit-details dt {
   color: var(--workstel-text-secondary);
@@ -339,7 +339,7 @@ onUnmounted(() => {
   padding: 30px 20px;
   text-align: center;
   color: var(--workstel-text-secondary);
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 .vault-audit-empty p {
   margin: 8px 0;

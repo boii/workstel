@@ -205,7 +205,7 @@ async function copyVersion() {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -224,7 +224,7 @@ async function copyVersion() {
   align-items: flex-start;
   gap: 12px;
   padding: 8px 0;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
 }
 .help-step-number {
@@ -234,15 +234,15 @@ async function copyVersion() {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #e4eef3;
+  background: var(--workstel-info-bg);
   color: var(--workstel-primary-text);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
 }
 .help-tips li {
   position: relative;
   padding: 6px 0 6px 18px;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
 }
 .help-tips li::before {
@@ -262,9 +262,9 @@ async function copyVersion() {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 6px;
-  background: #fdf3e7;
-  color: #7a4a10;
-  font-size: 12px;
+  background: var(--workstel-warning-bg);
+  color: var(--workstel-warning-text);
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
 }
 .help-warning .v-icon {
@@ -289,7 +289,7 @@ async function copyVersion() {
 .help-faq :deep(.v-expansion-panel-title) {
   min-height: 48px;
   padding: 10px 0;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .help-faq :deep(.v-expansion-panel-title__overlay) {
@@ -297,7 +297,7 @@ async function copyVersion() {
 }
 .help-faq :deep(.v-expansion-panel-text__wrapper) {
   padding: 0 0 12px;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }
@@ -308,7 +308,7 @@ async function copyVersion() {
   gap: 16px;
   padding: 9px 0;
   border-top: 1px solid var(--workstel-border);
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .help-shortcuts li:first-child {
   border-top: 0;
@@ -316,19 +316,19 @@ async function copyVersion() {
 kbd {
   flex-shrink: 0;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   min-width: 30px;
   padding: 3px 7px;
   text-align: center;
   border: 1px solid var(--workstel-border);
   border-bottom-width: 2px;
   border-radius: 4px;
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
   color: var(--workstel-text-secondary);
 }
 .help-muted {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }
@@ -340,7 +340,7 @@ kbd {
   margin-top: 12px;
   padding: 8px 4px 8px 12px;
   border-radius: 6px;
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .help-version > span {
   display: flex;
@@ -348,12 +348,12 @@ kbd {
   min-width: 0;
 }
 .help-version small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .help-version code {
   font-family: 'Noto Sans', sans-serif;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   overflow-wrap: anywhere;
 }
 .help-sr-status {

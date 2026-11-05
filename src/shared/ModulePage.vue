@@ -113,11 +113,11 @@ defineEmits<{ retry: [] }>();
   gap: 8px;
 }
 .module-page h1 {
-  font-size: clamp(23px, 2vw, 26px);
+  font-size: var(--workstel-font-xl);
   font-weight: 400;
 }
 .module-page p {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   line-height: 1.7;
   margin-top: 8px;
@@ -160,7 +160,7 @@ defineEmits<{ retry: [] }>();
   min-height: 92px;
 }
 .module-empty h2 {
-  font-size: 18px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
 }
 @media (max-width: 680px) {
@@ -174,7 +174,7 @@ defineEmits<{ retry: [] }>();
     width: 100%;
   }
   .module-page h1 {
-    font-size: 23px;
+    font-size: var(--workstel-font-xl);
   }
   .module-page-actions {
     width: 100%;

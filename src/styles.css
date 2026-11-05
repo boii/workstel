@@ -3,6 +3,29 @@
   --workstel-border: #e0e6eb;
   /* Primary tone for text on light surfaces; #0096c7 itself is below 4.5:1 on white. */
   --workstel-primary-text: #006f8f;
+  /* Neutral surfaces: page background, white cards, a muted fill and a subtle fill. */
+  --workstel-surface-muted: #f7f9fa;
+  --workstel-surface-subtle: #edf1f4;
+  /* Shared status colours. Modules map their states here instead of defining their own:
+     success = done/pass/won, warning = needs attention/low, danger = blocked/out,
+     info = in progress, neutral = not started or closed without a problem. */
+  --workstel-success-bg: #e3f3ec;
+  --workstel-success-text: #1f5f4f;
+  --workstel-warning-bg: #fdf3e7;
+  --workstel-warning-text: #7a4a10;
+  --workstel-danger-bg: #fbeaea;
+  --workstel-danger-text: #8a2424;
+  --workstel-info-bg: #e3f4fa;
+  --workstel-info-text: #005a75;
+  --workstel-neutral-bg: #edf1f4;
+  --workstel-neutral-text: #3d4d59;
+  /* Type scale: caption, small, body, title, display. Brand marks, timers, icons and
+     16px touch inputs (which stop iOS zooming) keep their own sizes. */
+  --workstel-font-xs: 11px;
+  --workstel-font-sm: 13px;
+  --workstel-font-md: 15px;
+  --workstel-font-lg: 20px;
+  --workstel-font-xl: clamp(23px, 2.2vw, 26px);
   font-family: Quicksand, sans-serif;
   color: rgba(0, 0, 0, 0.87);
   background: #f2f5f8;
@@ -37,7 +60,7 @@ button:focus-visible {
   border-radius: 6px;
   background: #ffffff;
   color: #007a9e;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   box-shadow:
     0 3px 10px -2px #55555514,
     0 2px 20px #5555550f;
@@ -56,7 +79,7 @@ p {
 }
 .v-application {
   font-family: Quicksand, sans-serif;
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 500;
 }
 .v-card {
@@ -78,7 +101,7 @@ p {
   height: 40px;
 }
 .v-field__input {
-  font-size: 14px;
+  font-size: var(--workstel-font-md);
 }
 .v-table {
   font-family: 'Noto Sans', sans-serif;
@@ -143,8 +166,8 @@ p {
   color: #0096c7;
 }
 .hotel-name {
-  font-size: 12px;
-  border-left: 1px solid #e3e7ea;
+  font-size: var(--workstel-font-sm);
+  border-left: 1px solid var(--workstel-border);
   padding-left: 20px;
   white-space: nowrap;
 }
@@ -158,7 +181,7 @@ p {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: #666;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
@@ -186,8 +209,8 @@ p {
   font-weight: 700;
 }
 .task-count {
-  font-size: 11px;
-  background: #edf1f4;
+  font-size: var(--workstel-font-xs);
+  background: var(--workstel-surface-subtle);
   border-radius: 4px;
   padding: 2px 5px;
 }
@@ -198,17 +221,17 @@ p {
   align-items: center;
 }
 .switch-button {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 .palette-button {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary) !important;
 }
 .palette-button-kbd {
   margin-left: 10px;
   padding: 1px 6px;
   font: inherit;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   border: 1px solid var(--workstel-border);
   border-bottom-width: 2px;
   border-radius: 4px;
@@ -235,7 +258,7 @@ p {
   }
 }
 .avatar-label {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: #526774;
   font-weight: 700;
 }
@@ -254,7 +277,7 @@ p {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 30px;
+  font-size: var(--workstel-font-xl);
   font-weight: 400;
   letter-spacing: -0.7px;
   min-width: 0;
@@ -267,10 +290,10 @@ p {
   margin-left: auto;
 }
 .demo-label {
-  font-size: 10px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   letter-spacing: 1px;
-  border: 1px solid #dae1e6;
+  border: 1px solid var(--workstel-border);
   border-radius: 4px;
   padding: 4px 6px;
   white-space: nowrap;
@@ -304,7 +327,7 @@ p {
   flex-shrink: 0;
 }
 .category-tabs .v-btn {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   padding: 0 12px;
 }
 .mobile-category-filter {
@@ -352,13 +375,13 @@ p {
   color: #b09a4e;
 }
 .module-open h2 {
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 600;
   line-height: 1.4;
   margin-bottom: 5px;
 }
 .module-open p {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   line-height: 1.6;
 }
@@ -369,7 +392,7 @@ p {
   font-size: 19px;
 }
 .module-card:has(.module-open:hover) {
-  background: #fcfdfe;
+  background: var(--workstel-surface-muted);
 }
 .empty-state {
   text-align: center;
@@ -378,11 +401,11 @@ p {
   line-height: 1.7;
 }
 .empty-state h2 {
-  font-size: 18px;
+  font-size: var(--workstel-font-lg);
   margin: 12px 0;
 }
 .empty-state p {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   margin-bottom: 15px;
 }
 footer {
@@ -391,7 +414,7 @@ footer {
   align-items: center;
   margin-top: 32px;
   padding-top: 15px;
-  border-top: 1px solid #e0e6eb;
+  border-top: 1px solid var(--workstel-border);
   color: var(--workstel-text-secondary);
 }
 footer > span {
@@ -399,7 +422,7 @@ footer > span {
   font-weight: 700;
 }
 footer small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
 }
 .task-panel {
   padding: 22px;
@@ -411,55 +434,55 @@ footer small {
   margin-bottom: 10px;
 }
 .panel-heading h2 {
-  font-size: 17px;
+  font-size: var(--workstel-font-lg);
   font-weight: 600;
 }
 .panel-heading > span {
-  font-size: 12px;
-  color: #7a868e;
+  font-size: var(--workstel-font-sm);
+  color: var(--workstel-text-secondary);
 }
 .task-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-top: 1px solid #edf0f3;
+  border-top: 1px solid var(--workstel-border);
   padding: 12px 0;
 }
 .task-row > .v-checkbox-btn {
   flex: 0 0 36px;
 }
 .task-row strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
 }
 .task-row small {
   display: block;
-  color: #819099;
-  font-size: 11px;
+  color: var(--workstel-text-secondary);
+  font-size: var(--workstel-font-xs);
   margin-top: 5px;
 }
 .task-time {
   margin-left: auto;
-  font-size: 12px;
-  color: #72818a;
+  font-size: var(--workstel-font-sm);
+  color: var(--workstel-text-secondary);
 }
 .completed strong {
   text-decoration: line-through;
-  color: #91a0aa;
+  color: var(--workstel-text-secondary);
 }
 .notification-card {
   padding: 22px;
   width: 280px;
 }
 .notification-card h3 {
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
 }
 .notification-card p {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   margin: 12px 0;
 }
 .notification-card small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .detail-panel {
@@ -476,32 +499,32 @@ footer small {
 }
 .eyebrow {
   display: block;
-  font-size: 10px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   letter-spacing: 1.2px;
-  color: #7d8e98;
+  color: var(--workstel-text-secondary);
   margin: 10px 0;
 }
 .detail-panel h2 {
-  font-size: 24px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
   margin-bottom: 10px;
 }
 .detail-panel p {
-  font-size: 13px;
-  color: #72828c;
+  font-size: var(--workstel-font-sm);
+  color: var(--workstel-text-secondary);
   line-height: 1.7;
   margin-bottom: 20px;
 }
 .detail-panel .v-alert {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 .detail-panel dl {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   margin: 20px 0;
 }
 .detail-panel dt {
-  color: #8b98a1;
+  color: var(--workstel-text-secondary);
   margin-top: 14px;
 }
 .detail-panel dd {
@@ -509,8 +532,8 @@ footer small {
   overflow-wrap: anywhere;
 }
 .detail-panel small {
-  font-size: 11px;
-  color: #819099;
+  font-size: var(--workstel-font-xs);
+  color: var(--workstel-text-secondary);
 }
 .submit-button {
   display: flex;
@@ -519,7 +542,7 @@ footer small {
 /* Labels sit close to their field and rows stay tight, so common forms fit without scrolling. */
 .field-label {
   display: block;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.4;
   margin: 14px 0 4px;
 }
@@ -528,12 +551,12 @@ footer small {
   overflow-wrap: anywhere;
 }
 .info-panel h2 {
-  font-size: 22px;
+  font-size: var(--workstel-font-lg);
   font-weight: 500;
   margin-bottom: 15px;
 }
 .info-panel p {
-  font-size: 14px;
+  font-size: var(--workstel-font-md);
   line-height: 1.7;
   margin-bottom: 20px;
 }
@@ -544,7 +567,7 @@ footer small {
   align-items: center;
   justify-content: space-between;
   padding: 0 38px;
-  border-bottom: 1px solid #e5ebef;
+  border-bottom: 1px solid var(--workstel-border);
 }
 .login-main {
   display: flex;
@@ -565,34 +588,34 @@ footer small {
   margin-bottom: 22px;
 }
 .login-panel h1 {
-  font-size: 25px;
+  font-size: var(--workstel-font-xl);
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: -0.5px;
   margin-bottom: 12px;
 }
 .login-panel p {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.8;
-  color: #77858e;
+  color: var(--workstel-text-secondary);
 }
 .sso-button {
   margin-top: 28px;
 }
 .sso-alert {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   margin-top: 15px;
 }
 .login-note {
-  font-size: 11px;
-  color: #84929b;
+  font-size: var(--workstel-font-xs);
+  color: var(--workstel-text-secondary);
   display: flex;
   align-items: center;
   gap: 7px;
   margin-top: 17px;
 }
 .demo-access {
-  border-top: 1px solid #e5ebef;
+  border-top: 1px solid var(--workstel-border);
   margin-top: 27px;
   padding-top: 20px;
   display: flex;
@@ -600,22 +623,22 @@ footer small {
   flex-direction: column;
 }
 .demo-access > span {
-  font-size: 10px;
+  font-size: var(--workstel-font-xs);
   letter-spacing: 1px;
   color: var(--workstel-text-secondary);
 }
 .demo-access .v-btn {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   margin: 6px 0;
   padding: 0;
 }
 .demo-access small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .login-support {
-  font-size: 11px;
-  color: #84929b;
+  font-size: var(--workstel-font-xs);
+  color: var(--workstel-text-secondary);
   margin-top: 22px;
 }
 @media (max-width: 1050px) {
@@ -678,8 +701,8 @@ footer small {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #81909a;
-  font-size: 12px;
+  color: var(--workstel-text-secondary);
+  font-size: var(--workstel-font-sm);
 }
 .module-coming-soon .module-open {
   cursor: default;
@@ -698,9 +721,9 @@ footer small {
   margin-top: 8px;
   padding: 2px 8px;
   border-radius: 4px;
-  background: #edf1f4;
+  background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }
@@ -784,7 +807,7 @@ footer small {
     flex-wrap: wrap;
   }
   .page-heading h1 {
-    font-size: 25px;
+    font-size: var(--workstel-font-xl);
     gap: 9px;
   }
 
@@ -819,10 +842,10 @@ footer small {
     gap: 13px;
   }
   .module-open h2 {
-    font-size: 15px;
+    font-size: var(--workstel-font-md);
   }
   .module-open p {
-    font-size: 12px;
+    font-size: var(--workstel-font-sm);
   }
   .favorite-button {
     margin-top: 12px;
@@ -834,10 +857,10 @@ footer small {
     gap: 8px;
   }
   .task-row strong {
-    font-size: 12px;
+    font-size: var(--workstel-font-sm);
   }
   .task-time {
-    font-size: 11px;
+    font-size: var(--workstel-font-xs);
     flex-shrink: 0;
   }
   .login-header {
@@ -903,4 +926,11 @@ footer small {
     font-size: 24px;
     margin-right: 6px;
   }
+}
+/* Framework text joins the type scale: buttons use the small step, badges the caption step. */
+.v-btn {
+  font-size: var(--workstel-font-sm);
+}
+.v-badge__badge {
+  font-size: var(--workstel-font-xs);
 }

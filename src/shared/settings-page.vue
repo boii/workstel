@@ -223,7 +223,7 @@ function granted(assignment: StaffAssignment) {
   grid-column: 1 / -1;
 }
 .settings-card h2 {
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -236,7 +236,7 @@ function granted(assignment: StaffAssignment) {
 }
 .settings-card-heading > span,
 .settings-muted {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }
@@ -248,7 +248,7 @@ function granted(assignment: StaffAssignment) {
   min-width: 0;
 }
 .settings-initials {
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 700;
   color: #526774;
 }
@@ -259,12 +259,12 @@ function granted(assignment: StaffAssignment) {
   min-width: 0;
 }
 .settings-profile-text strong {
-  font-size: 15px;
+  font-size: var(--workstel-font-md);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .settings-profile-text span {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
 }
 .settings-row {
@@ -284,10 +284,10 @@ function granted(assignment: StaffAssignment) {
   border-top: 0;
 }
 .settings-label {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .settings-language .v-btn {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   padding: 0 12px;
 }
 .settings-access {
@@ -311,12 +311,12 @@ function granted(assignment: StaffAssignment) {
   min-width: 0;
 }
 .settings-access-name strong {
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 .settings-access-name span {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .settings-permissions {
@@ -328,9 +328,9 @@ function granted(assignment: StaffAssignment) {
 .settings-permissions span {
   padding: 2px 8px;
   border-radius: 4px;
-  background: #edf1f4;
+  background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 700;
   line-height: 1.6;
 }

@@ -117,9 +117,9 @@ async function submit() {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 6px;
-  background: #fdf3e7;
-  color: #7a4a10;
-  font-size: 12px;
+  background: var(--workstel-warning-bg);
+  color: var(--workstel-warning-text);
+  font-size: var(--workstel-font-sm);
   line-height: 1.6;
 }
 .password-required .v-icon {

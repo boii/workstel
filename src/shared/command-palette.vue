@@ -283,7 +283,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 .palette-results h3 {
   margin: 10px 8px 4px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -320,14 +320,14 @@ function onKeydown(event: KeyboardEvent) {
   flex: 1;
 }
 .palette-option-text strong {
-  font-size: 14px;
+  font-size: var(--workstel-font-md);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .palette-option-text small {
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .palette-enter {
@@ -336,7 +336,7 @@ function onKeydown(event: KeyboardEvent) {
 .palette-empty {
   padding: 28px 12px;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
 }
 .palette-footer {
@@ -344,9 +344,9 @@ function onKeydown(event: KeyboardEvent) {
   gap: 18px;
   padding: 9px 16px;
   border-top: 1px solid var(--workstel-border);
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .palette-footer span {
   display: flex;
@@ -355,7 +355,7 @@ function onKeydown(event: KeyboardEvent) {
 }
 kbd {
   font: inherit;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   min-width: 20px;
   padding: 1px 5px;
   text-align: center;

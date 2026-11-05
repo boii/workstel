@@ -156,16 +156,16 @@ watch(open, (value) => {
   min-width: 520px;
   border-collapse: collapse;
   font:
-    13px 'Noto Sans',
+    var(--workstel-font-sm) 'Noto Sans',
     sans-serif;
 }
 .ledger-table th {
   padding: 8px 12px;
   text-align: left;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   font-weight: 400;
   color: var(--workstel-text-secondary);
-  background: #f7f9fa;
+  background: var(--workstel-surface-muted);
 }
 .ledger-table td {
   padding: 8px 12px;
@@ -175,7 +175,7 @@ watch(open, (value) => {
 .ledger-table td small {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
@@ -184,9 +184,9 @@ watch(open, (value) => {
   white-space: nowrap;
 }
 .ledger-in {
-  color: #1f5f4f;
+  color: var(--workstel-success-text);
 }
 .ledger-out {
-  color: #9b2c2c;
+  color: var(--workstel-danger-text);
 }
 </style>

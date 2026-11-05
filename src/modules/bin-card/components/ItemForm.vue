@@ -214,7 +214,7 @@ const fieldError = (field: ItemField) =>
 }
 .bin-form-hint {
   margin-top: 12px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 @media (max-width: 680px) {

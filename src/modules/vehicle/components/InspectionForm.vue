@@ -241,7 +241,7 @@ const fieldError = (field: InspectionField) => {
   flex: 1;
   min-width: 0;
   padding: 0 4px;
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
 }
 .inspection-checklist-heading {
   display: flex;
@@ -254,7 +254,7 @@ const fieldError = (field: InspectionField) => {
 }
 .inspection-hint {
   margin: 2px 0 12px;
-  font-size: 11px;
+  font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .inspection-hint.inspection-error {
@@ -274,19 +274,19 @@ const fieldError = (field: InspectionField) => {
   gap: 12px;
   min-height: 56px;
   padding: 8px 8px 8px 12px;
-  font-size: 13px;
+  font-size: var(--workstel-font-sm);
 }
 .inspection-items li + li {
   border-top: 1px solid var(--workstel-border);
 }
 .inspection-item--issue {
-  background: #fdf3e7;
+  background: var(--workstel-warning-bg);
 }
 .inspection-items .v-btn-toggle {
   flex-shrink: 0;
 }
 .inspection-items .v-btn {
-  font-size: 12px;
+  font-size: var(--workstel-font-sm);
   padding: 0 10px;
 }
 @media (max-width: 680px) {
