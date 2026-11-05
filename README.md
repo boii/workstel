@@ -1,34 +1,80 @@
 # Workstel.
 
-An internal hotel operations workspace built with Vue, TypeScript, Vite and Vuetify.
+An internal workspace for hotel operations: one sign-in, one compact dashboard, and a set of isolated modules for daily work.
 
-## Status
+Built with Vue 3, TypeScript, Vite and Vuetify. The frontend runs on Cloudflare Pages, and the backend is a Supabase instance hosted on the hotel's own server.
 
-This repository contains the approved desktop/mobile shell, module development foundation and authenticated Vault metadata service. Email/password login to Cloudflare Pages and the hotel-hosted Supabase backend has been confirmed by the operator.
-Private-by-default ownership, explicit read-only sharing and durable audit are implemented. The operator confirmed all 16 actual-server private metadata checks and the live Vault/audit entry points. See docs/DEPLOYMENT.md for release evidence and the server update workflow.
-Real password storage/reveal, Google provider setup and cross-module event delivery are not commissioned. Vehicle Checklist and Bin Card are implemented with module-specific server grants; they open in production after their migrations are installed on the hotel server (see docs/DEPLOYMENT.md). Other operational modules remain Coming soon. Do not enter passwords in metadata fields.
-Development demo records stay in memory and reset on reload. Production uses scoped server RPCs; tokens stay in memory and reloading requires sign-in. Only language preferences persist locally.
+**Production:** https://workstel.pages.dev (staff sign-in required)
 
-## Development
+## Contents
 
-Use Node.js 24 and npm.
+- [Modules](#modules)
+- [Quick start](#quick-start)
+- [Scripts](#scripts)
+- [Project structure](#project-structure)
+- [Add a module](#add-a-module)
+- [Deployment](#deployment)
+- [Security and current limits](#security-and-current-limits)
+- [Documentation](#documentation)
+
+## Modules
+
+| Module            | What it does                                              | Status    |
+| ----------------- | --------------------------------------------------------- | --------- |
+| Vehicle Checklist | Vehicle register and inspections with history             | Available |
+| Bin Card          | Stock items, stock movements and a running ledger         | Available |
+| Documents & SOPs  | Links to department documents and SOPs (https links only) | Available |
+| Sales CRM         | Accounts, deals, pipeline stages and logged activities    | Available |
+| Room Turnaround   | Per-room cleaning timer, attendants and daily summary     | Available |
+| Password Vault    | Private-by-default work accounts with explicit sharing    | Preview   |
+
+**Available** modules use module-specific server grants. A module opens for a staff member only after its migration is installed on the hotel server and a developer grants access on the Users page. Developers can switch a module off from **Settings → Modules**; the data and grants are kept.
+
+Every module is isolated: its own records, RPCs, permissions and audit namespace. Cross-module access needs an approved, server-enforced contract (see [Module standard](docs/MODULE_STANDARD.md#module-isolation)).
+
+## Quick start
+
+Requires **Node.js 24** and npm.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open http://127.0.0.1:5173/ and select **View demo dashboard**.
+Open http://127.0.0.1:5173/ and choose **View demo dashboard**.
 
-## Quality checks
+Demo mode needs no backend. Its records are held in memory and reset on reload.
 
-```sh
-npm run format
-npm run check
+## Scripts
+
+| Command                                | Purpose                                                                      |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| `npm run dev`                          | Start the local dev server (demo mode)                                       |
+| `npm run format`                       | Format the repository with Prettier                                          |
+| `npm run check`                        | Format check, lint, all tests and the production build — run before delivery |
+| `npm test`                             | Frontend, backend handler and database (PGlite) tests                        |
+| `npm run build`                        | Module checks, type checks and the Vite build                                |
+| `npm run module:new -- <id> "<Title>"` | Scaffold a new module from `src/modules/_template`                           |
+| `npm run modules:check`                | Validate manifests, scaffold files and English/Indonesian locale parity      |
+| `npm run build:production`             | Production configuration gate, build and Cloudflare Pages headers            |
+
+## Project structure
+
+```text
+src/
+  modules/        one folder per module (manifest, pages, components, api, locales, tests)
+    _template/    the starting point copied by npm run module:new
+  shared/         domain-independent UI: ModulePage, ModuleDialog, FilterGroup, UndoSnackbar …
+  core/           module registry, access, RPC client, shared composables
+  auth/ admin/ users/ profile/   shell pages and platform features
+  i18n/           English (default) and Indonesian system copy
+  styles.css      theme tokens (--workstel-*) and global styles
+backend/          server handlers (Vault secrets, users, session)
+functions/        Cloudflare Pages Functions
+supabase/         SQL migrations and database tests
+infra/            hotel-server install, migration and verification scripts
+docs/             standards, design reference and release records
 ```
-
-The check command validates formatting, Vue/TypeScript lint, module generator tests, manifest contracts, locale parity, types and the production build.
-GitHub Actions runs the same command on pushes and pull requests.
 
 ## Add a module
 
@@ -38,24 +84,47 @@ npm run format
 npm run check
 ```
 
-The generator registers a dashboard metadata card and creates a bilingual example page, service contract, domain types and acceptance checklist.
-Connect production routing and backend services separately before enabling operational functionality.
+The generator copies `src/modules/_template`, registers the manifest and creates a bilingual list page, a service contract, domain types and an acceptance checklist. The generated page already uses the shared patterns: `ModulePage`, `ModuleDialog`, `UndoSnackbar`, the floating primary action on phones, and empty states with an action.
 
-## Project guidance
+Generation alone does not enable anything in production. Wire the routes, server migration and RPCs, then complete `ACCEPTANCE.md`. Read the [module standard](docs/MODULE_STANDARD.md) and [design reference](docs/DESIGN_REFERENCE.md) first.
 
-- [Contributor instructions](AGENTS.md)
-- [Module standard](docs/MODULE_STANDARD.md)
-- [Approved design reference](docs/DESIGN_REFERENCE.md)
-- [Engineering workflow](docs/ENGINEERING.md)
-- [Project skill](.agents/skills/workstel-development/SKILL.md)
+## Deployment
 
-English is the default UI and coding language. Indonesian can be selected from the login/application header.
-Keep the approved compact layout, no-sidebar navigation, mobile single-column cards, bundled fonts and Material Design Icons.
+The frontend is deployed to Cloudflare Pages; the database, auth and functions run on the hotel-hosted Supabase stack. Only public values (`VITE_*`, see [.env.example](.env.example)) belong in the frontend build — never service-role, database or Vault keys.
 
-## Production foundation
+```sh
+npm run build:production
+npx wrangler pages deploy dist --project-name workstel --branch main
+node scripts/verify-pages-deployment.mjs
+```
 
-The selected deployment is Cloudflare Pages plus hotel-hosted Supabase. See docs/DEPLOYMENT.md. Use npm run build:production for an externally deployed build; local npm run dev remains a metadata demo unless explicitly disabled. Real Vault passwords remain unsupported until the secret backend, key management, audit archive and recovery requirements are commissioned.
+The [Quality workflow](.github/workflows/ci.yml) runs `npm run check` and deploys `main` when GitHub Actions is available. Server setup, migrations and every release record are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
-### Footer release metadata
+## Security and current limits
 
-The footer reads its version from package.json and embeds the short Git commit during Vite startup/build. GitHub Actions and Cloudflare Pages commit variables take precedence over the local Git checkout. Builds without Git metadata display local. The copyright year uses the current browser year when the application opens.
+- Sign-in comes first. Email/password sign-in is confirmed in production; Google sign-in is not configured.
+- The server derives hotel, department and user scope from the session and checks permissions on every RPC. Hiding UI is not authorization.
+- Create, update, archive, restore and secret access are audited on the server. Audit readers are scoped per module, and the platform audit reader is for platform developers only.
+- Vault accounts are private by default, with explicit read-only sharing. Passwords are encrypted server-side with AES-256-GCM ([Vault operations](docs/VAULT_OPERATIONS.md)). Off-server backup and a restore drill of the database plus keyring are not yet done.
+- Access tokens stay in memory. A reload restores the session through an encrypted, HttpOnly cookie that lasts 12 hours from sign-in ([Session and auth](docs/SESSION_AUTH.md)). Staff must sign out on shared devices. Passwords, refresh tokens and Vault values are never stored in browser storage.
+- Cross-module event delivery (outbox and consumers) is not implemented yet.
+
+## Documentation
+
+| Document                                                                               | Covers                                             |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| [AGENTS.md](AGENTS.md)                                                                 | Contributor rules                                  |
+| [Module standard](docs/MODULE_STANDARD.md)                                             | Required files, isolation, API, security, UI rules |
+| [Design reference](docs/DESIGN_REFERENCE.md)                                           | Approved desktop/mobile baseline and design tokens |
+| [Engineering workflow](docs/ENGINEERING.md)                                            | Development process                                |
+| [Routing](docs/ROUTING.md)                                                             | Module routes and URLs                             |
+| [Session and auth](docs/SESSION_AUTH.md)                                               | Sign-in and session handling                       |
+| [Deployment](docs/DEPLOYMENT.md)                                                       | Server setup and release records                   |
+| [Vault backend](docs/VAULT_BACKEND_DESIGN.md) · [operations](docs/VAULT_OPERATIONS.md) | Secret storage design and key handling             |
+| [Project skill](.agents/skills/workstel-development/SKILL.md)                          | Guidance for AI coding agents                      |
+
+## Language
+
+English is the default interface and engineering language. Bahasa Indonesia can be selected from the header; every module ships matching English and Indonesian system copy. User-entered records are never translated.
+
+The footer shows the version from `package.json` and the short Git commit of the build (`local` when no Git metadata is available).
