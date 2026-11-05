@@ -140,8 +140,13 @@ const tasks = ref(
       ]
     : [],
 );
+// Released modules the user cannot open (no grant or switched off) stay off every module list;
+// coming-soon modules remain listed as disabled, as docs/MODULE_STANDARD.md requires.
+const listedModules = computed(() =>
+  modules.filter((m) => !isModuleEnabled(m) || canOpenModule(m)),
+);
 const visible = computed(() =>
-  modules.filter(
+  listedModules.value.filter(
     (m) =>
       (category.value === 'All modules' || m.category === category.value) &&
       translate(m.title).toLowerCase().includes(query.value.toLowerCase()) &&
@@ -251,14 +256,12 @@ const paletteItems = computed<PaletteItem[]>(() => [
       icon: pageIcons[page],
       run: () => nav(page),
     })),
-  ...modules.map((m) => ({
+  ...listedModules.value.map((m) => ({
     id: 'module:' + m.id,
     group: 'modules' as const,
     title: translate(m.title),
     keywords: m.title + ' ' + translate(m.description),
-    subtitle: canOpenModule(m)
-      ? translate(m.description)
-      : t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon'),
+    subtitle: canOpenModule(m) ? translate(m.description) : t('comingSoon'),
     icon: m.icon || 'mdi-view-module-outline',
     disabled: !canOpenModule(m),
     run: () => openModule(m),
@@ -588,16 +591,12 @@ function logout() {
                 min-width="240"
                 ><v-list-subheader>{{ t('hotelModules') }}</v-list-subheader
                 ><v-list-item
-                  v-for="m in modules"
+                  v-for="m in listedModules"
                   :key="m.id"
                   :prepend-icon="m.icon || 'mdi-view-module-outline'"
                   :title="translate(m.title)"
                   :disabled="!canOpenModule(m)"
-                  :subtitle="
-                    !canOpenModule(m)
-                      ? t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon')
-                      : undefined
-                  "
+                  :subtitle="!canOpenModule(m) ? t('comingSoon') : undefined"
                   @click="openModule(m)" /></v-list></v-menu
             ><v-btn
               icon="mdi-help-circle-outline"
@@ -799,7 +798,7 @@ function logout() {
                     <span
                       v-if="!canOpenModule(m)"
                       class="module-status"
-                      >{{ t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon') }}</span
+                      >{{ t('comingSoon') }}</span
                     >
                   </span></button
                 ><v-btn
@@ -835,6 +834,17 @@ function logout() {
                 @click="nav('Dashboard')"
                 >{{ t('browseModules') }}</v-btn
               >
+            </div>
+            <div
+              v-else-if="!listedModules.some((m) => canOpenModule(m)) && !query"
+              class="empty-state"
+            >
+              <v-icon
+                icon="mdi-lock-outline"
+                size="32"
+              />
+              <h2>{{ t('noAccessibleModules') }}</h2>
+              <p>{{ t('noAccessibleModulesHint') }}</p>
             </div>
             <div
               v-else-if="!visible.length"
