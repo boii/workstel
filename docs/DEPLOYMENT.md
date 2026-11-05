@@ -357,4 +357,10 @@ Migration `202611050002_user_profiles.sql` adds `workstel_private.user_profiles`
 
 The frontend edits the profile from Settings → Profile (a bottom sheet on phones). It shows the display name and initials in the account menu, and applies the saved language at sign-in. Servers without the migration hide the Edit button and keep the email display. Demo mode keeps the profile in memory.
 
-Not yet applied on 192.168.2.12 and not yet deployed.
+Commit b0e0647. The migration was applied on 192.168.2.12 over SSH after the restricted local backup `/opt/workstel/backups/pre-user-profiles-20261105T170629Z.dump` was created and its archive listing checked. This is not an off-server backup or a restore drill. Verification ran in a transaction that was rolled back, so no profile row or audit event remains:
+
+- `anon` cannot execute either RPC, and `authenticated` cannot read the table directly.
+- A request without a user receives `ACCESS_DENIED`.
+- The developer account received an empty profile. An invalid extension returned `INVALID_INPUT`, and a name save returned the name and wrote one `platform.profile.update` event.
+
+The frontend was published through Wrangler Direct Upload to https://a1b47ccc.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build. Format check, lint and every other test passed. The Room Turnaround test "history per day and per room, and the daily summary" failed because it ran just after midnight Asia/Jakarta. It depends on the time of day, this release does not touch it, and a fix is in progress separately. Lint was run without `.claude/**`, because a parallel session's worktree in `.claude/worktrees/` made ESLint find two TypeScript roots. In the signed-in production session, Settings showed Edit profile, so `workstel_profile_get` answered through the REST API. No profile was saved in production.
