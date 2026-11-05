@@ -321,3 +321,18 @@ Commit 28a9bde (frontend only) switches per-row actions to the outlined style, s
 ## Compact forms second pass release — 5 November 2026
 
 Commit 4a99439 (frontend only) keeps paired fields side by side on phones and folds optional fields behind "Add …" links. It was published through Wrangler Direct Upload to https://db8aa25f.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session at 390px, Add deal showed Stage beside Segment and Arrival beside Departure, with notes folded behind "Add notes". The form was only opened and closed.
+
+## Startup request parallelisation — 5 November 2026
+
+Investigation of the slow Supabase reports came first. DNS, TLS and connection to `workstel.gabot.my.id` (Cloudflare edge, CGK) took about 60 ms. Unauthenticated auth and REST responses took 80–110 ms, and the CORS preflight is cached for 3600 s. Authenticated RPCs measured in the signed-in browser took 60–200 ms. The 0.9–4.3 s timings recorded earlier the same day did not reproduce, so the server slowness is intermittent. Likely causes are cold connections after idle time or load on the hotel host; confirming them needs server-side monitoring.
+
+The frontend ran six startup requests one after another: `/api/session`, `/auth/v1/user`, `workstel_session`, `workstel_module_access`, `/auth/v1/settings`, then the module list. Commit df9f0c5 runs the user check and both access RPCs together, and loads the sign-in settings alongside the session restore. Signed-in users no longer wait for those settings. It was published through Wrangler Direct Upload to https://c53607fb.workstel.pages.dev/ (production https://workstel.pages.dev/). `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed.
+
+Measured on the signed-in Room Turnaround reload, with the network chain running from the first auth request to the room list:
+
+|                       | Network chain      | Rooms data ready after navigation |
+| --------------------- | ------------------ | --------------------------------- |
+| Before                | 715 ms             | 1483 ms                           |
+| After (three reloads) | 467 / 289 / 288 ms | 1120 / 715 / 690 ms               |
+
+The sign-in page path (no session) was not exercised, so as not to sign the operator out.
