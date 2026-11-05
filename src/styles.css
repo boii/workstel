@@ -200,6 +200,40 @@ p {
 .switch-button {
   font-size: 12px;
 }
+.palette-button {
+  font-size: 12px;
+  color: var(--workstel-text-secondary) !important;
+}
+.palette-button-kbd {
+  margin-left: 10px;
+  padding: 1px 6px;
+  font: inherit;
+  font-size: 11px;
+  border: 1px solid var(--workstel-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: white;
+}
+@media (max-width: 1050px) {
+  .palette-button {
+    width: 40px;
+    min-width: 40px !important;
+    padding: 0 8px !important;
+  }
+  .palette-button .v-btn__content {
+    display: none;
+  }
+  .palette-button .v-btn__prepend {
+    margin: 0;
+  }
+}
+@media (max-width: 680px) {
+  .palette-button {
+    width: 44px;
+    min-width: 44px !important;
+    height: 44px !important;
+  }
+}
 .avatar-label {
   font-size: 11px;
   color: #526774;

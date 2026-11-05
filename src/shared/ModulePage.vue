@@ -106,6 +106,11 @@ defineEmits<{ retry: [] }>();
     align-items: flex-start;
     flex-direction: column;
   }
+  /* In a column the 240px basis would become height and leave an empty gap. */
+  .module-page-title {
+    flex-basis: auto;
+    width: 100%;
+  }
   .module-page h1 {
     font-size: 23px;
   }

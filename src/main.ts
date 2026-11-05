@@ -11,6 +11,7 @@ import '@fontsource/quicksand/700.css';
 import '@fontsource/noto-sans/400.css';
 import './styles.css';
 import './responsive.css';
+import './shared/stack-table.css';
 import App from './App.vue';
 import { router } from './router';
 const vuetify = createVuetify({

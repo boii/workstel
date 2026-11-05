@@ -75,12 +75,12 @@ watch(open, (value) => {
     </p>
     <div
       v-else
-      class="ledger-scroll"
+      class="ledger-scroll stack-table-container"
       role="region"
       :aria-label="messages.ledgerTitle"
       tabindex="0"
     >
-      <table class="ledger-table">
+      <table class="ledger-table stack-table">
         <thead>
           <tr>
             <th scope="col">{{ messages.date }}</th>
@@ -105,19 +105,25 @@ watch(open, (value) => {
             v-for="entry in entries"
             :key="entry.id"
           >
-            <td>
+            <td :data-label="messages.date">
               {{ formatTime(entry.createdAt) }}
               <small>{{ messages.by }} {{ entry.createdByEmail || '—' }}</small>
             </td>
-            <td>{{ messages[entryKeys[entry.type]] }}</td>
+            <td class="stack-table-primary">{{ messages[entryKeys[entry.type]] }}</td>
             <td
               class="ledger-number"
               :class="entry.quantity < 0 ? 'ledger-out' : 'ledger-in'"
+              :data-label="messages.change"
             >
               {{ formatQuantity(entry.quantity, true) }}
             </td>
-            <td class="ledger-number">{{ formatQuantity(entry.balanceAfter) }}</td>
-            <td>
+            <td
+              class="ledger-number"
+              :data-label="messages.balanceAfter"
+            >
+              {{ formatQuantity(entry.balanceAfter) }}
+            </td>
+            <td :data-label="messages.reference">
               {{ entry.reference || '—' }}
               <small v-if="entry.notes">{{ entry.notes }}</small>
             </td>

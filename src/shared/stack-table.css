@@ -1,0 +1,62 @@
+/*
+ * Domain-independent adaptive table. Wrap a table in .stack-table-container and give it
+ * .stack-table; when the container is narrower than 560px each row becomes a compact card
+ * so nothing scrolls sideways. Give every cell a data-label (its column header) and mark the
+ * cell that names the row with .stack-table-primary. --stack-columns sets the card grid.
+ */
+.stack-table-container {
+  container-type: inline-size;
+}
+@container (max-width: 560px) {
+  .stack-table {
+    min-width: 0 !important;
+  }
+  .stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .stack-table,
+  .stack-table tbody {
+    display: block;
+  }
+  .stack-table tr {
+    display: grid;
+    grid-template-columns: repeat(var(--stack-columns, 2), minmax(0, 1fr));
+    gap: 8px 14px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--workstel-border);
+  }
+  .stack-table tbody tr:first-child {
+    border-top: 0;
+  }
+  .stack-table-container .stack-table td {
+    display: block;
+    min-width: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+  .stack-table-container .stack-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 1px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--workstel-text-secondary);
+  }
+  .stack-table-container .stack-table td.stack-table-primary {
+    order: -1;
+    grid-column: 1 / -1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .stack-table-container .stack-table td.stack-table-primary::before {
+    display: none;
+  }
+}

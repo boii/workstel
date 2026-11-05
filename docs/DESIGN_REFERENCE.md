@@ -52,3 +52,11 @@ Validation: the local browser preview could not be reached through localhost or 
 ## Language baseline
 
 English is the default interface and coding language. Bahasa Indonesia is an optional user-selectable locale; visual structure remains the same across locales.
+
+## Interaction additions — 5 November 2026
+
+- Command palette: Ctrl/⌘ + K or the header search button opens a palette of shell pages, modules and actions (language, shortcuts, sign out). It is a centred dialog on desktop and fullscreen on screens up to 680px. It never searches module records, so module isolation is unchanged. Only item IDs of the last five picks are stored in the browser.
+- Adaptive tables: `src/shared/stack-table.css` turns a `.stack-table` into compact cards when its `.stack-table-container` is narrower than 560px. Cells carry `data-label`; the naming cell uses `.stack-table-primary`. Used by the Room Turnaround attendant table and the Bin Card ledger.
+- Optimistic archive with Undo: Documents archive and restore update the list immediately and offer Undo for 6 seconds. The server still enforces permissions and versions; a rejected change restores the row.
+
+Validation: desktop and 390px mobile were checked in the in-app browser preview in demo mode.

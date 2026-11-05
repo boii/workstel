@@ -559,10 +559,13 @@ const departmentItems = computed(() => [
           </div>
           <section
             v-if="summary && summary.attendants.length"
-            class="hk-panel"
+            class="hk-panel stack-table-container"
           >
             <h2>{{ messages.attendants }}</h2>
-            <table class="hk-table">
+            <table
+              class="hk-table stack-table"
+              style="--stack-columns: 3"
+            >
               <thead>
                 <tr>
                   <th scope="col">{{ messages.attendant }}</th>
@@ -591,10 +594,30 @@ const departmentItems = computed(() => [
                   v-for="person in summary.attendants"
                   :key="person.email"
                 >
-                  <td :title="person.email">{{ shortName(person.email) }}</td>
-                  <td class="hk-number">{{ person.done }}</td>
-                  <td class="hk-number">{{ formatDuration(person.avgSeconds) }}</td>
-                  <td class="hk-number">{{ formatDuration(person.totalSeconds) }}</td>
+                  <td
+                    class="stack-table-primary"
+                    :title="person.email"
+                  >
+                    {{ shortName(person.email) }}
+                  </td>
+                  <td
+                    class="hk-number"
+                    :data-label="messages.cleaned"
+                  >
+                    {{ person.done }}
+                  </td>
+                  <td
+                    class="hk-number"
+                    :data-label="messages.average"
+                  >
+                    {{ formatDuration(person.avgSeconds) }}
+                  </td>
+                  <td
+                    class="hk-number"
+                    :data-label="messages.totalTime"
+                  >
+                    {{ formatDuration(person.totalSeconds) }}
+                  </td>
                 </tr>
               </tbody>
             </table>

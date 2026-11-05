@@ -19,6 +19,8 @@ export default ts.config(
         AbortController: 'readonly',
         TextEncoder: 'readonly',
         navigator: 'readonly',
+        HTMLElement: 'readonly',
+        KeyboardEvent: 'readonly',
         window: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',

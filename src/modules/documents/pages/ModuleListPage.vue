@@ -126,15 +126,51 @@ async function saveDocument(input: DocumentInput) {
   notice.value = messages.value.saved;
   await load();
 }
+// Archive and restore update the list at once and offer Undo; the server still checks
+// permissions and versions, and a rejected change puts the row back.
+const undoAction = ref<(() => void) | null>(null);
+function showNotice(message: string, undo: (() => void) | null = null) {
+  notice.value = message;
+  undoAction.value = undo;
+}
+function placeRow(row: DocumentLink, index: number) {
+  const rest = documents.value.filter((entry) => entry.id !== row.id);
+  const visible = status.value === 'all' || row.status === status.value;
+  if (visible) rest.splice(Math.min(index, rest.length), 0, row);
+  documents.value = rest;
+}
 async function toggleArchive(document: DocumentLink) {
+  const archiving = document.status === 'active';
+  const index = documents.value.findIndex((entry) => entry.id === document.id);
+  const changed: DocumentLink = { ...document, status: archiving ? 'archived' : 'active' };
+  placeRow(changed, index);
+  showNotice(archiving ? messages.value.archivedDone : messages.value.restoredDone);
   try {
-    await api.setArchived(hotelId.value, document, document.status === 'active');
-    notice.value =
-      document.status === 'active' ? messages.value.archivedDone : messages.value.restoredDone;
+    await api.setArchived(hotelId.value, document, archiving);
   } catch (error) {
-    notice.value = errorMessage(messages.value, error);
+    placeRow(document, index);
+    showNotice(errorMessage(messages.value, error));
+    return;
   }
-  await load();
+  const committed = { ...changed, version: document.version + 1 };
+  if (documents.value.some((entry) => entry.id === committed.id)) placeRow(committed, index);
+  showNotice(
+    archiving ? messages.value.archivedDone : messages.value.restoredDone,
+    () => void undoArchive(committed, document, index),
+  );
+}
+async function undoArchive(committed: DocumentLink, original: DocumentLink, index: number) {
+  const restored = { ...original, version: committed.version + 1 };
+  placeRow(restored, index);
+  showNotice(
+    original.status === 'active' ? messages.value.restoredDone : messages.value.archivedDone,
+  );
+  try {
+    await api.setArchived(hotelId.value, committed, original.status === 'archived');
+  } catch (error) {
+    showNotice(errorMessage(messages.value, error));
+    await load();
+  }
 }
 
 const searchField = ref<FocusableField | null>(null);
@@ -344,9 +380,19 @@ const departmentItems = computed(() => [
     />
     <v-snackbar
       :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
+      :timeout="undoAction ? 6000 : 3000"
+      @update:model-value="showNotice('')"
+      >{{ notice
+      }}<template
+        v-if="undoAction"
+        #actions
+        ><v-btn
+          variant="text"
+          class="documents-undo"
+          @click="undoAction()"
+          >{{ t('undo') }}</v-btn
+        ></template
+      ></v-snackbar
     >
   </div>
 </template>

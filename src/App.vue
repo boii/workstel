@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, nextTick } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
 import { useDisplay, useLocale } from 'vuetify';
@@ -39,6 +39,8 @@ import { useShortcuts } from './core/use-shortcuts';
 import { focusFieldInput } from './core/focus-field';
 import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
+import CommandPalette from './shared/command-palette.vue';
+import type { PaletteItem } from './shared/command-palette.vue';
 import SettingsPage from './shared/settings-page.vue';
 import HelpPage from './shared/help-page.vue';
 import UsersPage from './users/users-page.vue';
@@ -161,13 +163,86 @@ useShortcuts(
   // Module pages register their own shortcuts; the shell must not capture the same keys twice.
   () => session.value && !route.meta.moduleId,
 );
+const paletteOpen = ref(false);
+const paletteKeys = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘ K' : 'Ctrl K';
+// Ctrl/⌘ + K opens the palette everywhere, including module pages and while typing.
+function onPaletteKey(event: KeyboardEvent) {
+  if (!session.value || mustChangePassword.value) return;
+  if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    paletteOpen.value = !paletteOpen.value;
+  }
+}
+onMounted(() => window.addEventListener('keydown', onPaletteKey));
+onUnmounted(() => window.removeEventListener('keydown', onPaletteKey));
+const pageIcons: Record<string, string> = {
+  Dashboard: 'mdi-view-dashboard-outline',
+  'My tasks': 'mdi-clipboard-check-outline',
+  Favorites: 'mdi-star-outline',
+  Settings: 'mdi-cog-outline',
+  Help: 'mdi-help-circle-outline',
+  Users: 'mdi-account-multiple-outline',
+};
+// The palette only navigates and runs shell actions; it never searches module records,
+// so it does not cross module isolation boundaries.
+const paletteItems = computed<PaletteItem[]>(() => [
+  ...['Dashboard', 'My tasks', 'Favorites', 'Settings', 'Help', 'Users']
+    .filter((page) => (page === 'My tasks' ? runtime.demo : page !== 'Users' || isDeveloper.value))
+    .map((page) => ({
+      id: 'page:' + page,
+      group: 'pages' as const,
+      title: translate(page),
+      keywords: page,
+      icon: pageIcons[page],
+      run: () => nav(page),
+    })),
+  ...modules.map((m) => ({
+    id: 'module:' + m.id,
+    group: 'modules' as const,
+    title: translate(m.title),
+    keywords: m.title + ' ' + translate(m.description),
+    subtitle: canOpenModule(m)
+      ? translate(m.description)
+      : t(isModuleEnabled(m) ? 'temporarilyUnavailable' : 'comingSoon'),
+    icon: m.icon || 'mdi-view-module-outline',
+    disabled: !canOpenModule(m),
+    run: () => openModule(m),
+  })),
+  {
+    id: 'action:language',
+    group: 'actions',
+    title: locale.value === 'en' ? 'Bahasa Indonesia' : 'English',
+    keywords: t('language') + ' language bahasa',
+    subtitle: t('language'),
+    icon: 'mdi-translate',
+    run: () => (locale.value = locale.value === 'en' ? 'id' : 'en'),
+  },
+  {
+    id: 'action:shortcuts',
+    group: 'actions',
+    title: t('shortcutHelp'),
+    keywords: 'keyboard shortcuts',
+    icon: 'mdi-keyboard-outline',
+    run: () => (shortcutsOpen.value = true),
+  },
+  {
+    id: 'action:sign-out',
+    group: 'actions',
+    title: t('signOut'),
+    keywords: 'sign out logout',
+    icon: 'mdi-logout',
+    run: logout,
+  },
+]);
 const shortcutRows = computed(() => [
+  { keys: paletteKeys, label: t('paletteShortcut') },
   { keys: '/', label: t('shortcutSearch') },
   { keys: '?', label: t('shortcutList') },
   { keys: 'Esc', label: t('shortcutClose') },
 ]);
 // Help lists every shortcut, including the Vault-only "new account" key registered by that page.
 const helpShortcutRows = computed(() => [
+  { keys: paletteKeys, label: t('paletteShortcut') },
   { keys: '/', label: t('helpSearchShortcut') },
   { keys: 'N', label: t('helpNewAccount') },
   { keys: '?', label: t('shortcutList') },
@@ -416,7 +491,16 @@ function logout() {
             </button>
           </nav>
           <div class="header-actions">
-            <v-menu
+            <v-btn
+              variant="text"
+              class="palette-button"
+              prepend-icon="mdi-magnify"
+              :aria-label="t('paletteShortcut') + ' (' + paletteKeys + ')'"
+              :title="paletteKeys"
+              @click="paletteOpen = true"
+              ><span class="palette-button-label">{{ t('paletteButton') }}</span
+              ><kbd class="palette-button-kbd">{{ paletteKeys }}</kbd></v-btn
+            ><v-menu
               ><template #activator="{ props }"
                 ><v-btn
                   v-bind="props"
@@ -827,6 +911,11 @@ function logout() {
     <KeyboardShortcuts
       v-model="shortcutsOpen"
       :rows="shortcutRows"
+    />
+    <CommandPalette
+      v-if="session && !mustChangePassword"
+      v-model="paletteOpen"
+      :items="paletteItems"
     />
   </v-app>
 </template>
