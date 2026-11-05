@@ -289,3 +289,9 @@ Commit dd8d7e9 fixes both. It was published through Wrangler Direct Upload to ht
 - Vehicle Checklist, Bin Card and Sales CRM show "1 vehicle", "1 item" and "1 deal" and keep their Filters button.
 
 Observed but not addressed: RPCs to the hotel Supabase host took 0.9–4.3 s each for single-row results (slowest: `room_turnaround_rooms_list` 4.3 s, `bin_card_list_items` 3.6 s). The host sends no `Timing-Allow-Origin`, so the browser cannot split network and server time. Investigate on the server. Undo against production data has not been exercised.
+
+## Room floor grouping release — 5 November 2026
+
+Commit 7828c3b (frontend only) lists Room Turnaround rooms without a floor last, under "No floor" ("Tanpa lantai"), after numbered floors in natural order. It was published through Wrangler Direct Upload to https://a1fa3066.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session the groups read Floor 1, Floor 2, Floor 3, Floor 10, No floor.
+
+The production hotel now also holds UI dummy records. They were created on 5 November 2026 through the app's own RPCs, so permissions were checked and every action was audited, as a development fixture: vehicles, Bin Card items, 56 documents, Sales CRM accounts and deals, and Housekeeping rooms and tasks. Undo was confirmed there against the real server: a dummy vehicle was archived, restored by Undo, and the version advanced with no conflict. A Bin Card archive with stock remaining was refused and the row returned. Remove these records before go-live.
