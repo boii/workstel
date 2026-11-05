@@ -317,3 +317,7 @@ Commit 28a9bde (frontend only) switches per-row actions to the outlined style, s
 - The header navigation shows only Dashboard and Favorites.
 - The dummy deal "Weekend packages" reads "No value yet · Other · Sales & Marketing".
 - Log activity renders as an outlined button.
+
+## Compact forms second pass release — 5 November 2026
+
+Commit 4a99439 (frontend only) keeps paired fields side by side on phones and folds optional fields behind "Add …" links. It was published through Wrangler Direct Upload to https://db8aa25f.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session at 390px, Add deal showed Stage beside Segment and Arrival beside Departure, with notes folded behind "Add notes". The form was only opened and closed.
