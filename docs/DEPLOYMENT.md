@@ -350,3 +350,11 @@ Verification ran in database transactions that were rolled back, so no `platform
 - The platform developer received 30 events, all `platform.*`, with no Vault or other module events.
 
 Commit ad2444e was fast-forwarded onto `main` and pushed. It was published through Wrangler Direct Upload to https://294a2b09.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build. In the signed-in production session at desktop width, `/admin/audit` loaded 29 events through the REST API, all `platform.*`. That read is recorded as `platform.audit.read`. The production page was not checked at phone width; the 390px layout was checked in demo mode before release.
+
+## Editable staff profile — 6 November 2026
+
+Migration `202611050002_user_profiles.sql` adds `workstel_private.user_profiles` and two self-service RPCs, `workstel_profile_get()` and `workstel_profile_save(p_input)`. Each user reads and writes only their own row; there is no cross-user read. The server validates the fields: display name and job title up to 80 characters, extension up to 20 characters of digits, spaces and `+ ( ) # -`, locale `en` or `id`, and no control characters. Saves are partial, and an empty string clears a field. Changes to the name, job title or extension are audited as `platform.profile.update`, without their values. Language changes are a preference and are not audited.
+
+The frontend edits the profile from Settings → Profile (a bottom sheet on phones). It shows the display name and initials in the account menu, and applies the saved language at sign-in. Servers without the migration hide the Edit button and keep the email display. Demo mode keeps the profile in memory.
+
+Not yet applied on 192.168.2.12 and not yet deployed.

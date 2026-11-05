@@ -7,6 +7,8 @@ import type { ModuleManifest } from '../core/module';
 import ModuleSwitches from './module-switches.vue';
 import ModuleDialog from './module-dialog.vue';
 import ChangePassword from '../users/change-password.vue';
+import ProfileForm from '../profile/profile-form.vue';
+import { initialsOf, useProfile } from '../profile/use-profile';
 
 const props = defineProps<{
   demo: boolean;
@@ -38,8 +40,11 @@ const demoAssignments: StaffAssignment[] = [
 const access = computed(() => (props.demo ? demoAssignments : props.assignments));
 // The profile already names the hotel; repeat it per row only when access spans several hotels.
 const multiHotel = computed(() => new Set(access.value.map((a) => a.hotelId)).size > 1);
-const displayName = computed(() => (props.demo ? t('demoAdmin') : props.email));
-const initials = computed(() => (props.demo ? 'AD' : props.email.slice(0, 2).toUpperCase()));
+const { profile, available: profileAvailable } = useProfile();
+const accountName = computed(() => (props.demo ? t('demoAdmin') : props.email));
+const displayName = computed(() => profile.value.displayName ?? accountName.value);
+const initials = computed(() => initialsOf(displayName.value));
+const profileOpen = ref(false);
 const permissions: [keyof StaffAssignment, MessageKey][] = [
   ['canRead', 'permRead'],
   ['canWrite', 'permWrite'],
@@ -63,7 +68,18 @@ function granted(assignment: StaffAssignment) {
       class="settings-card"
       aria-labelledby="settings-profile"
     >
-      <h2 id="settings-profile">{{ t('profile') }}</h2>
+      <div class="settings-card-heading">
+        <h2 id="settings-profile">{{ t('profile') }}</h2>
+        <v-btn
+          v-if="profileAvailable"
+          class="settings-profile-edit"
+          variant="text"
+          color="primary"
+          prepend-icon="mdi-pencil-outline"
+          @click="profileOpen = true"
+          >{{ t('editProfile') }}</v-btn
+        >
+      </div>
       <div class="settings-profile">
         <v-avatar
           size="48"
@@ -72,8 +88,14 @@ function granted(assignment: StaffAssignment) {
         >
         <div class="settings-profile-text">
           <strong>{{ displayName }}</strong>
-          <span>{{ demo ? t('demoRole') : t('authorized') }}</span>
-          <span>{{ hotelName }}</span>
+          <span>{{ profile.jobTitle ?? (demo ? t('demoRole') : t('authorized')) }}</span>
+          <span v-if="profile.displayName">{{ accountName }}</span>
+          <span
+            >{{ hotelName
+            }}<template v-if="profile.extension">
+              · {{ t('extensionShort') }} {{ profile.extension }}</template
+            ></span
+          >
         </div>
       </div>
     </v-card>
@@ -201,6 +223,10 @@ function granted(assignment: StaffAssignment) {
         @sign-in-again="emit('signOut')"
       />
     </ModuleDialog>
+    <ProfileForm
+      v-model="profileOpen"
+      @saved="notice = t('profileSaved')"
+    />
     <v-snackbar
       :model-value="!!notice"
       timeout="3000"
@@ -234,6 +260,9 @@ function granted(assignment: StaffAssignment) {
   justify-content: space-between;
   gap: 4px 16px;
 }
+.settings-profile-edit {
+  margin: -6px -8px -6px 0;
+}
 .settings-card-heading > span,
 .settings-muted {
   font-size: var(--workstel-font-sm);
@@ -244,7 +273,7 @@ function granted(assignment: StaffAssignment) {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-top: 16px;
+  margin-top: 12px;
   min-width: 0;
 }
 .settings-initials {
@@ -265,6 +294,7 @@ function granted(assignment: StaffAssignment) {
 }
 .settings-profile-text span {
   font-size: var(--workstel-font-sm);
+  overflow-wrap: anywhere;
   color: var(--workstel-text-secondary);
 }
 .settings-row {

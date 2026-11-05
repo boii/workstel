@@ -45,6 +45,7 @@ import SettingsPage from './shared/settings-page.vue';
 import HelpPage from './shared/help-page.vue';
 import UsersPage from './users/users-page.vue';
 import AuditPage from './admin/audit-page.vue';
+import { initialsOf, useProfile } from './profile/use-profile';
 import ChangePassword from './users/change-password.vue';
 const appVersion = import.meta.env.VITE_APP_VERSION;
 const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
@@ -79,6 +80,7 @@ watch(auth.authenticated, (value) => {
   }
 });
 
+const profileStore = useProfile();
 const session = ref(false),
   ssoNotice = ref(false),
   query = ref(''),
@@ -87,6 +89,24 @@ const session = ref(false),
   creating = ref(false),
   title = ref(''),
   error = ref('');
+const accountName = computed(() =>
+  runtime.demo
+    ? (profileStore.profile.value.displayName ?? t('demoAdmin'))
+    : (profileStore.profile.value.displayName ?? auth.email.value),
+);
+// The profile loads with each session; its saved language follows the user across devices.
+watch(session, (value) => (value ? void loadProfile() : profileStore.reset()));
+async function loadProfile() {
+  await profileStore.load(runtime.demo);
+  const saved = profileStore.profile.value.locale;
+  if (saved && saved !== locale.value) locale.value = saved;
+}
+watch(locale, (value) => {
+  if (runtime.demo || !session.value || !profileStore.available.value) return;
+  if (profileStore.profile.value.locale === value) return;
+  // A language preference that fails to sync still applies on this device.
+  profileStore.save({ locale: value }).catch(() => undefined);
+});
 const tasks = ref(
   runtime.demo
     ? [
@@ -610,16 +630,14 @@ function logout() {
                   ><v-avatar
                     size="32"
                     color="#E8EDF0"
-                    ><span class="avatar-label">{{
-                      runtime.demo ? 'AD' : auth.email.value.slice(0, 2).toUpperCase()
-                    }}</span></v-avatar
+                    ><span class="avatar-label">{{ initialsOf(accountName) }}</span></v-avatar
                   ></v-btn
                 ></template
               ><v-list
                 density="compact"
                 min-width="230"
                 ><v-list-item
-                  :title="runtime.demo ? t('demoAdmin') : auth.email.value"
+                  :title="accountName"
                   :subtitle="
                     runtime.demo ? t('demoRole') : t('authorized')
                   " /><v-divider /><v-list-item
