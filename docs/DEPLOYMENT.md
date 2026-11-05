@@ -275,3 +275,17 @@ Commit e115ca3 (frontend only; no migration) extends optimistic archive/restore 
 GitHub Actions remained blocked by the account billing lock. `npm run check` and `npm run build:production` passed locally. The bundle was published through Wrangler Direct Upload to https://95ee52f3.workstel.pages.dev/ (production https://workstel.pages.dev/). `scripts/verify-pages-deployment.mjs` passed, and the production assets matched the local build.
 
 Operator acceptance after sign-in, not yet performed: archive a test vehicle and a zero-balance Bin Card item, then select Undo for each. Confirm that archiving an item with stock is refused and the row stays. Archive a Sales CRM test account, confirm, then select Undo. No version-conflict message should appear, and every action should appear in the module audit.
+
+## Production inspection fixes — 5 November 2026
+
+The operator signed in, and production build e115ca3 was then inspected in the in-app browser at desktop and 390px widths. No data was changed. Palette, compact filters, floating actions, skeletons and the unfiltered empty state worked. Two display bugs were found:
+
+- An empty Filters button appeared in Room Turnaround because the hotel has one floor and one department.
+- Counts read "1 items" and showed "0" while loading.
+
+Commit dd8d7e9 fixes both. It was published through Wrangler Direct Upload to https://f9cf0415.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build. In the signed-in session, the following were confirmed:
+
+- Room Turnaround shows "Loading records", then "1 room", with no Filters button.
+- Vehicle Checklist, Bin Card and Sales CRM show "1 vehicle", "1 item" and "1 deal" and keep their Filters button.
+
+Observed but not addressed: RPCs to the hotel Supabase host took 0.9–4.3 s each for single-row results (slowest: `room_turnaround_rooms_list` 4.3 s, `bin_card_list_items` 3.6 s). The host sends no `Timing-Allow-Origin`, so the browser cannot split network and server time. Investigate on the server. Undo against production data has not been exercised.
