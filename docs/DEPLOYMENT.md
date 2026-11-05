@@ -295,3 +295,13 @@ Observed but not addressed: RPCs to the hotel Supabase host took 0.9–4.3 s eac
 Commit 7828c3b (frontend only) lists Room Turnaround rooms without a floor last, under "No floor" ("Tanpa lantai"), after numbered floors in natural order. It was published through Wrangler Direct Upload to https://a1fa3066.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session the groups read Floor 1, Floor 2, Floor 3, Floor 10, No floor.
 
 The production hotel now also holds UI dummy records. They were created on 5 November 2026 through the app's own RPCs, so permissions were checked and every action was audited, as a development fixture: vehicles, Bin Card items, 56 documents, Sales CRM accounts and deals, and Housekeeping rooms and tasks. Undo was confirmed there against the real server: a dummy vehicle was archived, restored by Undo, and the version advanced with no conflict. A Bin Card archive with stock remaining was refused and the row returned. Remove these records before go-live.
+
+## Compact forms release — 5 November 2026
+
+Commit 0afce03 (frontend only) tightens form spacing, adds phone bottom sheets for short forms and switches to icon-button secondary row actions in narrow lists. See DESIGN_REFERENCE.md. It was published through Wrangler Direct Upload to https://59a9df77.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session, the following were confirmed:
+
+- On desktop, Add deal is 749px on an 846px viewport and does not scroll.
+- At 390px, a Bin Card row is 127px with four rows on the first screen, and the ledger button keeps the accessible name "Bin card — Bath towel".
+- Record stock movement opens as a 594px bottom sheet anchored to the bottom.
+
+Forms were only opened and closed; no data was changed.
