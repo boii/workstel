@@ -16,6 +16,7 @@ Built with Vue 3, TypeScript, Vite and Vuetify. The frontend runs on Cloudflare 
 - [Deployment](#deployment)
 - [Security and current limits](#security-and-current-limits)
 - [Documentation](#documentation)
+- [License](#license)
 
 ## Modules
 
@@ -128,3 +129,8 @@ The [Quality workflow](.github/workflows/ci.yml) runs `npm run check` and deploy
 English is the default interface and engineering language. Bahasa Indonesia can be selected from the header; every module ships matching English and Indonesian system copy. User-entered records are never translated.
 
 The footer shows the version from `package.json` and the short Git commit of the build (`local` when no Git metadata is available).
+
+## License
+
+Proprietary. Copyright © 2026 Einhver. All rights reserved; see [LICENSE](LICENSE). Viewing this repository does not grant a right to use, copy or run the code.
+Open-source components keep their own licences (MIT, Apache-2.0 and SIL OFL 1.1); see [Third-party notices](THIRD_PARTY_NOTICES.md).
