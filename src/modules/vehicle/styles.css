@@ -55,7 +55,7 @@
   min-width: 0;
 }
 .vehicle-identity > .v-icon {
-  color: #0096c7;
+  color: var(--workstel-primary-text);
   flex-shrink: 0;
 }
 .vehicle-identity > div,

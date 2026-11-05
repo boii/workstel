@@ -15,6 +15,6 @@ export default {
   required: 'Enter a name.',
   demoNotice: 'Template preview. Records are stored in memory only.',
   created: 'Record created.',
-  close: 'Close',
+  reset: 'Clear search',
   records: 'Records',
 } as const;

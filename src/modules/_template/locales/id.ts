@@ -16,6 +16,6 @@ export default {
   required: 'Masukkan nama.',
   demoNotice: 'Pratinjau template. Data hanya disimpan di memori.',
   created: 'Data ditambahkan.',
-  close: 'Tutup',
+  reset: 'Hapus pencarian',
   records: 'Data',
 } satisfies Record<keyof typeof en, string>;

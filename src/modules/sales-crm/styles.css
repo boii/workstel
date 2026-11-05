@@ -77,7 +77,7 @@
   gap: 2px;
   height: 4px;
   margin-top: 6px;
-  border-radius: 2px;
+  border-radius: 4px;
   overflow: hidden;
 }
 .sales-pipeline-bar i {
@@ -85,10 +85,10 @@
   min-width: 4px;
 }
 .sales-stage-fill--lead {
-  background: #9fb3c2;
+  background: var(--workstel-text-secondary);
 }
 .sales-stage-fill--proposal {
-  background: #0096c7;
+  background: rgb(var(--v-theme-primary));
 }
 .sales-stage-fill--negotiation {
   background: var(--workstel-info-text);
@@ -174,7 +174,7 @@
 }
 .sales-contact-line {
   font-size: var(--workstel-font-sm);
-  color: rgba(0, 0, 0, 0.7);
+  color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
 .sales-lost-reason {
