@@ -20,6 +20,7 @@ export default {
   search: 'Search room number',
   floor: 'Floor',
   allFloors: 'All floors',
+  noFloor: 'No floor',
   department: 'Department',
   allDepartments: 'All departments',
   room: 'Room',

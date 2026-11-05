@@ -21,6 +21,7 @@ export default {
   search: 'Cari nomor kamar',
   floor: 'Lantai',
   allFloors: 'Semua lantai',
+  noFloor: 'Tanpa lantai',
   department: 'Departemen',
   allDepartments: 'Semua departemen',
   room: 'Kamar',

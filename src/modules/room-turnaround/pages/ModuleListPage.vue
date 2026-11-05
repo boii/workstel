@@ -117,11 +117,10 @@ onBeforeUnmount(() => {
   window.clearInterval(poll);
 });
 
-const floors = computed(() =>
-  [...new Set(rooms.value.map((r) => r.floor))].sort((a, b) =>
-    a.localeCompare(b, undefined, { numeric: true }),
-  ),
-);
+// Numbered floors in natural order (2 before 10); rooms without a floor, such as villas, last.
+const byFloor = (a: string, b: string) =>
+  a === b ? 0 : !a ? 1 : !b ? -1 : a.localeCompare(b, undefined, { numeric: true });
+const floors = computed(() => [...new Set(rooms.value.map((r) => r.floor))].sort(byFloor));
 const groups = computed(() => {
   const text = search.value?.trim().toUpperCase() ?? '';
   const map = new Map<string, Room[]>();
@@ -131,7 +130,7 @@ const groups = computed(() => {
       (floor.value === null || room.floor === floor.value)
     )
       map.set(room.floor, [...(map.get(room.floor) ?? []), room]);
-  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }));
+  return [...map.entries()].sort((a, b) => byFloor(a[0], b[0]));
 });
 const visibleCount = computed(() => groups.value.reduce((sum, [, list]) => sum + list.length, 0));
 const myRoom = computed(() => rooms.value.find((r) => r.openTask?.mine) ?? null);
@@ -283,7 +282,7 @@ const shortcutRows = computed(() => [
 ]);
 const floorItems = computed(() => [
   { value: null, title: messages.value.allFloors },
-  ...floors.value.map((value) => ({ value, title: value || '—' })),
+  ...floors.value.map((value) => ({ value, title: value || messages.value.noFloor })),
 ]);
 const departmentItems = computed(() => [
   { value: null, title: messages.value.allDepartments },
@@ -480,7 +479,9 @@ const departmentItems = computed(() => [
           :key="floorName"
           class="hk-floor"
         >
-          <h2 v-if="floors.length > 1">{{ messages.floor }} {{ floorName || '—' }}</h2>
+          <h2 v-if="floors.length > 1">
+            {{ floorName ? messages.floor + ' ' + floorName : messages.noFloor }}
+          </h2>
           <div class="hk-grid">
             <button
               v-for="room in list"
