@@ -329,7 +329,7 @@ const departmentItems = computed(() => [
             <v-btn
               v-if="item.status === 'active' && can(item.departmentId, 'canWrite')"
               color="primary"
-              variant="tonal"
+              variant="outlined"
               prepend-icon="mdi-swap-vertical"
               @click="openEntry(item)"
               >{{ messages.record }}</v-btn

@@ -717,7 +717,8 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
                 {{ deal.accountName }}
               </button>
               <small>
-                {{ formatMoney(deal.value) }} · {{ messages[segmentKeys[deal.segment]] }}
+                {{ deal.value ? formatMoney(deal.value) : messages.noValue }} ·
+                {{ messages[segmentKeys[deal.segment]] }}
                 <template v-if="deal.arrivalDate">
                   · {{ formatStay(deal.arrivalDate, deal.departureDate) }}</template
                 >
@@ -754,7 +755,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
             ><v-btn
               v-if="can(deal.departmentId, 'canWrite')"
               color="primary"
-              variant="tonal"
+              variant="outlined"
               prepend-icon="mdi-plus"
               :aria-label="messages.logActivity + ' — ' + deal.title"
               @click="

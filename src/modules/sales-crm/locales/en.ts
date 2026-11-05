@@ -87,6 +87,7 @@ export default {
   dealTitle: 'Deal',
   dealTitlePlaceholder: 'Example: Annual leadership meeting',
   value: 'Estimated value (IDR)',
+  noValue: 'No value yet',
   valueShort: 'Value',
   roomNights: 'Room nights',
   arrivalDate: 'Arrival',

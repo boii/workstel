@@ -202,6 +202,8 @@ onUnmounted(() => {
   window.removeEventListener('scroll', onScroll);
   window.cancelAnimationFrame(scrollFrame);
 });
+// My tasks has no production backend yet, so production hides it instead of showing a dead link.
+const navItems = runtime.demo ? ['Dashboard', 'My tasks', 'Favorites'] : ['Dashboard', 'Favorites'];
 const pageIcons: Record<string, string> = {
   Dashboard: 'mdi-view-dashboard-outline',
   'My tasks': 'mdi-clipboard-check-outline',
@@ -500,12 +502,10 @@ function logout() {
             :aria-label="t('navigation')"
           >
             <button
-              v-for="item in ['Dashboard', 'My tasks', 'Favorites']"
+              v-for="item in navItems"
               :key="item"
               :class="{ active: view === item }"
               :aria-current="view === item ? 'page' : undefined"
-              :disabled="!runtime.demo && item === 'My tasks'"
-              :title="!runtime.demo && item === 'My tasks' ? t('comingSoon') : undefined"
               @click="nav(item)"
             >
               <span

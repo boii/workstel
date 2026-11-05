@@ -329,7 +329,7 @@ const departmentItems = computed(() => [
             <v-btn
               v-if="vehicle.status === 'active' && can(vehicle.departmentId, 'canWrite')"
               color="primary"
-              variant="tonal"
+              variant="outlined"
               prepend-icon="mdi-clipboard-check-outline"
               @click="openInspection(vehicle)"
               >{{ messages.inspect }}</v-btn

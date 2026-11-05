@@ -208,7 +208,7 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
               <div>
                 <strong>{{ deal.title }}</strong>
                 <small
-                  >{{ formatMoney(deal.value) }}
+                  >{{ deal.value ? formatMoney(deal.value) : messages.noValue }}
                   <template v-if="deal.arrivalDate">
                     · {{ formatStay(deal.arrivalDate, deal.departureDate) }}</template
                   ></small

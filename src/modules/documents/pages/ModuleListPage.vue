@@ -320,7 +320,7 @@ const departmentItems = computed(() => [
             <v-btn
               v-if="document.status === 'active'"
               color="primary"
-              variant="tonal"
+              variant="outlined"
               append-icon="mdi-open-in-new"
               :href="document.url"
               target="_blank"

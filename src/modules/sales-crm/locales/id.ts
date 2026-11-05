@@ -88,6 +88,7 @@ export default {
   dealTitle: 'Peluang',
   dealTitlePlaceholder: 'Contoh: Annual leadership meeting',
   value: 'Estimasi nilai (IDR)',
+  noValue: 'Belum ada nilai',
   valueShort: 'Nilai',
   roomNights: 'Room night',
   arrivalDate: 'Kedatangan',

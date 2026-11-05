@@ -109,6 +109,7 @@ p {
 .v-btn--variant-text.text-primary,
 .v-btn--variant-plain.text-primary,
 .v-btn--variant-tonal.text-primary,
+.v-btn--variant-outlined.text-primary,
 .v-btn-toggle .v-btn--active.text-primary {
   color: var(--workstel-primary-text) !important;
 }
@@ -740,10 +741,6 @@ footer small {
 .wordmark,
 .header-actions {
   flex-shrink: 0;
-}
-.top-nav > button:disabled {
-  color: var(--workstel-text-secondary);
-  cursor: default;
 }
 .module-open > span:last-child {
   min-width: 0;
