@@ -217,7 +217,8 @@ const fieldError = (field: ItemField) =>
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
-@media (max-width: 680px) {
+/* Paired short fields stay side by side on phones; only very narrow screens stack them. */
+@media (max-width: 359px) {
   .bin-form-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import OptionalFields from '../../../shared/optional-fields.vue';
+import { t } from '../../../i18n';
 import { accountTypeKeys, errorMessage, useSalesMessages } from '../composables/useSalesMessages';
 import { accountTypes } from '../types';
 import type { AccountInput, SalesAccount } from '../types';
@@ -177,21 +179,27 @@ const fieldError = (field: keyof AccountInput) =>
           />
         </div>
       </div>
-      <label
-        for="sales-account-notes"
-        class="field-label"
-        >{{ messages.notes }}</label
-      ><v-textarea
-        id="sales-account-notes"
-        v-model="draft.notes"
-        :disabled="saving"
-        rows="2"
-        auto-grow
-        maxlength="1000"
-        :hint="messages.notesHint"
-        persistent-hint
-        :error-messages="fieldError('notes')"
-      />
+      <OptionalFields
+        :label="t('addNotes')"
+        :filled="!!draft.notes || !!fieldError('notes')"
+        :reset-key="open"
+      >
+        <label
+          for="sales-account-notes"
+          class="field-label"
+          >{{ messages.notes }}</label
+        ><v-textarea
+          id="sales-account-notes"
+          v-model="draft.notes"
+          :disabled="saving"
+          rows="2"
+          auto-grow
+          maxlength="1000"
+          :hint="messages.notesHint"
+          persistent-hint
+          :error-messages="fieldError('notes')"
+        />
+      </OptionalFields>
     </v-form>
     <template #actions>
       <v-btn

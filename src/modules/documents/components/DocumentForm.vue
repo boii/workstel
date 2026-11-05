@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import OptionalFields from '../../../shared/optional-fields.vue';
+import { t } from '../../../i18n';
 import {
   categoryKeys,
   errorMessage,
@@ -151,21 +153,27 @@ const fieldError = (field: DocumentField) =>
           />
         </div>
       </div>
-      <label
-        for="document-description"
-        class="field-label"
-        >{{ messages.notes }}</label
-      ><v-textarea
-        id="document-description"
-        v-model="draft.description"
-        :disabled="saving"
-        rows="2"
-        auto-grow
-        maxlength="500"
-        :hint="messages.notesHint"
-        persistent-hint
-        :error-messages="fieldError('description')"
-      />
+      <OptionalFields
+        :label="t('addNotes')"
+        :filled="!!draft.description || !!fieldError('description')"
+        :reset-key="open"
+      >
+        <label
+          for="document-description"
+          class="field-label"
+          >{{ messages.notes }}</label
+        ><v-textarea
+          id="document-description"
+          v-model="draft.description"
+          :disabled="saving"
+          rows="2"
+          auto-grow
+          maxlength="500"
+          :hint="messages.notesHint"
+          persistent-hint
+          :error-messages="fieldError('description')"
+        />
+      </OptionalFields>
     </v-form>
     <template #actions>
       <v-btn
@@ -193,7 +201,8 @@ const fieldError = (field: DocumentField) =>
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
-@media (max-width: 680px) {
+/* Category and department stay side by side on phones; only very narrow screens stack them. */
+@media (max-width: 359px) {
   .document-form-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 0;

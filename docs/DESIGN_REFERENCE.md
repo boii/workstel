@@ -94,3 +94,9 @@ Approved by the user as a correction pass within the baseline. Colours, Quicksan
 - Row actions: per-row primary actions (Record, Inspect, Open, Log activity) use the outlined primary style instead of tonal blocks. A page's filled button is then the only solid call to action. Outlined primary text uses `--workstel-primary-text` for contrast.
 - Money: summaries use compact currency and rows and details use the full amount. A deal value of 0 reads "No value yet" ("Belum ada nilai") instead of "IDR 0".
 - Navigation: production hides My tasks until it has a backend, instead of showing a disabled link. Demo mode still shows it.
+
+## Compact forms, second pass — 5 November 2026
+
+- Paired fields: short pairs stay side by side on phones and stack only below 360px. The pairs are Sales stage and segment, value and room nights, arrival and departure; Bin Card code and unit, minimum and department; and Document category and department. The vehicle inspection odometer and fuel level still stack, because the fuel buttons need the full width.
+- Optional fields: `src/shared/optional-fields.vue` folds optional fields behind one "Add …" link (deal, account and document notes; inspection notes; stock reference and notes). The fields open by themselves when they already have a value, when a server error points at them, or for inspection notes once an item is marked as an issue. They fold again when the form is reopened, and expanding them focuses the first field. The Bin Card stock movement sheet on a phone went from 594px to 473px.
+- Footers: every module form already keeps Cancel and Save in the `ModuleDialog` footer, outside the scrolling body, so no change was needed.

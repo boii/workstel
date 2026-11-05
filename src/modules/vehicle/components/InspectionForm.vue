@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import OptionalFields from '../../../shared/optional-fields.vue';
+import { t } from '../../../i18n';
 import {
   errorMessage,
   fuelKeys,
@@ -191,21 +193,27 @@ const fieldError = (field: InspectionField) => {
           >
         </li>
       </ul>
-      <label
-        for="inspection-notes"
-        class="field-label"
-        >{{ messages.notes }}</label
-      ><v-textarea
-        id="inspection-notes"
-        v-model="notes"
-        :disabled="saving"
-        rows="2"
-        auto-grow
-        maxlength="1000"
-        :hint="issueMarked ? messages.notesHint : ''"
-        :persistent-hint="issueMarked"
-        :error-messages="fieldError('notes')"
-      />
+      <OptionalFields
+        :label="t('addNotes')"
+        :filled="!!notes || issueMarked || !!fieldError('notes')"
+        :reset-key="open"
+      >
+        <label
+          for="inspection-notes"
+          class="field-label"
+          >{{ messages.notes }}</label
+        ><v-textarea
+          id="inspection-notes"
+          v-model="notes"
+          :disabled="saving"
+          rows="2"
+          auto-grow
+          maxlength="1000"
+          :hint="issueMarked ? messages.notesHint : ''"
+          :persistent-hint="issueMarked"
+          :error-messages="fieldError('notes')"
+        />
+      </OptionalFields>
     </v-form>
     <template #actions>
       <v-btn

@@ -396,10 +396,14 @@
     font-size: var(--workstel-font-lg);
   }
 }
-@media (max-width: 680px) {
+/* Paired short fields (stage and segment, value and nights, arrival and departure) stay
+   side by side on phones and only stack on very narrow screens. */
+@media (max-width: 359px) {
   .sales-form-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+@media (max-width: 680px) {
   .sales-mini-list .v-btn--icon {
     width: 44px !important;
     height: 44px !important;

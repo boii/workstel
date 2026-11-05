@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import OptionalFields from '../../../shared/optional-fields.vue';
+import { t } from '../../../i18n';
 import {
   entryKeys,
   errorMessage,
@@ -148,30 +150,36 @@ const unit = computed(() => props.item?.unit ?? '');
         :hint="type === 'adjustment' ? messages.countHint : ''"
         :persistent-hint="type === 'adjustment'"
         :error-messages="fieldError('quantity')"
-      /><label
-        for="bin-entry-reference"
-        class="field-label"
-        >{{ messages.reference }}</label
-      ><v-text-field
-        id="bin-entry-reference"
-        v-model="reference"
-        :disabled="saving"
-        :placeholder="messages.referencePlaceholder"
-        maxlength="60"
-        :error-messages="fieldError('reference')"
-      /><label
-        for="bin-entry-notes"
-        class="field-label"
-        >{{ messages.notes }}</label
-      ><v-textarea
-        id="bin-entry-notes"
-        v-model="notes"
-        :disabled="saving"
-        rows="2"
-        auto-grow
-        maxlength="500"
-        :error-messages="fieldError('notes')"
-      />
+      /><OptionalFields
+        :label="t('addReferenceNotes')"
+        :filled="!!reference || !!notes || !!fieldError('reference') || !!fieldError('notes')"
+        :reset-key="open"
+      >
+        <label
+          for="bin-entry-reference"
+          class="field-label"
+          >{{ messages.reference }}</label
+        ><v-text-field
+          id="bin-entry-reference"
+          v-model="reference"
+          :disabled="saving"
+          :placeholder="messages.referencePlaceholder"
+          maxlength="60"
+          :error-messages="fieldError('reference')"
+        /><label
+          for="bin-entry-notes"
+          class="field-label"
+          >{{ messages.notes }}</label
+        ><v-textarea
+          id="bin-entry-notes"
+          v-model="notes"
+          :disabled="saving"
+          rows="2"
+          auto-grow
+          maxlength="500"
+          :error-messages="fieldError('notes')"
+        />
+      </OptionalFields>
     </v-form>
     <template #actions>
       <v-btn

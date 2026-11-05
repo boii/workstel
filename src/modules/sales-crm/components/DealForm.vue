@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import OptionalFields from '../../../shared/optional-fields.vue';
+import { t } from '../../../i18n';
 import {
   errorMessage,
   segmentKeys,
@@ -307,19 +309,25 @@ const fieldError = (field: keyof DealInput) =>
           :error-messages="fieldError('nextFollowUp')"
         />
       </template>
-      <label
-        for="sales-deal-notes"
-        class="field-label"
-        >{{ messages.notes }}</label
-      ><v-textarea
-        id="sales-deal-notes"
-        v-model="draft.notes"
-        :disabled="saving"
-        rows="2"
-        auto-grow
-        maxlength="1000"
-        :error-messages="fieldError('notes')"
-      />
+      <OptionalFields
+        :label="t('addNotes')"
+        :filled="!!draft.notes || !!fieldError('notes')"
+        :reset-key="open"
+      >
+        <label
+          for="sales-deal-notes"
+          class="field-label"
+          >{{ messages.notes }}</label
+        ><v-textarea
+          id="sales-deal-notes"
+          v-model="draft.notes"
+          :disabled="saving"
+          rows="2"
+          auto-grow
+          maxlength="1000"
+          :error-messages="fieldError('notes')"
+        />
+      </OptionalFields>
     </v-form>
     <template #actions>
       <v-btn
