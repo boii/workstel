@@ -336,3 +336,17 @@ Measured on the signed-in Room Turnaround reload, with the network chain running
 | After (three reloads) | 467 / 289 / 288 ms | 1120 / 715 / 690 ms               |
 
 The sign-in page path (no session) was not exercised, so as not to sign the operator out.
+
+## Platform audit reader — 5 November 2026
+
+Commit b5447e1 adds the platform-owned audit reader `workstel_admin_list_audit(p_limit)` (migration `202611050001_platform_audit.sql`) and the developer-only Audit log page at `/admin/audit`, which no longer calls the Vault audit RPC. See MODULE_STANDARD.md, Module isolation.
+
+The migration was applied on 192.168.2.12 over SSH. Before it was applied, the server had every migration through `202611040013` and one platform developer. The restricted local backup `/opt/workstel/backups/pre-platform-audit-20261105T164242Z.dump` was created and its archive listing checked first. This is not an off-server backup or a restore drill. The migration ran in one transaction, recorded its version and reloaded the PostgREST schema.
+
+Verification ran in database transactions that were rolled back, so no `platform.audit.read` events were written:
+
+- `anon` cannot execute the function, and `authenticated` can.
+- A non-developer receives `ACCESS_DENIED`.
+- The platform developer received 30 events, all `platform.*`, with no Vault or other module events.
+
+Not yet done: a call through the REST API in a signed-in session, frontend deployment and pushing the branch.
