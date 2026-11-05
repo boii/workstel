@@ -259,3 +259,11 @@ Operator acceptance after sign-in, not yet performed:
 4. On a phone, open a Bin Card ledger and the Room Turnaround summary. Rows show as labelled cards without sideways scrolling.
 
 Once the GitHub billing issue is resolved, re-run the Quality workflow on main so CI records the check and deployment.
+
+## Mobile density release — 5 November 2026
+
+Commit 64fb3ea (frontend only; no migration) adds compact mobile filters, the collapsing mobile header and the floating primary action, and fixes command palette search focus. See DESIGN_REFERENCE.md.
+
+GitHub Actions remained blocked by the account billing lock. `npm run check` and `npm run build:production` passed locally. The bundle was published through Wrangler Direct Upload to https://92a1da7e.workstel.pages.dev/ (production https://workstel.pages.dev/). `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build.
+
+Operator acceptance on a phone after sign-in, not yet performed: the Filters button and badge in Documents, Bin Card, Vehicle Checklist, Sales CRM and Room Turnaround; the header navigation row hides on scroll down and returns on scroll up; the floating create button opens its form and does not cover the last record.
