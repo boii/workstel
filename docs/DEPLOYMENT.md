@@ -305,3 +305,7 @@ Commit 0afce03 (frontend only) tightens form spacing, adds phone bottom sheets f
 - Record stock movement opens as a 594px bottom sheet anchored to the bottom.
 
 Forms were only opened and closed; no data was changed.
+
+## Design tokens release — 5 November 2026
+
+Commit d3cbc35 adds shared status, neutral and type tokens (see DESIGN_REFERENCE.md). Commit e6238c1 adds Vuetify field labels, found still at 12px and 16px during the production check. Both are frontend only. They were published through Wrangler Direct Upload; the latest deployment is https://07cf0470.workstel.pages.dev/ (production https://workstel.pages.dev/). GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session, Sales CRM text used only 11, 13, 15, 20 and 23 px, and the negotiation stage rendered with the info token (#e3f4fa background, #005a75 text).
