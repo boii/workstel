@@ -309,3 +309,11 @@ Forms were only opened and closed; no data was changed.
 ## Design tokens release — 5 November 2026
 
 Commit d3cbc35 adds shared status, neutral and type tokens (see DESIGN_REFERENCE.md). Commit e6238c1 adds Vuetify field labels, found still at 12px and 16px during the production check. Both are frontend only. They were published through Wrangler Direct Upload; the latest deployment is https://07cf0470.workstel.pages.dev/ (production https://workstel.pages.dev/). GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session, Sales CRM text used only 11, 13, 15, 20 and 23 px, and the negotiation stage rendered with the info token (#e3f4fa background, #005a75 text).
+
+## Row action and navigation corrections — 5 November 2026
+
+Commit 28a9bde (frontend only) switches per-row actions to the outlined style, shows "No value yet" for a deal value of 0, and hides My tasks in production. It was published through Wrangler Direct Upload to https://298be571.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. In the signed-in production session, the following were confirmed:
+
+- The header navigation shows only Dashboard and Favorites.
+- The dummy deal "Weekend packages" reads "No value yet · Other · Sales & Marketing".
+- Log activity renders as an outlined button.
