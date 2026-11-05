@@ -40,9 +40,16 @@ export function useAuth() {
     }
     try {
       const client = getSupabase();
-      const { data: user, error: userError } = await client.auth.getUser();
+      // The three checks are independent, so they run together. Every RPC still verifies the
+      // token on the server, and nothing is applied unless the user check also succeeds.
+      const [userResult, sessionResult, modules] = await Promise.all([
+        client.auth.getUser(),
+        client.rpc('workstel_session'),
+        client.rpc('workstel_module_access'),
+      ]);
+      const { data: user, error: userError } = userResult;
       if (userError || !user.user) throw Error('Invalid session');
-      const { data, error } = await client.rpc('workstel_session');
+      const { data, error } = sessionResult;
       if (current !== generation) return;
       if (error) throw error;
       if (!Array.isArray(data?.data) || !data.data.length) {
@@ -69,8 +76,6 @@ export function useAuth() {
       )
         throw Error('Invalid access response');
       // Servers without the operational-module migration keep those modules unavailable.
-      const modules = await client.rpc('workstel_module_access');
-      if (current !== generation) return;
       moduleAccess.value = modules.error ? noModuleAccess : parseModuleAccess(modules.data);
       assignments.value = rows as StaffAssignment[];
       vaultReady.value = data.meta?.vaultPolicy === 'private-v1';
@@ -87,6 +92,23 @@ export function useAuth() {
       }
     }
   }
+  /** Loads which sign-in methods the server allows; resolves false when unavailable. */
+  async function loadSignInSettings(): Promise<boolean> {
+    try {
+      const response = await fetch(runtime.supabaseUrl + '/auth/v1/settings', {
+        headers: { apikey: runtime.anonKey },
+        signal: AbortSignal.timeout(10000),
+        redirect: 'error',
+      });
+      if (!response.ok) return false;
+      const settings = await response.json();
+      googleEnabled.value = settings.external?.google === true;
+      emailEnabled.value = settings.external?.email === true;
+      return true;
+    } catch {
+      return false;
+    }
+  }
   async function start() {
     if (runtime.demo || !runtime.configured || stop) return;
     const client = getSupabase();
@@ -98,6 +120,9 @@ export function useAuth() {
       });
     });
     stop = () => data.subscription.unsubscribe();
+    // Sign-in options only matter on the sign-in page, so they load alongside the session
+    // restore instead of after it.
+    const settingsLoaded = loadSignInSettings();
     try {
       // INITIAL_SESSION may already contain an OAuth callback session. Otherwise restore
       // via the server cookie; the marker is never a real refresh credential.
@@ -108,15 +133,8 @@ export function useAuth() {
         await synchronize(restored.data.session);
         busy.value = false;
       }
-      const response = await fetch(runtime.supabaseUrl + '/auth/v1/settings', {
-        headers: { apikey: runtime.anonKey },
-        signal: AbortSignal.timeout(10000),
-        redirect: 'error',
-      });
-      if (!response.ok) throw Error('Settings unavailable');
-      const settings = await response.json();
-      googleEnabled.value = settings.external?.google === true;
-      emailEnabled.value = settings.external?.email === true;
+      // A signed-in user sees the workspace at once; the sign-in page waits for its options.
+      if (!authenticated.value && !(await settingsLoaded)) failure.value = 'authUnavailable';
     } catch {
       busy.value = false;
       failure.value = 'authUnavailable';
