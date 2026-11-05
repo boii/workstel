@@ -349,4 +349,4 @@ Verification ran in database transactions that were rolled back, so no `platform
 - A non-developer receives `ACCESS_DENIED`.
 - The platform developer received 30 events, all `platform.*`, with no Vault or other module events.
 
-Not yet done: a call through the REST API in a signed-in session, frontend deployment and pushing the branch.
+Commit ad2444e was fast-forwarded onto `main` and pushed. It was published through Wrangler Direct Upload to https://294a2b09.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build. In the signed-in production session at desktop width, `/admin/audit` loaded 29 events through the REST API, all `platform.*`. That read is recorded as `platform.audit.read`. The production page was not checked at phone width; the 390px layout was checked in demo mode before release.
