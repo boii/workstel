@@ -35,3 +35,7 @@ What the seed covers:
 | Password Vault    | Metadata only, with no secret values: active and archived accounts, an empty website, long notes, and an IT account shared with Front Office.                                                                                                                                                                              |
 
 Seeding and removal write the access changes to the audit log (`staff.access.*`, `staff.module-access.*`). Audit events are append-only, so the test hotel's audit history remains after removal. During removal, the append-only guards on vehicle inspections, Bin Card entries and sales activities are disabled for that transaction only. `supabase/tests/test-hotel-seed.test.ts` runs both scripts against all migrations.
+
+## Latency investigation
+
+See [SERVER_LATENCY.md](SERVER_LATENCY.md). `latency-probe.sh` times the same requests through Cloudflare, directly on the server and against the database. `server-health.sh` takes a read-only snapshot of the host, containers, PostgREST pool and database. Both scripts are read-only and never print secrets.
