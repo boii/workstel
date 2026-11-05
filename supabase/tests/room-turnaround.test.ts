@@ -93,11 +93,6 @@ test('Room Turnaround times each room cleaning per module grants', async (t) => 
         [taskId, startedMinutesAgo, pausedMinutesAgo ?? null],
       );
     };
-    const today = (
-      await db.query<{ d: string }>(
-        "select to_char((now() at time zone 'Asia/Jakarta')::date,'YYYY-MM-DD') as d",
-      )
-    ).rows[0].d;
 
     await t.test('the module, grants and tables carry the new name', async () => {
       await db.exec('reset role');
@@ -239,6 +234,14 @@ test('Room Turnaround times each room cleaning per module grants', async (t) => 
     });
 
     await t.test('history per day and per room, and the daily summary', async () => {
+      // Backdated starts straddle two Jakarta days when the suite runs just after midnight,
+      // so move every task, keeping their spacing, to noon of a fixed hotel day.
+      const today = '2026-01-15';
+      await db.exec('reset role');
+      await db.query(
+        "with shift as (select ($1::date+time '12:00') at time zone 'Asia/Jakarta'-min(started_at) as by from public.room_turnaround_tasks where hotel_id=$2) update public.room_turnaround_tasks set started_at=started_at+shift.by,paused_at=paused_at+shift.by,finished_at=finished_at+shift.by from shift where hotel_id=$2",
+        [today, hotel],
+      );
       await as(reader);
       const history = await rpc('room_turnaround_tasks_list', [hotel, null, today]);
       assert.equal(history.data!.length, 3);
