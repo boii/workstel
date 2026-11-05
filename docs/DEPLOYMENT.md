@@ -267,3 +267,11 @@ Commit 64fb3ea (frontend only; no migration) adds compact mobile filters, the co
 GitHub Actions remained blocked by the account billing lock. `npm run check` and `npm run build:production` passed locally. The bundle was published through Wrangler Direct Upload to https://92a1da7e.workstel.pages.dev/ (production https://workstel.pages.dev/). `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build.
 
 Operator acceptance on a phone after sign-in, not yet performed: the Filters button and badge in Documents, Bin Card, Vehicle Checklist, Sales CRM and Room Turnaround; the header navigation row hides on scroll down and returns on scroll up; the floating create button opens its form and does not cover the last record.
+
+## Undo, skeleton and empty state release — 5 November 2026
+
+Commit e115ca3 (frontend only; no migration) extends optimistic archive/restore with Undo to Vehicle Checklist and Bin Card, adds Undo after a confirmed Sales CRM account archive, and adds content-shaped skeletons and actionable empty states. Undo relies on the archive/restore RPCs raising the record version by one. This was confirmed in the `vehicle_save`, `bin_card_item_save` and `sales_account_save` migrations.
+
+GitHub Actions remained blocked by the account billing lock. `npm run check` and `npm run build:production` passed locally. The bundle was published through Wrangler Direct Upload to https://95ee52f3.workstel.pages.dev/ (production https://workstel.pages.dev/). `scripts/verify-pages-deployment.mjs` passed, and the production assets matched the local build.
+
+Operator acceptance after sign-in, not yet performed: archive a test vehicle and a zero-balance Bin Card item, then select Undo for each. Confirm that archiving an item with stock is refused and the row stays. Archive a Sales CRM test account, confirm, then select Undo. No version-conflict message should appear, and every action should appear in the module audit.
