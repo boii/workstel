@@ -304,6 +304,8 @@ const departmentItems = computed(() => [
     <ModulePage
       :title="messages.title"
       :description="rooms.length + ' ' + messages.rooms"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-timer-outline'"
+      :skeleton="tab === 'rooms' ? 'grid' : 'list'"
       :loading="loading"
       :error="failure"
       :empty="tab === 'rooms' && !visibleCount"

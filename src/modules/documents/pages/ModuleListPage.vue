@@ -2,6 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
@@ -63,7 +65,7 @@ const search = ref('');
 const departmentId = ref<string | null>(null);
 const category = ref<Category | null>(null);
 const status = ref<DocumentStatus | 'all'>('active');
-const notice = ref('');
+const { notice, undoAction, show: showNotice } = useUndoNotice();
 let controller: AbortController | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -137,52 +139,18 @@ async function saveDocument(input: DocumentInput) {
   notice.value = messages.value.saved;
   await load();
 }
-// Archive and restore update the list at once and offer Undo; the server still checks
-// permissions and versions, and a rejected change puts the row back.
-const undoAction = ref<(() => void) | null>(null);
-function showNotice(message: string, undo: (() => void) | null = null) {
-  notice.value = message;
-  undoAction.value = undo;
-}
-function placeRow(row: DocumentLink, index: number) {
-  const rest = documents.value.filter((entry) => entry.id !== row.id);
-  const visible = status.value === 'all' || row.status === status.value;
-  if (visible) rest.splice(Math.min(index, rest.length), 0, row);
-  documents.value = rest;
-}
-async function toggleArchive(document: DocumentLink) {
-  const archiving = document.status === 'active';
-  const index = documents.value.findIndex((entry) => entry.id === document.id);
-  const changed: DocumentLink = { ...document, status: archiving ? 'archived' : 'active' };
-  placeRow(changed, index);
-  showNotice(archiving ? messages.value.archivedDone : messages.value.restoredDone);
-  try {
-    await api.setArchived(hotelId.value, document, archiving);
-  } catch (error) {
-    placeRow(document, index);
-    showNotice(errorMessage(messages.value, error));
-    return;
-  }
-  const committed = { ...changed, version: document.version + 1 };
-  if (documents.value.some((entry) => entry.id === committed.id)) placeRow(committed, index);
-  showNotice(
-    archiving ? messages.value.archivedDone : messages.value.restoredDone,
-    () => void undoArchive(committed, document, index),
-  );
-}
-async function undoArchive(committed: DocumentLink, original: DocumentLink, index: number) {
-  const restored = { ...original, version: committed.version + 1 };
-  placeRow(restored, index);
-  showNotice(
-    original.status === 'active' ? messages.value.restoredDone : messages.value.archivedDone,
-  );
-  try {
-    await api.setArchived(hotelId.value, committed, original.status === 'archived');
-  } catch (error) {
-    showNotice(errorMessage(messages.value, error));
-    await load();
-  }
-}
+const { toggle: toggleArchive } = useOptimisticArchive({
+  rows: documents,
+  statusFilter: () => status.value,
+  commit: (document, archived) => api.setArchived(hotelId.value, document, archived),
+  show: showNotice,
+  messages: () => ({
+    archived: messages.value.archivedDone,
+    restored: messages.value.restoredDone,
+  }),
+  errorMessage: (error) => errorMessage(messages.value, error),
+  reload: () => load(),
+});
 
 const searchField = ref<FocusableField | null>(null);
 const shortcutsOpen = ref(false);
@@ -229,6 +197,7 @@ const departmentItems = computed(() => [
     <ModulePage
       :title="messages.title"
       :description="documents.length + ' ' + messages.documents"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-file-document-multiple-outline'"
       :loading="loading"
       :error="failure"
       :empty="!documents.length"
@@ -306,6 +275,13 @@ const departmentItems = computed(() => [
           color="primary"
           @click="resetFilters"
           >{{ messages.reset }}</v-btn
+        ><v-btn
+          v-else-if="writableDepartments.length"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="openForm()"
+          >{{ messages.add }}</v-btn
         >
       </template>
       <ul class="documents-list">
@@ -395,21 +371,10 @@ const departmentItems = computed(() => [
       v-model="shortcutsOpen"
       :rows="shortcutRows"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      :timeout="undoAction ? 6000 : 3000"
-      @update:model-value="showNotice('')"
-      >{{ notice
-      }}<template
-        v-if="undoAction"
-        #actions
-        ><v-btn
-          variant="text"
-          class="documents-undo"
-          @click="undoAction()"
-          >{{ t('undo') }}</v-btn
-        ></template
-      ></v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
   </div>
 </template>

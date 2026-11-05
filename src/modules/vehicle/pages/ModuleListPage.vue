@@ -2,6 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import { runtime } from '../../../config/runtime';
 import type { ModuleAssignment } from '../../../core/module-access';
 import { useShortcuts } from '../../../core/use-shortcuts';
@@ -57,7 +59,7 @@ const failure = ref('');
 const search = ref('');
 const departmentId = ref<string | null>(null);
 const status = ref<VehicleStatus | 'all'>('active');
-const notice = ref('');
+const { notice, undoAction, show: showNotice } = useUndoNotice();
 let controller: AbortController | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -130,16 +132,18 @@ async function saveVehicle(input: VehicleInput) {
   notice.value = messages.value.saved;
   await load();
 }
-async function toggleArchive(vehicle: Vehicle) {
-  try {
-    await api.setArchived(hotelId.value, vehicle, vehicle.status === 'active');
-    notice.value =
-      vehicle.status === 'active' ? messages.value.archivedDone : messages.value.restoredDone;
-  } catch (error) {
-    notice.value = errorMessage(messages.value, error);
-  }
-  await load();
-}
+const { toggle: toggleArchive } = useOptimisticArchive({
+  rows: vehicles,
+  statusFilter: () => status.value,
+  commit: (vehicle, archived) => api.setArchived(hotelId.value, vehicle, archived),
+  show: showNotice,
+  messages: () => ({
+    archived: messages.value.archivedDone,
+    restored: messages.value.restoredDone,
+  }),
+  errorMessage: (error) => errorMessage(messages.value, error),
+  reload: () => load(),
+});
 function openInspection(vehicle: Vehicle) {
   selected.value = vehicle;
   inspectOpen.value = true;
@@ -204,6 +208,7 @@ const departmentItems = computed(() => [
     <ModulePage
       :title="messages.title"
       :description="vehicles.length + ' ' + messages.vehicles"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-car-outline'"
       :loading="loading"
       :error="failure"
       :empty="!vehicles.length"
@@ -276,6 +281,13 @@ const departmentItems = computed(() => [
           color="primary"
           @click="resetFilters"
           >{{ messages.reset }}</v-btn
+        ><v-btn
+          v-else-if="manageableDepartments.length"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="openForm()"
+          >{{ messages.add }}</v-btn
         >
       </template>
       <ul class="vehicle-list">
@@ -377,11 +389,10 @@ const departmentItems = computed(() => [
       v-model="shortcutsOpen"
       :rows="shortcutRows"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
   </div>
 </template>

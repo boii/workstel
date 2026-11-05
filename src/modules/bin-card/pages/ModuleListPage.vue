@@ -2,6 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
@@ -63,7 +65,7 @@ const search = ref('');
 const departmentId = ref<string | null>(null);
 const status = ref<ItemStatus | 'all'>('active');
 const lowOnly = ref(false);
-const notice = ref('');
+const { notice, undoAction, show: showNotice } = useUndoNotice();
 let controller: AbortController | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -138,16 +140,18 @@ async function saveItem(input: StockItemInput) {
   notice.value = messages.value.saved;
   await load();
 }
-async function toggleArchive(item: StockItem) {
-  try {
-    await api.setArchived(hotelId.value, item, item.status === 'active');
-    notice.value =
-      item.status === 'active' ? messages.value.archivedDone : messages.value.restoredDone;
-  } catch (error) {
-    notice.value = errorMessage(messages.value, error);
-  }
-  await load();
-}
+const { toggle: toggleArchive } = useOptimisticArchive({
+  rows: items,
+  statusFilter: () => status.value,
+  commit: (item, archived) => api.setArchived(hotelId.value, item, archived),
+  show: showNotice,
+  messages: () => ({
+    archived: messages.value.archivedDone,
+    restored: messages.value.restoredDone,
+  }),
+  errorMessage: (error) => errorMessage(messages.value, error),
+  reload: () => load(),
+});
 function openEntry(item: StockItem) {
   selected.value = item;
   entryOpen.value = true;
@@ -209,6 +213,7 @@ const departmentItems = computed(() => [
     <ModulePage
       :title="messages.title"
       :description="items.length + ' ' + messages.items"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-package-variant-closed'"
       :loading="loading"
       :error="failure"
       :empty="!items.length"
@@ -289,6 +294,13 @@ const departmentItems = computed(() => [
           color="primary"
           @click="resetFilters"
           >{{ messages.reset }}</v-btn
+        ><v-btn
+          v-else-if="manageableDepartments.length"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="openForm()"
+          >{{ messages.add }}</v-btn
         >
       </template>
       <ul class="bin-list">
@@ -379,11 +391,10 @@ const departmentItems = computed(() => [
       v-model="shortcutsOpen"
       :rows="shortcutRows"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
   </div>
 </template>

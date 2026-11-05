@@ -1,14 +1,23 @@
 <script setup lang="ts">
-defineProps<{
-  title: string;
-  description: string;
-  loading?: boolean;
-  error?: string;
-  empty?: boolean;
-  emptyTitle: string;
-  emptyDescription: string;
-  retryLabel: string;
-}>();
+import { t } from '../i18n';
+
+withDefaults(
+  defineProps<{
+    title: string;
+    description: string;
+    loading?: boolean;
+    error?: string;
+    empty?: boolean;
+    emptyTitle: string;
+    emptyDescription: string;
+    /** MDI icon shown above the empty-state title. */
+    emptyIcon?: string;
+    retryLabel: string;
+    /** Loading placeholder shaped like the content: record rows or a tile grid. */
+    skeleton?: 'list' | 'grid';
+  }>(),
+  { skeleton: 'list', emptyIcon: undefined, error: '' },
+);
 defineEmits<{ retry: [] }>();
 </script>
 <template>
@@ -24,10 +33,30 @@ defineEmits<{ retry: [] }>();
       <div class="module-page-actions"><slot name="actions" /></div>
     </div>
     <div class="module-page-toolbar"><slot name="toolbar" /></div>
-    <v-skeleton-loader
+    <div
       v-if="loading"
-      type="table"
-    /><v-alert
+      class="module-skeleton"
+      :class="'module-skeleton--' + skeleton"
+      role="status"
+      :aria-label="t('loadingRecords')"
+    >
+      <template v-if="skeleton === 'grid'">
+        <v-skeleton-loader
+          v-for="n in 9"
+          :key="n"
+          type="heading, text"
+          class="module-skeleton-tile"
+        />
+      </template>
+      <v-skeleton-loader
+        v-for="n in 5"
+        v-else
+        :key="n"
+        type="list-item-avatar-two-line"
+        class="module-skeleton-row"
+      />
+    </div>
+    <v-alert
       v-else-if="error"
       type="error"
       variant="tonal"
@@ -41,7 +70,12 @@ defineEmits<{ retry: [] }>();
     ><v-card
       v-else-if="empty"
       class="module-empty"
-      ><h2>{{ emptyTitle }}</h2>
+      ><v-icon
+        v-if="emptyIcon"
+        :icon="emptyIcon"
+        size="36"
+        class="module-empty-icon" />
+      <h2>{{ emptyTitle }}</h2>
       <p>{{ emptyDescription }}</p>
       <slot name="empty-action"
     /></v-card>
@@ -96,6 +130,33 @@ defineEmits<{ retry: [] }>();
 .module-empty {
   padding: 30px;
   text-align: center;
+}
+.module-empty-icon {
+  margin-bottom: 10px;
+  color: var(--workstel-primary-text);
+  opacity: 0.8;
+}
+.module-empty :deep(.v-btn) {
+  margin-top: 14px;
+}
+.module-skeleton--list {
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid var(--workstel-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.module-skeleton-row + .module-skeleton-row {
+  border-top: 1px solid var(--workstel-border);
+}
+.module-skeleton--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.module-skeleton-tile {
+  border: 1px solid var(--workstel-border);
+  border-radius: 6px;
+  min-height: 92px;
 }
 .module-empty h2 {
   font-size: 18px;

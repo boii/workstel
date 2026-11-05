@@ -2,6 +2,8 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useUndoNotice } from '../../../core/use-optimistic-archive';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
@@ -92,7 +94,7 @@ const nextCursor = ref<string | null>(null);
 const loading = ref(true);
 const loadingMore = ref(false);
 const failure = ref('');
-const notice = ref('');
+const { notice, undoAction, show: showNotice } = useUndoNotice();
 let controller: AbortController | null = null;
 let summaryController: AbortController | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
@@ -287,19 +289,39 @@ async function setArchived(archived: boolean) {
   archiving.value = true;
   try {
     await api.setAccountArchived(hotelId.value, account, archived);
-    notice.value = archived ? messages.value.archivedDone : messages.value.restoredDone;
-    detailAccount.value = {
+    const committed: SalesAccount = {
       ...account,
       status: archived ? 'archived' : 'active',
       version: account.version + 1,
     };
+    detailAccount.value = committed;
     archiveConfirmOpen.value = false;
+    showNotice(
+      archived ? messages.value.archivedDone : messages.value.restoredDone,
+      () => void undoArchive(committed, archived),
+    );
     refresh();
   } catch (error) {
     notice.value = errorMessage(messages.value, error);
   } finally {
     archiving.value = false;
   }
+}
+// Undo reverses a confirmed archive or a restore; the RPC raises the version by one.
+async function undoArchive(committed: SalesAccount, archived: boolean) {
+  try {
+    await api.setAccountArchived(hotelId.value, committed, !archived);
+    if (detailAccount.value?.id === committed.id)
+      detailAccount.value = {
+        ...committed,
+        status: archived ? 'active' : 'archived',
+        version: committed.version + 1,
+      };
+    showNotice(archived ? messages.value.restoredDone : messages.value.archivedDone);
+  } catch (error) {
+    showNotice(errorMessage(messages.value, error));
+  }
+  refresh();
 }
 const loadAccountDeals = (accountId: string, signal: AbortSignal) =>
   api.listDeals(
@@ -478,6 +500,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
     <ModulePage
       :title="messages.title"
       :description="rows + ' ' + (tab === 'pipeline' ? messages.deals : messages.accounts)"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-handshake-outline'"
       :loading="loading"
       :error="failure"
       :empty="!rows"
@@ -877,11 +900,10 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       v-model="shortcutsOpen"
       :rows="shortcutRows"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
   </div>
 </template>
