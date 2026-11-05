@@ -4,6 +4,7 @@ export default {
   description: 'Dokumen dan prosedur operasional.',
   back: 'Dashboard',
   documents: 'dokumen',
+  documentOne: 'dokumen',
   add: 'Tambah dokumen',
   edit: 'Ubah dokumen',
   save: 'Simpan dokumen',

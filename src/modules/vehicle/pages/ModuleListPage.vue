@@ -207,7 +207,9 @@ const departmentItems = computed(() => [
     </button>
     <ModulePage
       :title="messages.title"
-      :description="vehicles.length + ' ' + messages.vehicles"
+      :description="
+        vehicles.length + ' ' + (vehicles.length === 1 ? messages.vehicleOne : messages.vehicles)
+      "
       :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-car-outline'"
       :loading="loading"
       :error="failure"

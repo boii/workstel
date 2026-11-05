@@ -28,7 +28,8 @@ defineEmits<{ retry: [] }>();
     <div class="module-page-heading">
       <div class="module-page-title">
         <h1>{{ title }}</h1>
-        <p>{{ description }}</p>
+        <!-- A count read before the first response would show a misleading zero. -->
+        <p>{{ loading ? t('loadingRecords') : description }}</p>
       </div>
       <div class="module-page-actions"><slot name="actions" /></div>
     </div>

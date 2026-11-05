@@ -303,7 +303,7 @@ const departmentItems = computed(() => [
     </button>
     <ModulePage
       :title="messages.title"
-      :description="rooms.length + ' ' + messages.rooms"
+      :description="rooms.length + ' ' + (rooms.length === 1 ? messages.roomOne : messages.rooms)"
       :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-timer-outline'"
       :skeleton="tab === 'rooms' ? 'grid' : 'list'"
       :loading="loading"

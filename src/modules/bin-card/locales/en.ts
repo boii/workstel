@@ -3,6 +3,7 @@ export default {
   description: 'Track stock receipts, issues, and balances.',
   back: 'Dashboard',
   items: 'items',
+  itemOne: 'item',
   add: 'Add item',
   edit: 'Edit item',
   save: 'Save item',

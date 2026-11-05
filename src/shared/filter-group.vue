@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { Comment, computed, ref, useSlots } from 'vue';
+import type { VNode } from 'vue';
 import { useDisplay } from 'vuetify';
 import { t } from '../i18n';
 
@@ -13,6 +14,17 @@ const emit = defineEmits<{ reset: [] }>();
 const { width } = useDisplay();
 const compact = computed(() => width.value <= 680);
 const open = ref(false);
+const slots = useSlots();
+// Filters rendered with v-if (one floor, one department) leave only comment nodes;
+// then there is nothing to choose and the phone button stays hidden.
+const hasFilters = (nodes: VNode[] | undefined): boolean =>
+  (nodes ?? []).some((node) =>
+    node.type === Comment
+      ? false
+      : Array.isArray(node.children) && typeof node.type === 'symbol'
+        ? hasFilters(node.children as VNode[])
+        : true,
+  );
 const label = computed(() =>
   props.count ? `${t('filters')} (${props.count} ${t('filtersActive')})` : t('filters'),
 );
@@ -20,7 +32,7 @@ const label = computed(() =>
 <template>
   <slot v-if="!compact" />
   <v-menu
-    v-else
+    v-else-if="hasFilters(slots.default?.())"
     v-model="open"
     location="bottom end"
     :close-on-content-click="false"

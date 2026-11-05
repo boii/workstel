@@ -196,7 +196,11 @@ const departmentItems = computed(() => [
     </button>
     <ModulePage
       :title="messages.title"
-      :description="documents.length + ' ' + messages.documents"
+      :description="
+        documents.length +
+        ' ' +
+        (documents.length === 1 ? messages.documentOne : messages.documents)
+      "
       :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-file-document-multiple-outline'"
       :loading="loading"
       :error="failure"

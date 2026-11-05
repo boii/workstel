@@ -3,6 +3,7 @@ export default {
   description: 'Inspect hotel vehicles before each use.',
   back: 'Dashboard',
   vehicles: 'vehicles',
+  vehicleOne: 'vehicle',
   add: 'Add vehicle',
   edit: 'Edit vehicle',
   save: 'Save vehicle',

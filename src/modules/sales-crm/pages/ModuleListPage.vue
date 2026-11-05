@@ -499,7 +499,17 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
     </button>
     <ModulePage
       :title="messages.title"
-      :description="rows + ' ' + (tab === 'pipeline' ? messages.deals : messages.accounts)"
+      :description="
+        rows +
+        ' ' +
+        (tab === 'pipeline'
+          ? rows === 1
+            ? messages.dealOne
+            : messages.deals
+          : rows === 1
+            ? messages.accountOne
+            : messages.accounts)
+      "
       :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-handshake-outline'"
       :loading="loading"
       :error="failure"

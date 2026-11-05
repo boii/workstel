@@ -3,6 +3,7 @@ export default {
   description: 'Hotel documents and operating procedures.',
   back: 'Dashboard',
   documents: 'documents',
+  documentOne: 'document',
   add: 'Add document',
   edit: 'Edit document',
   save: 'Save document',

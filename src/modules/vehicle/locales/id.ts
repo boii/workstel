@@ -4,6 +4,7 @@ export default {
   description: 'Periksa kendaraan hotel sebelum dipakai.',
   back: 'Dashboard',
   vehicles: 'kendaraan',
+  vehicleOne: 'kendaraan',
   add: 'Tambah kendaraan',
   edit: 'Ubah kendaraan',
   save: 'Simpan kendaraan',

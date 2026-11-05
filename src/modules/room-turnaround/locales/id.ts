@@ -4,6 +4,7 @@ export default {
   description: 'Lama menyiapkan setiap kamar.',
   back: 'Dashboard',
   rooms: 'kamar',
+  roomOne: 'kamar',
   tabRooms: 'Kamar',
   tabHistory: 'Riwayat',
   manageRooms: 'Daftar kamar',

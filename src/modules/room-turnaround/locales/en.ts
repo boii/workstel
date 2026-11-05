@@ -3,6 +3,7 @@ export default {
   description: 'How long each room takes to get ready.',
   back: 'Dashboard',
   rooms: 'rooms',
+  roomOne: 'room',
   tabRooms: 'Rooms',
   tabHistory: 'History',
   manageRooms: 'Room list',

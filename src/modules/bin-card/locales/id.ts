@@ -4,6 +4,7 @@ export default {
   description: 'Catat stok masuk, keluar, dan saldo.',
   back: 'Dashboard',
   items: 'barang',
+  itemOne: 'barang',
   add: 'Tambah barang',
   edit: 'Ubah barang',
   save: 'Simpan barang',

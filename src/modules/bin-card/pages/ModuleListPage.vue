@@ -212,7 +212,7 @@ const departmentItems = computed(() => [
     </button>
     <ModulePage
       :title="messages.title"
-      :description="items.length + ' ' + messages.items"
+      :description="items.length + ' ' + (items.length === 1 ? messages.itemOne : messages.items)"
       :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-package-variant-closed'"
       :loading="loading"
       :error="failure"
