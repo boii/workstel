@@ -244,3 +244,18 @@ Migration `202611040012_housekeeping_timer.sql` narrows Housekeeping to timing e
 ## Room Turnaround release — 4 November 2026
 
 Migration `202611040013_room_turnaround.sql` renames the Housekeeping timer module to **Room Turnaround** (Indonesian: Waktu Siap Kamar): module ID `room-turnaround`, route `/room-turnaround`, tables `room_turnaround_rooms` and `room_turnaround_tasks`, RPCs `room_turnaround_*` and audit actions `room-turnaround.*`. Existing grants and the module switch move to the new ID. The Housekeeping department keeps its name and code, and earlier `housekeeping.*` audit events stay as recorded. Apply it with `infra/apply-operations-modules.sh`, then deploy the frontend right away, because the old frontend calls the removed `housekeeping_*` RPCs.
+
+## Command palette and adaptive tables release — 5 November 2026
+
+Commit 4875a43 (frontend only; no migration) adds the command palette, adaptive stacked tables for the Bin Card ledger and Room Turnaround attendants, and optimistic Documents archive/restore with Undo. See DESIGN_REFERENCE.md.
+
+The GitHub Actions run for this push (42027486289) did not start: GitHub reported the account as locked due to a billing issue. The previous run (41911176044, commit 9b2c638) failed for the same reason. CI therefore did not run `npm run check` or deploy. `npm run check` passed locally before the commit. `npm run build:production` passed locally, including the production configuration gate. The bundle was then published through Wrangler Direct Upload to https://c7b2cf07.workstel.pages.dev/ (production https://workstel.pages.dev/). `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build.
+
+Operator acceptance after sign-in, not yet performed:
+
+1. Press Ctrl/⌘ + K on the dashboard and inside a module. Search a module and press Enter. Switch the language from the palette.
+2. On a phone, tap the header search icon. The palette opens fullscreen and Cancel closes it.
+3. In Documents, with a manage grant, archive a test document. The row disappears and Undo appears. Select Undo, then archive and restore it once more. No version-conflict message should appear. Confirm both actions appear in the module audit.
+4. On a phone, open a Bin Card ledger and the Room Turnaround summary. Rows show as labelled cards without sideways scrolling.
+
+Once the GitHub billing issue is resolved, re-run the Quality workflow on main so CI records the check and deployment.
