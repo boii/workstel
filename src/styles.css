@@ -934,3 +934,9 @@ footer small {
 .v-badge__badge {
   font-size: var(--workstel-font-xs);
 }
+.v-field-label {
+  font-size: var(--workstel-font-md);
+}
+.v-field-label.v-field-label--floating {
+  font-size: var(--workstel-font-xs);
+}
