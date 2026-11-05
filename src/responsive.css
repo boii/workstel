@@ -108,3 +108,78 @@
     margin: 12px;
   }
 }
+/* Phones: search and the Filters button share one row (see shared/filter-group.vue). */
+@media (max-width: 680px) {
+  .module-page
+    .module-page-toolbar
+    :is(.vehicle-toolbar, .bin-toolbar, .documents-toolbar, .sales-toolbar, .hk-toolbar):has(
+      > .filter-group-button
+    ) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .module-page
+    .module-page-toolbar
+    :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search) {
+    grid-column: auto;
+  }
+  /* Centre the 44px button on the 40px search field. */
+  .module-page .module-page-toolbar .filter-group-button {
+    margin-top: -2px;
+  }
+}
+/* Phones: hide the navigation row of the fixed header while scrolling down (App.vue). */
+@media (max-width: 680px) {
+  .portal-header.v-app-bar {
+    transition:
+      clip-path 0.2s ease,
+      box-shadow 0.2s ease;
+    clip-path: inset(0 0 -40px 0);
+  }
+  /* The clip also hides the header shadow, so draw a hairline at the new bottom edge. */
+  .portal-header.portal-header--collapsed.v-app-bar {
+    clip-path: inset(0 0 44px 0);
+    background-image: linear-gradient(
+      to bottom,
+      transparent 67px,
+      var(--workstel-border) 67px,
+      var(--workstel-border) 68px,
+      transparent 68px
+    );
+  }
+  .portal-header--collapsed .top-nav {
+    visibility: hidden;
+    transition: visibility 0s 0.2s;
+  }
+}
+@media (max-width: 680px) and (prefers-reduced-motion: reduce) {
+  .portal-header.v-app-bar,
+  .portal-header--collapsed .top-nav {
+    transition: none;
+  }
+}
+/* Phones: a module's main create action floats above the list, within thumb reach. */
+@media (max-width: 680px) {
+  .module-page-actions > .v-btn.module-primary-action {
+    position: fixed;
+    right: var(--workstel-page-gutter, 16px);
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 5;
+    flex: 0 0 auto;
+    height: 52px !important;
+    padding-inline: 20px;
+    border-radius: 26px;
+    /* Measured header shadow token (DESIGN_REFERENCE.md). */
+    box-shadow:
+      0 2px 30px -1px rgba(85, 85, 85, 0.08),
+      0 4px 30px rgba(85, 85, 85, 0.06),
+      0 1px 30px rgba(85, 85, 85, 0.03);
+  }
+  .module-page:has(.module-primary-action) {
+    padding-bottom: 76px;
+  }
+  /* With only the floating action left, the empty actions row should not add a gap. */
+  .module-page-actions:has(> .module-primary-action:only-child) {
+    display: contents;
+  }
+}

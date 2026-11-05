@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import FilterGroup from '../../../shared/filter-group.vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
@@ -191,6 +192,21 @@ const hasFilters = computed(
       ? stage.value !== 'open' || followUp.value !== 'any'
       : !!accountType.value || accountStatus.value !== 'active'),
 );
+// Filters other than search; on phones they share one Filters button.
+const filterCount = computed(
+  () =>
+    (departmentId.value ? 1 : 0) +
+    (tab.value === 'pipeline'
+      ? (stage.value !== 'open' ? 1 : 0) + (followUp.value !== 'any' ? 1 : 0)
+      : (accountType.value ? 1 : 0) + (accountStatus.value !== 'active' ? 1 : 0)),
+);
+function resetFilterGroup() {
+  departmentId.value = null;
+  stage.value = 'open';
+  followUp.value = 'any';
+  accountType.value = null;
+  accountStatus.value = 'active';
+}
 function resetFilters() {
   search.value = '';
   departmentId.value = null;
@@ -494,6 +510,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
             >{{ messages.addAccount }}</v-btn
           ><v-btn
             color="primary"
+            class="module-primary-action"
             prepend-icon="mdi-plus"
             @click="openDealForm()"
             >{{ messages.addDeal }}</v-btn
@@ -587,36 +604,41 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
             clearable
             maxlength="150"
           />
-          <template v-if="tab === 'pipeline'">
+          <FilterGroup
+            :count="filterCount"
+            @reset="resetFilterGroup"
+          >
+            <template v-if="tab === 'pipeline'">
+              <v-select
+                v-model="stage"
+                :items="stageItems"
+                :label="messages.stage"
+              />
+              <v-select
+                v-model="followUp"
+                :items="followUpItems"
+                :label="messages.followUp"
+              />
+            </template>
+            <template v-else>
+              <v-select
+                v-model="accountType"
+                :items="typeItems"
+                :label="messages.accountType"
+              />
+              <v-select
+                v-model="accountStatus"
+                :items="statusItems"
+                :label="messages.status"
+              />
+            </template>
             <v-select
-              v-model="stage"
-              :items="stageItems"
-              :label="messages.stage"
+              v-if="hotelScope.length > 1"
+              v-model="departmentId"
+              :items="departmentItems"
+              :label="messages.department"
             />
-            <v-select
-              v-model="followUp"
-              :items="followUpItems"
-              :label="messages.followUp"
-            />
-          </template>
-          <template v-else>
-            <v-select
-              v-model="accountType"
-              :items="typeItems"
-              :label="messages.accountType"
-            />
-            <v-select
-              v-model="accountStatus"
-              :items="statusItems"
-              :label="messages.status"
-            />
-          </template>
-          <v-select
-            v-if="hotelScope.length > 1"
-            v-model="departmentId"
-            :items="departmentItems"
-            :label="messages.department"
-          />
+          </FilterGroup>
         </div>
       </template>
       <template #empty-action>

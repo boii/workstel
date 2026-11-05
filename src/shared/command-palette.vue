@@ -3,6 +3,8 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { t } from '../i18n';
 import { usePersistedRef } from '../core/use-persisted-ref';
+import { focusFieldInput } from '../core/focus-field';
+import type { FocusableField } from '../core/focus-field';
 
 export interface PaletteItem {
   /** Stable identifier, also used to remember recent picks. */
@@ -24,6 +26,7 @@ const fullscreen = computed(() => width.value <= 680);
 const query = ref('');
 const active = ref(0);
 const listRef = ref<HTMLElement | null>(null);
+const searchField = ref<FocusableField | null>(null);
 // Only item identifiers are remembered; no record data leaves the session.
 const recent = usePersistedRef<string[]>(
   'workstel.palette.recent',
@@ -84,11 +87,13 @@ const sections = computed(() => {
   return result;
 });
 
+// Focus the search as soon as the field renders; the dialog's own autofocus waits for the
+// opening transition, which drops keys typed straight after Ctrl/⌘ + K or a tap.
 watch(open, (value) => {
-  if (value) {
-    query.value = '';
-    active.value = firstEnabled(0, 1);
-  }
+  if (!value) return;
+  query.value = '';
+  active.value = firstEnabled(0, 1);
+  void nextTick(() => focusFieldInput(searchField.value));
 });
 watch(query, () => {
   active.value = firstEnabled(0, 1);
@@ -147,8 +152,8 @@ function onKeydown(event: KeyboardEvent) {
     <v-card class="palette">
       <div class="palette-search">
         <v-text-field
+          ref="searchField"
           v-model="query"
-          autofocus
           :placeholder="t('palettePlaceholder')"
           :aria-label="t('palettePlaceholder')"
           prepend-inner-icon="mdi-magnify"

@@ -60,3 +60,13 @@ English is the default interface and coding language. Bahasa Indonesia is an opt
 - Optimistic archive with Undo: Documents archive and restore update the list immediately and offer Undo for 6 seconds. The server still enforces permissions and versions; a rejected change restores the row.
 
 Validation: desktop and 390px mobile were checked in the in-app browser preview in demo mode.
+
+## Mobile density changes — 5 November 2026
+
+Approved by the user on 5 November 2026 after a 390px review. Before this change, the first Documents record started 587px down an 844px screen.
+
+- Compact filters: on screens up to 680px, secondary filters collapse into one Filters button next to search (`src/shared/filter-group.vue`). The button shows a badge with the active filter count, and its panel has Reset and Show results. This applies to Documents, Bin Card, Vehicle Checklist, Sales CRM and the Room Turnaround rooms tab. Vault keeps its own filter toggle. Desktop filters stay inline.
+- Collapsing header: on phones the Dashboard/My tasks/Favorites row hides while scrolling down past the header and returns on scroll up, at the top of the page, on navigation, or when focus enters the header. This refines the earlier rule that navigation sits beneath the top header row; there is still no bottom navigation.
+- Floating primary action: on phones a module's main create button (`.module-primary-action`) floats at the bottom right, using the measured header shadow token. Secondary actions stay in the page heading.
+
+Result: the first Documents record now starts at about 400px. Checked in the in-app browser at 390 x 844 and on desktop in demo mode.

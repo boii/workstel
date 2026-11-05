@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import FilterGroup from '../../../shared/filter-group.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
@@ -135,6 +136,12 @@ const groups = computed(() => {
 const visibleCount = computed(() => groups.value.reduce((sum, [, list]) => sum + list.length, 0));
 const myRoom = computed(() => rooms.value.find((r) => r.openTask?.mine) ?? null);
 const hasFilters = computed(() => !!search.value || floor.value !== null || !!departmentId.value);
+// Filters other than search; on phones they share one Filters button.
+const filterCount = computed(() => (floor.value !== null ? 1 : 0) + (departmentId.value ? 1 : 0));
+function resetFilterGroup() {
+  floor.value = null;
+  departmentId.value = null;
+}
 function resetFilters() {
   search.value = '';
   floor.value = null;
@@ -417,18 +424,23 @@ const departmentItems = computed(() => [
             clearable
             maxlength="10"
           />
-          <v-select
-            v-if="floors.length > 1"
-            v-model="floor"
-            :items="floorItems"
-            :label="messages.floor"
-          />
-          <v-select
-            v-if="hotelScope.length > 1"
-            v-model="departmentId"
-            :items="departmentItems"
-            :label="messages.department"
-          />
+          <FilterGroup
+            :count="filterCount"
+            @reset="resetFilterGroup"
+          >
+            <v-select
+              v-if="floors.length > 1"
+              v-model="floor"
+              :items="floorItems"
+              :label="messages.floor"
+            />
+            <v-select
+              v-if="hotelScope.length > 1"
+              v-model="departmentId"
+              :items="departmentItems"
+              :label="messages.department"
+            />
+          </FilterGroup>
         </div>
         <div
           v-else

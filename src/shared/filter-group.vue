@@ -1,0 +1,100 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useDisplay } from 'vuetify';
+import { t } from '../i18n';
+
+/**
+ * Secondary list filters. On wider screens the slot renders inline inside the module
+ * toolbar grid; on phones it collapses into one Filters button next to search, with a
+ * badge for active filters, so records start higher on the first screen.
+ */
+const props = defineProps<{ count: number }>();
+const emit = defineEmits<{ reset: [] }>();
+const { width } = useDisplay();
+const compact = computed(() => width.value <= 680);
+const open = ref(false);
+const label = computed(() =>
+  props.count ? `${t('filters')} (${props.count} ${t('filtersActive')})` : t('filters'),
+);
+</script>
+<template>
+  <slot v-if="!compact" />
+  <v-menu
+    v-else
+    v-model="open"
+    location="bottom end"
+    :close-on-content-click="false"
+    max-width="calc(100vw - 32px)"
+  >
+    <template #activator="{ props: menu }">
+      <v-btn
+        v-bind="menu"
+        class="filter-group-button"
+        variant="tonal"
+        :color="count ? 'primary' : undefined"
+        :aria-label="label"
+        :title="label"
+      >
+        <v-badge
+          :model-value="count > 0"
+          :content="count"
+          color="primary"
+          floating
+          ><v-icon icon="mdi-filter-variant"
+        /></v-badge>
+      </v-btn>
+    </template>
+    <v-card class="filter-group-panel">
+      <header>
+        <h2>{{ t('filters') }}</h2>
+        <v-btn
+          v-if="count"
+          variant="text"
+          color="primary"
+          @click="emit('reset')"
+          >{{ t('filtersReset') }}</v-btn
+        >
+      </header>
+      <div class="filter-group-fields"><slot /></div>
+      <v-btn
+        color="primary"
+        block
+        class="filter-group-done"
+        @click="open = false"
+        >{{ t('filtersDone') }}</v-btn
+      >
+    </v-card>
+  </v-menu>
+</template>
+<style scoped>
+.filter-group-button {
+  min-width: 44px !important;
+  width: 44px;
+  height: 44px !important;
+  padding: 0 !important;
+}
+.filter-group-panel {
+  width: 320px;
+  max-width: 100%;
+  padding: 14px 16px 16px;
+}
+.filter-group-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin-bottom: 6px;
+}
+.filter-group-panel h2 {
+  font-size: 16px;
+  font-weight: 500;
+}
+.filter-group-fields {
+  display: grid;
+  gap: 4px;
+}
+.filter-group-done {
+  margin-top: 6px;
+}
+</style>

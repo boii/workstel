@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import FilterGroup from '../../../shared/filter-group.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
@@ -108,6 +109,14 @@ onBeforeUnmount(() => {
 const hasFilters = computed(
   () => !!search.value || !!departmentId.value || status.value !== 'active' || lowOnly.value,
 );
+// Filters other than search; on phones they share one Filters button.
+const filterCount = computed(
+  () => (departmentId.value ? 1 : 0) + (status.value !== 'active' ? 1 : 0),
+);
+function resetFilterGroup() {
+  departmentId.value = null;
+  status.value = 'active';
+}
 function resetFilters() {
   search.value = '';
   departmentId.value = null;
@@ -218,6 +227,7 @@ const departmentItems = computed(() => [
         <v-btn
           v-if="manageableDepartments.length"
           color="primary"
+          class="module-primary-action"
           prepend-icon="mdi-plus"
           :aria-label="messages.add"
           @click="openForm()"
@@ -246,17 +256,22 @@ const departmentItems = computed(() => [
             clearable
             maxlength="150"
           />
-          <v-select
-            v-if="hotelScope.length > 1"
-            v-model="departmentId"
-            :items="departmentItems"
-            :label="messages.department"
-          />
-          <v-select
-            v-model="status"
-            :items="statusItems"
-            :label="messages.status"
-          />
+          <FilterGroup
+            :count="filterCount"
+            @reset="resetFilterGroup"
+          >
+            <v-select
+              v-if="hotelScope.length > 1"
+              v-model="departmentId"
+              :items="departmentItems"
+              :label="messages.department"
+            />
+            <v-select
+              v-model="status"
+              :items="statusItems"
+              :label="messages.status"
+            />
+          </FilterGroup>
         </div>
         <v-checkbox
           v-model="lowOnly"

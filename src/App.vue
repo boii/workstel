@@ -173,8 +173,35 @@ function onPaletteKey(event: KeyboardEvent) {
     paletteOpen.value = !paletteOpen.value;
   }
 }
-onMounted(() => window.addEventListener('keydown', onPaletteKey));
-onUnmounted(() => window.removeEventListener('keydown', onPaletteKey));
+// Phones: the navigation row slides away while reading down a list and returns on any
+// upward scroll, near the top of the page, or when keyboard focus enters the header.
+const headerCollapsed = ref(false);
+let lastScrollY = 0;
+let scrollFrame = 0;
+function onScroll() {
+  if (scrollFrame) return;
+  scrollFrame = window.requestAnimationFrame(() => {
+    scrollFrame = 0;
+    const y = window.scrollY;
+    if (width.value > 680 || y < 112) headerCollapsed.value = false;
+    else if (y > lastScrollY + 8) headerCollapsed.value = true;
+    else if (y < lastScrollY - 8) headerCollapsed.value = false;
+    if (Math.abs(y - lastScrollY) > 8 || y < 112) lastScrollY = y;
+  });
+}
+watch(
+  () => route.fullPath,
+  () => (headerCollapsed.value = false),
+);
+onMounted(() => {
+  window.addEventListener('keydown', onPaletteKey);
+  window.addEventListener('scroll', onScroll, { passive: true });
+});
+onUnmounted(() => {
+  window.removeEventListener('keydown', onPaletteKey);
+  window.removeEventListener('scroll', onScroll);
+  window.cancelAnimationFrame(scrollFrame);
+});
 const pageIcons: Record<string, string> = {
   Dashboard: 'mdi-view-dashboard-outline',
   'My tasks': 'mdi-clipboard-check-outline',
@@ -458,6 +485,8 @@ function logout() {
       ><v-app-bar
         :height="headerHeight"
         class="portal-header"
+        :class="{ 'portal-header--collapsed': headerCollapsed }"
+        @focusin="headerCollapsed = false"
         ><div class="header-inner">
           <button
             class="wordmark"
