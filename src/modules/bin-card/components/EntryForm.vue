@@ -84,6 +84,7 @@ const unit = computed(() => props.item?.unit ?? '');
 <template>
   <ModuleDialog
     v-model="open"
+    sheet
     :title="messages.entryTitle"
     :subtitle="item ? item.code + ' · ' + item.name : ''"
     :busy="saving"

@@ -5,11 +5,20 @@ import { t } from '../i18n';
 
 const open = defineModel<boolean>({ required: true });
 const props = withDefaults(
-  defineProps<{ title: string; subtitle?: string; busy?: boolean; width?: number }>(),
-  { subtitle: '', busy: false, width: 560 },
+  defineProps<{
+    title: string;
+    subtitle?: string;
+    busy?: boolean;
+    width?: number;
+    /** Short forms open on phones as a bottom sheet sized to their content. */
+    sheet?: boolean;
+  }>(),
+  { subtitle: '', busy: false, width: 560, sheet: false },
 );
 const { width: viewport } = useDisplay();
-const fullscreen = computed(() => viewport.value <= 680);
+const phone = computed(() => viewport.value <= 680);
+const fullscreen = computed(() => phone.value && !props.sheet);
+const bottomSheet = computed(() => phone.value && props.sheet);
 </script>
 <template>
   <v-dialog
@@ -17,6 +26,8 @@ const fullscreen = computed(() => viewport.value <= 680);
     :max-width="props.width"
     :persistent="busy"
     :fullscreen="fullscreen"
+    :class="{ 'module-dialog-sheet': bottomSheet }"
+    :transition="bottomSheet ? 'dialog-bottom-transition' : undefined"
     scrollable
     :aria-label="title"
   >
@@ -93,6 +104,13 @@ const fullscreen = computed(() => viewport.value <= 680);
   flex-shrink: 0;
 }
 @media (max-width: 680px) {
+  .module-dialog-sheet .module-dialog {
+    border-radius: 12px 12px 0 0 !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .module-dialog-sheet .module-dialog-actions :deep(.v-btn:last-child) {
+    flex: 1 1 auto;
+  }
   .module-dialog-heading {
     padding: 12px 16px;
   }
@@ -110,6 +128,20 @@ const fullscreen = computed(() => viewport.value <= 680);
   /* Slot buttons carry the parent's scope, so they are reached with :deep(). */
   .module-dialog-actions :deep(.v-btn) {
     min-height: 44px;
+  }
+}
+</style>
+<style>
+/* The overlay content is teleported outside this component, so the sheet layout is global. */
+@media (max-width: 680px) {
+  .v-dialog.module-dialog-sheet {
+    align-items: flex-end;
+  }
+  .v-dialog.module-dialog-sheet > .v-overlay__content {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    margin: 0 !important;
   }
 }
 </style>

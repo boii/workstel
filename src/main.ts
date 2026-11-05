@@ -37,6 +37,7 @@ const vuetify = createVuetify({
     VTextField: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
     VSelect: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
     VTextarea: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
+    VAutocomplete: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
     VDialog: { maxWidth: 520 },
   },
 });

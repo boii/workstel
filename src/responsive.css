@@ -183,3 +183,35 @@
     display: contents;
   }
 }
+/* Narrow lists: identity on the first line, status and actions share the second line, and
+   secondary row actions become 44px icon buttons that keep their accessible names. */
+@container (max-width: 720px) {
+  .module-page :is(.vehicle-row, .bin-row) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 12px 8px 10px 14px;
+  }
+  .module-page :is(.vehicle-identity, .bin-identity) {
+    grid-column: 1 / -1;
+  }
+  .module-page :is(.vehicle-actions, .bin-actions) {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+  .module-page :is(.vehicle-actions, .bin-actions) .v-btn--icon {
+    margin-left: 0;
+  }
+  .module-page .row-secondary-action.v-btn {
+    width: 44px;
+    min-width: 44px !important;
+    padding: 0 !important;
+  }
+  .module-page .row-secondary-action .v-btn__content {
+    display: none;
+  }
+  .module-page .row-secondary-action .v-btn__prepend {
+    margin: 0;
+  }
+}

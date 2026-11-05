@@ -75,3 +75,11 @@ Result: the first Documents record now starts at about 400px. Checked in the in-
 
 - ModulePage shows a loading placeholder shaped like the content: record rows by default, or a tile grid (`skeleton="grid"`, used by the Room Turnaround rooms tab). This replaces the generic table skeleton.
 - Empty states show an icon, one sentence and one action. With filters they show a filter-off icon and Reset filters. Without filters they show the module icon and its create action when the user may create.
+
+## Compact forms and row actions — 5 November 2026
+
+Approved by the user after measuring production forms.
+
+- Form spacing: `.field-label` margins went from 20px/8px to 14px/4px. `VAutocomplete` now shares the compact, filled and `hideDetails: 'auto'` defaults of the other fields. A field row went from 88px to 76px, and the Sales CRM Add deal form now fits a laptop screen without scrolling (749px, down from 822px).
+- Bottom sheet: `ModuleDialog` has a `sheet` option. On phones, short forms open from the bottom at their content height, with a full-width primary button. Used by Record stock movement, Log activity, Add/Edit room and the room timer. Long forms stay fullscreen on phones.
+- Row actions: in list containers narrower than 720px, the record name takes the first line, and status and actions share the second. Secondary row actions (`.row-secondary-action`: Bin card ledger, Vehicle history) become 44px icon buttons that keep their accessible names and tooltips. A Bin Card row on a 390px phone went from 167px to 128px. Desktop rows are unchanged.

@@ -74,6 +74,7 @@ const control = (action: TaskAction) =>
 <template>
   <ModuleDialog
     v-model="open"
+    sheet
     :title="room ? messages.room + ' ' + room.number : ''"
     :subtitle="
       room

@@ -335,7 +335,10 @@ const departmentItems = computed(() => [
               >{{ messages.inspect }}</v-btn
             ><v-btn
               variant="text"
+              class="row-secondary-action"
               prepend-icon="mdi-history"
+              :aria-label="messages.history + ' — ' + vehicle.name"
+              :title="messages.history"
               @click="openHistory(vehicle)"
               >{{ messages.history }}</v-btn
             ><v-menu v-if="can(vehicle.departmentId, 'canManage')"

@@ -516,10 +516,12 @@ footer small {
   display: flex;
   margin-top: 22px;
 }
+/* Labels sit close to their field and rows stay tight, so common forms fit without scrolling. */
 .field-label {
   display: block;
   font-size: 13px;
-  margin: 20px 0 8px;
+  line-height: 1.4;
+  margin: 14px 0 4px;
 }
 .info-panel {
   padding: 28px;

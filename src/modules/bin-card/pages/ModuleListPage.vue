@@ -335,7 +335,10 @@ const departmentItems = computed(() => [
               >{{ messages.record }}</v-btn
             ><v-btn
               variant="text"
+              class="row-secondary-action"
               prepend-icon="mdi-format-list-bulleted"
+              :aria-label="messages.ledger + ' — ' + item.name"
+              :title="messages.ledger"
               @click="openLedger(item)"
               >{{ messages.ledger }}</v-btn
             ><v-menu v-if="can(item.departmentId, 'canManage')"
