@@ -44,6 +44,7 @@ import type { PaletteItem } from './shared/command-palette.vue';
 import SettingsPage from './shared/settings-page.vue';
 import HelpPage from './shared/help-page.vue';
 import UsersPage from './users/users-page.vue';
+import AuditPage from './admin/audit-page.vue';
 import ChangePassword from './users/change-password.vue';
 const appVersion = import.meta.env.VITE_APP_VERSION;
 const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
@@ -211,12 +212,17 @@ const pageIcons: Record<string, string> = {
   Settings: 'mdi-cog-outline',
   Help: 'mdi-help-circle-outline',
   Users: 'mdi-account-multiple-outline',
+  'Audit log': 'mdi-history',
 };
 // The palette only navigates and runs shell actions; it never searches module records,
 // so it does not cross module isolation boundaries.
 const paletteItems = computed<PaletteItem[]>(() => [
-  ...['Dashboard', 'My tasks', 'Favorites', 'Settings', 'Help', 'Users']
-    .filter((page) => (page === 'My tasks' ? runtime.demo : page !== 'Users' || isDeveloper.value))
+  ...['Dashboard', 'My tasks', 'Favorites', 'Settings', 'Help', 'Users', 'Audit log']
+    .filter((page) =>
+      page === 'My tasks'
+        ? runtime.demo
+        : !['Users', 'Audit log'].includes(page) || isDeveloper.value,
+    )
     .map((page) => ({
       id: 'page:' + page,
       group: 'pages' as const,
@@ -624,6 +630,10 @@ function logout() {
                   prepend-icon="mdi-account-multiple-outline"
                   :title="t('usersTitle')"
                   @click="nav('Users')" /><v-list-item
+                  v-if="isDeveloper"
+                  prepend-icon="mdi-history"
+                  :title="t('auditLogTitle')"
+                  @click="nav('Audit log')" /><v-list-item
                   prepend-icon="mdi-help-circle-outline"
                   :title="t('help')"
                   @click="nav('Help')" /><v-list-item
@@ -638,7 +648,7 @@ function logout() {
       ><v-main :id="session ? 'workspace-main' : undefined"
         ><div class="workspace-content">
           <div
-            v-if="!route.meta.moduleId"
+            v-if="!route.meta.moduleId && view !== 'Audit log'"
             class="page-heading"
           >
             <h1>
@@ -869,6 +879,12 @@ function logout() {
             v-else-if="view === 'Users' && isDeveloper"
             :demo="runtime.demo"
             :self-email="auth.email.value"
+          />
+          <!-- ModulePage inside renders the heading, as module pages do. -->
+          <AuditPage
+            v-else-if="view === 'Audit log'"
+            :demo="runtime.demo"
+            :platform-admin="isDeveloper"
           />
           <HelpPage
             v-else-if="view === 'Help'"

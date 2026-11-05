@@ -13,6 +13,7 @@ export const shellPaths: Record<string, string> = {
   Settings: '/settings',
   Help: '/help',
   Users: '/admin/users',
+  'Audit log': '/admin/audit',
 };
 
 export const routes: RouteRecordRaw[] = [
