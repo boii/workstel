@@ -390,3 +390,14 @@ Commit 159bbe3 (frontend only) applies one placement rule across modules (see DE
 It was fast-forwarded onto `main` and pushed. It was published through Wrangler Direct Upload to https://d57a0395.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build.
 
 In the signed-in production session at desktop width, every module's heading actions aligned at the same height, and Vault, Sales CRM and Room Turnaround secondary actions used the text variant. The Sales CRM stage rendered in the status column, and the Bin Card toolbar showed three 180px filters. At 390px, Vault and Sales CRM showed the floating add action, secondary actions kept their natural width, the Vault title used the shared 23px size, and nothing overflowed. Nothing was saved in production.
+
+## Style guard and shared list rows release — 6 November 2026
+
+Commit 5b04f19 (frontend and tooling only) adds `npm run styles:check` to the build. It also moves Bin Card, Vehicle Checklist, Documents and Sales CRM rows onto the shared `ListRow` (see DESIGN_REFERENCE.md). It was fast-forwarded onto `main` and pushed, then published through Wrangler Direct Upload to https://185de284.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` (including the style check) and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build.
+
+In the signed-in production session:
+
+- **Desktop:** all four modules rendered shared rows with 10/12/10/16px padding and a leading icon (16 bin items, 6 vehicles, 50 documents, 8 deals). Each row had a status column, except Documents.
+- **390px:** every row used 12/8/10/14px padding, with actions below the identity and 8px from the right edge. No page overflowed horizontally.
+
+Nothing was saved in production.
