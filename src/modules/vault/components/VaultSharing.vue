@@ -297,30 +297,29 @@ onUnmounted(() => {
         </div>
       </section>
     </template>
-    <v-dialog
+    <VaultDialog
       v-model="confirmTransfer"
-      :max-width="dialogWidth.xs"
+      sheet
+      :title="messages.transferConfirm"
+      :width="dialogWidth.md"
     >
-      <v-card class="vault-transfer-confirm">
-        <h2>{{ messages.transferConfirm }}</h2>
-        <p>
-          <strong>{{ entry.name }}</strong> → <strong>{{ newOwner.trim() }}</strong>
-        </p>
-        <p>{{ messages.transferConfirmBody }}</p>
-        <div class="vault-transfer-confirm-actions">
-          <v-btn
-            variant="text"
-            @click="confirmTransfer = false"
-            >{{ messages.cancel }}</v-btn
-          ><v-btn
-            color="primary"
-            variant="flat"
-            @click="transfer"
-            >{{ messages.transfer }}</v-btn
-          >
-        </div>
-      </v-card>
-    </v-dialog>
+      <p>
+        <strong>{{ entry.name }}</strong> → <strong>{{ newOwner.trim() }}</strong>
+      </p>
+      <p class="vault-transfer-confirm-body">{{ messages.transferConfirmBody }}</p>
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="confirmTransfer = false"
+          >{{ messages.cancel }}</v-btn
+        ><v-btn
+          color="primary"
+          variant="flat"
+          @click="transfer"
+          >{{ messages.transfer }}</v-btn
+        >
+      </template>
+    </VaultDialog>
     <template #actions>
       <v-btn
         variant="text"
@@ -376,30 +375,11 @@ onUnmounted(() => {
   gap: var(--workstel-space-2);
   margin-top: var(--workstel-space-2);
 }
-.vault-transfer-confirm {
-  padding: 22px;
-}
-.vault-transfer-confirm h2 {
-  font-size: var(--workstel-font-lg);
-  font-weight: var(--workstel-weight-medium);
-}
-.vault-transfer-confirm p {
+.vault-transfer-confirm-body {
   margin-top: var(--workstel-space-2_5);
-  font-size: var(--workstel-font-sm);
-  line-height: var(--workstel-leading-relaxed);
-  color: var(--workstel-text-secondary);
-  overflow-wrap: anywhere;
-}
-.vault-transfer-confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: var(--workstel-space-2);
-  margin-top: var(--workstel-space-5);
 }
 @media (max-width: 680px) {
-  .vault-transfer-actions .v-btn,
-  .vault-transfer-confirm-actions .v-btn {
+  .vault-transfer-actions .v-btn {
     min-height: var(--workstel-touch-target);
   }
   .vault-share-section :deep(.v-selection-control) {

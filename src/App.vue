@@ -39,6 +39,8 @@ import { useShortcuts } from './core/use-shortcuts';
 import { focusFieldInput } from './core/focus-field';
 import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
+import ModuleDialog from './shared/module-dialog.vue';
+import { dialogWidth } from './shared/dialog-widths';
 import CommandPalette from './shared/command-palette.vue';
 import type { PaletteItem } from './shared/command-palette.vue';
 import SettingsPage from './shared/settings-page.vue';
@@ -947,40 +949,43 @@ function logout() {
       ></template
     >
 
-    <v-dialog v-model="creating"
-      ><v-card class="detail-panel"
-        ><v-btn
-          icon="mdi-close"
-          variant="text"
-          class="close-button"
-          :aria-label="t('closeForm')"
-          @click="creating = false"
-        />
-        <h2>{{ t('createTask') }}</h2>
-        <p>{{ t('taskHint') }}</p>
-        <v-form @submit.prevent="addTask"
-          ><label
-            for="task-title"
-            class="field-label"
-            >{{ t('taskName') }}</label
-          ><v-text-field
-            id="task-title"
-            v-model="title"
-            autofocus
-            :placeholder="t('taskPlaceholder')"
-            maxlength="150"
-            :error-messages="translate(error)"
-            @update:model-value="error = ''"
-          /><small>{{ t('temporaryData') }}</small
-          ><v-btn
-            type="submit"
-            color="primary"
-            class="submit-button"
-            >{{ t('addTask') }}</v-btn
-          ></v-form
-        ></v-card
-      ></v-dialog
+    <ModuleDialog
+      v-model="creating"
+      sheet
+      :title="t('createTask')"
+      :subtitle="t('taskHint')"
+      :width="dialogWidth.md"
     >
+      <v-form
+        id="task-form"
+        @submit.prevent="addTask"
+        ><label
+          for="task-title"
+          class="field-label"
+          >{{ t('taskName') }}</label
+        ><v-text-field
+          id="task-title"
+          v-model="title"
+          autofocus
+          :placeholder="t('taskPlaceholder')"
+          maxlength="150"
+          :error-messages="translate(error)"
+          @update:model-value="error = ''"
+        /><small class="task-form-note">{{ t('temporaryData') }}</small></v-form
+      >
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="creating = false"
+          >{{ t('cancelAction') }}</v-btn
+        ><v-btn
+          type="submit"
+          form="task-form"
+          color="primary"
+          >{{ t('addTask') }}</v-btn
+        >
+      </template>
+    </ModuleDialog>
     <KeyboardShortcuts
       v-model="shortcutsOpen"
       :rows="shortcutRows"

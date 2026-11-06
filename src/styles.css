@@ -544,17 +544,10 @@ footer small {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
-.detail-panel {
-  padding: var(--workstel-space-8);
-  position: relative;
-}
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-.detail-panel > .v-icon {
-  margin-bottom: 18px;
+.task-form-note {
+  display: block;
+  font-size: var(--workstel-font-xs);
+  color: var(--workstel-text-secondary);
 }
 .eyebrow {
   display: block;
@@ -563,40 +556,6 @@ footer small {
   letter-spacing: var(--workstel-tracking-caps);
   color: var(--workstel-text-secondary);
   margin: var(--workstel-space-2_5) 0;
-}
-.detail-panel h2 {
-  font-size: var(--workstel-font-lg);
-  font-weight: var(--workstel-weight-medium);
-  margin-bottom: var(--workstel-space-2_5);
-}
-.detail-panel p {
-  font-size: var(--workstel-font-sm);
-  color: var(--workstel-text-secondary);
-  line-height: var(--workstel-leading-loose);
-  margin-bottom: var(--workstel-space-5);
-}
-.detail-panel .v-alert {
-  font-size: var(--workstel-font-sm);
-}
-.detail-panel dl {
-  font-size: var(--workstel-font-sm);
-  margin: var(--workstel-space-5) 0;
-}
-.detail-panel dt {
-  color: var(--workstel-text-secondary);
-  margin-top: var(--workstel-space-3_5);
-}
-.detail-panel dd {
-  margin: 5px 0;
-  overflow-wrap: anywhere;
-}
-.detail-panel small {
-  font-size: var(--workstel-font-xs);
-  color: var(--workstel-text-secondary);
-}
-.submit-button {
-  display: flex;
-  margin-top: 22px;
 }
 /* Labels sit close to their field and rows stay tight, so common forms fit without scrolling. */
 .field-label {
@@ -923,9 +882,6 @@ footer small {
   }
   .login-panel {
     padding: var(--workstel-space-7) var(--workstel-space-6);
-  }
-  .detail-panel {
-    padding: var(--workstel-space-7) 23px;
   }
   .login-note {
     align-items: flex-start;

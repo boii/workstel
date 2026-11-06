@@ -177,3 +177,12 @@ On phones (680px and below), short dialogs now open as bottom sheets sized to th
 - **Already bottom sheets:** stock movement, Log activity, add/edit room, the room timer and Profile.
 - **Still full screen, by design:** Sales CRM deal form (12 fields) and account form (8 fields), the Vehicle inspection form (checklist), the user access dialog, and the views whose length grows with records: Sales account detail, Bin Card ledger, Vehicle history and Vault Audit log.
 - Vault's other dialogs (edit account, password, sharing, confirmations) were content-sized centered popups on phones and are unchanged.
+
+## One dialog shell — 6 November 2026
+
+Approved by the user. Every dialog except the command palette now uses `ModuleDialog`, or `VaultDialog` inside Vault: a title with a close button, a scrolling body, and Cancel and the action in the footer.
+
+- **Confirmations:** module switch-off (Settings → Modules), block user, reset password and Vault ownership transfer (Users), and Vault transfer were three copies of one hand-built card. They had no close button, no accessible name and no bottom sheet on phones. They now use the shell with `sheet` at the `md` width (460px, up from 420px), like the Sales CRM archive confirmation. A destructive action stays `color="error"`. Body text is the dialog's normal text colour instead of secondary grey.
+- **Keyboard shortcuts:** uses `ModuleDialog` with `sheet` at the `xs` width instead of its own header.
+- **New task (demo My tasks):** uses `ModuleDialog` with `sheet` at the `md` width. The hint is the subtitle, and Add task moved to the footer with Cancel. The global `.detail-panel`, `.close-button` and `.submit-button` styles were used only here and are gone.
+- **Still custom:** the command palette keeps its search-first layout.

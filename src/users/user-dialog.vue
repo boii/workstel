@@ -371,63 +371,60 @@ async function confirmAction() {
         </ul>
       </section>
     </template>
-    <v-dialog
+    <ModuleDialog
       :model-value="!!confirm"
-      :max-width="dialogWidth.xs"
+      sheet
+      :title="
+        t(
+          confirm === 'block'
+            ? 'userConfirmBlockTitle'
+            : confirm === 'vault'
+              ? 'userVaultConfirmTitle'
+              : 'userConfirmResetTitle',
+        )
+      "
+      :width="dialogWidth.md"
       @update:model-value="confirm = null"
     >
-      <v-card class="user-confirm">
-        <h2>
-          {{
+      <p>
+        <strong>{{ user?.email }}</strong> —
+        {{
+          t(
+            confirm === 'block'
+              ? 'userConfirmBlockBody'
+              : confirm === 'vault'
+                ? 'userVaultConfirmBody'
+                : 'userConfirmResetBody',
+          )
+        }}
+      </p>
+      <p
+        v-if="confirm === 'block' && owned && owned.length"
+        class="user-confirm-warning"
+      >
+        {{ t('userVaultBlockWarning') }} <strong>{{ owned.length }}</strong>
+      </p>
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="confirm = null"
+          >{{ t('cancelAction') }}</v-btn
+        ><v-btn
+          :color="confirm === 'block' ? 'error' : 'primary'"
+          variant="flat"
+          @click="confirmAction"
+          >{{
             t(
               confirm === 'block'
-                ? 'userConfirmBlockTitle'
+                ? 'userBlock'
                 : confirm === 'vault'
-                  ? 'userVaultConfirmTitle'
-                  : 'userConfirmResetTitle',
+                  ? 'userVaultTransfer'
+                  : 'userResetPassword',
             )
-          }}
-        </h2>
-        <p>
-          <strong>{{ user?.email }}</strong> —
-          {{
-            t(
-              confirm === 'block'
-                ? 'userConfirmBlockBody'
-                : confirm === 'vault'
-                  ? 'userVaultConfirmBody'
-                  : 'userConfirmResetBody',
-            )
-          }}
-        </p>
-        <p
-          v-if="confirm === 'block' && owned && owned.length"
-          class="user-confirm-warning"
+          }}</v-btn
         >
-          {{ t('userVaultBlockWarning') }} <strong>{{ owned.length }}</strong>
-        </p>
-        <div class="user-confirm-actions">
-          <v-btn
-            variant="text"
-            @click="confirm = null"
-            >{{ t('cancelAction') }}</v-btn
-          ><v-btn
-            :color="confirm === 'block' ? 'error' : 'primary'"
-            variant="flat"
-            @click="confirmAction"
-            >{{
-              t(
-                confirm === 'block'
-                  ? 'userBlock'
-                  : confirm === 'vault'
-                    ? 'userVaultTransfer'
-                    : 'userResetPassword',
-              )
-            }}</v-btn
-          >
-        </div>
-      </v-card>
-    </v-dialog>
+      </template>
+    </ModuleDialog>
   </ModuleDialog>
 </template>
 <style scoped>
@@ -559,32 +556,11 @@ async function confirmAction() {
   font-size: var(--workstel-font-sm);
 }
 .user-confirm-warning {
-  color: var(--workstel-warning-text) !important;
-}
-.user-confirm {
-  padding: 22px;
-}
-.user-confirm h2 {
-  font-size: var(--workstel-font-lg);
-  font-weight: var(--workstel-weight-medium);
-}
-.user-confirm p {
   margin-top: var(--workstel-space-2_5);
-  font-size: var(--workstel-font-sm);
-  line-height: var(--workstel-leading-relaxed);
-  color: var(--workstel-text-secondary);
-  overflow-wrap: anywhere;
-}
-.user-confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: var(--workstel-space-2);
-  margin-top: var(--workstel-space-5);
+  color: var(--workstel-warning-text) !important;
 }
 @media (max-width: 680px) {
   .user-actions .v-btn,
-  .user-confirm-actions .v-btn,
   .user-vault-transfer .v-btn {
     min-height: var(--workstel-touch-target);
   }

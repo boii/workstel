@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { dialogWidth } from './dialog-widths';
 import { onMounted, ref } from 'vue';
+import ModuleDialog from './module-dialog.vue';
 import { locale, t, translate } from '../i18n';
 import type { ModuleManifest } from '../core/module';
 import { createDemoModuleSwitch, createLiveModuleSwitch } from '../core/module-switch';
@@ -130,31 +131,30 @@ function changedLabel(state: ModuleState) {
         />
       </li>
     </ul>
-    <v-dialog
+    <ModuleDialog
       :model-value="!!pendingOff"
-      :max-width="dialogWidth.xs"
+      sheet
+      :title="t('moduleDisableTitle')"
+      :width="dialogWidth.md"
       @update:model-value="pendingOff = null"
     >
-      <v-card class="switches-confirm">
-        <h2>{{ t('moduleDisableTitle') }}</h2>
-        <p>
-          <strong>{{ pendingOff ? translate(pendingOff.title) : '' }}</strong> —
-          {{ t('moduleDisableBody') }}
-        </p>
-        <div class="switches-confirm-actions">
-          <v-btn
-            variant="text"
-            @click="pendingOff = null"
-            >{{ t('cancelAction') }}</v-btn
-          ><v-btn
-            color="error"
-            variant="flat"
-            @click="pendingOff && apply(pendingOff, false)"
-            >{{ t('moduleTurnOff') }}</v-btn
-          >
-        </div>
-      </v-card>
-    </v-dialog>
+      <p>
+        <strong>{{ pendingOff ? translate(pendingOff.title) : '' }}</strong> —
+        {{ t('moduleDisableBody') }}
+      </p>
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="pendingOff = null"
+          >{{ t('cancelAction') }}</v-btn
+        ><v-btn
+          color="error"
+          variant="flat"
+          @click="pendingOff && apply(pendingOff, false)"
+          >{{ t('moduleTurnOff') }}</v-btn
+        >
+      </template>
+    </ModuleDialog>
     <v-snackbar
       :model-value="!!notice"
       timeout="3000"
@@ -238,32 +238,9 @@ function changedLabel(state: ModuleState) {
 .switches-list .v-switch {
   flex: 0 0 auto;
 }
-.switches-confirm {
-  padding: 22px;
-}
-.switches-confirm h2 {
-  font-size: var(--workstel-font-lg);
-  font-weight: var(--workstel-weight-medium);
-}
-.switches-confirm p {
-  margin-top: var(--workstel-space-2_5);
-  font-size: var(--workstel-font-sm);
-  line-height: var(--workstel-leading-relaxed);
-  color: var(--workstel-text-secondary);
-}
-.switches-confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: var(--workstel-space-2);
-  margin-top: var(--workstel-space-5);
-}
 @media (max-width: 680px) {
   .switches-list li {
     flex-wrap: wrap;
-  }
-  .switches-confirm-actions .v-btn {
-    min-height: var(--workstel-touch-target);
   }
   .switches-list :deep(.v-selection-control) {
     min-height: var(--workstel-touch-target);
