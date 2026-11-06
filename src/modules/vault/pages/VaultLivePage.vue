@@ -513,15 +513,6 @@ onMounted(() => {
       "
       ><template #actions>
         <v-btn
-          v-if="canAudit"
-          variant="text"
-          prepend-icon="mdi-history"
-          :aria-label="messages.auditTitle"
-          :title="messages.auditTitle"
-          @click="auditOpen = true"
-          >{{ messages.auditTitle }}</v-btn
-        >
-        <v-btn
           :disabled="!canWrite || busy"
           color="primary"
           class="module-primary-action"
@@ -533,58 +524,70 @@ onMounted(() => {
         >
       </template>
       <template #toolbar>
-        <div class="vault-toolbar">
-          <v-text-field
-            :model-value="search"
-            class="vault-search"
-            :placeholder="messages.search"
-            :aria-label="messages.search"
-            prepend-inner-icon="mdi-magnify"
-            :loading="searching"
-            single-line
-            clearable
-            maxlength="150"
-            @update:model-value="search = $event ?? ''"
-            @keydown.enter.prevent="load()"
+        <!-- Audit log sits at the end of the toolbar row as an icon, so phones keep one row. -->
+        <div class="vault-toolbar-row">
+          <div class="vault-toolbar">
+            <v-text-field
+              :model-value="search"
+              class="vault-search"
+              :placeholder="messages.search"
+              :aria-label="messages.search"
+              prepend-inner-icon="mdi-magnify"
+              :loading="searching"
+              single-line
+              clearable
+              maxlength="150"
+              @update:model-value="search = $event ?? ''"
+              @keydown.enter.prevent="load()"
+            />
+            <FilterGroup
+              :count="filterCount"
+              @reset="resetFilterGroup"
+            >
+              <v-select
+                v-model="access"
+                :label="messages.access"
+                :items="[
+                  { value: 'all', title: messages.allAccounts },
+                  { value: 'mine', title: messages.ownedByMe },
+                  { value: 'shared', title: messages.sharedWithMe },
+                ]"
+              />
+              <v-select
+                v-model="status"
+                :label="messages.status"
+                :items="[
+                  { value: 'active', title: messages.active },
+                  { value: 'archived', title: messages.archived },
+                  { value: 'all', title: messages.all },
+                ]"
+                @update:model-value="load()"
+              />
+              <v-select
+                v-model="department"
+                :items="[{ value: null, title: messages.allDepartments }, ...departments]"
+                :label="messages.department"
+                @update:model-value="load()"
+              />
+              <v-select
+                v-if="hotels.length > 1"
+                v-model="hotelId"
+                :label="messages.hotel"
+                :items="hotels"
+                :disabled="busy || formOpen"
+                @update:model-value="changedHotel"
+              />
+            </FilterGroup>
+          </div>
+          <v-btn
+            v-if="canAudit"
+            class="vault-audit-action"
+            icon="mdi-history"
+            variant="text"
+            :aria-label="messages.auditTitle"
+            :title="messages.auditTitle"
+            @click="auditOpen = true"
           />
-          <FilterGroup
-            :count="filterCount"
-            @reset="resetFilterGroup"
-          >
-            <v-select
-              v-model="access"
-              :label="messages.access"
-              :items="[
-                { value: 'all', title: messages.allAccounts },
-                { value: 'mine', title: messages.ownedByMe },
-                { value: 'shared', title: messages.sharedWithMe },
-              ]"
-            />
-            <v-select
-              v-model="status"
-              :label="messages.status"
-              :items="[
-                { value: 'active', title: messages.active },
-                { value: 'archived', title: messages.archived },
-                { value: 'all', title: messages.all },
-              ]"
-              @update:model-value="load()"
-            />
-            <v-select
-              v-model="department"
-              :items="[{ value: null, title: messages.allDepartments }, ...departments]"
-              :label="messages.department"
-              @update:model-value="load()"
-            />
-            <v-select
-              v-if="hotels.length > 1"
-              v-model="hotelId"
-              :label="messages.hotel"
-              :items="hotels"
-              :disabled="busy || formOpen"
-              @update:model-value="changedHotel"
-            />
-          </FilterGroup>
         </div>
         <p
           v-if="!secretAvailable"

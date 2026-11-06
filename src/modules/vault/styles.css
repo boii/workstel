@@ -257,6 +257,28 @@
 .vault-toolbar > * {
   min-width: 0;
 }
+.vault-toolbar-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--workstel-space-2);
+}
+.vault-toolbar-row > .vault-toolbar {
+  flex: 1;
+  min-width: 0;
+}
+/* Matches the 40px filled field; phones use the 44px touch target like the Filters button. */
+.vault-toolbar-row > .vault-audit-action {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+@media (max-width: 680px) {
+  .vault-toolbar-row > .vault-audit-action {
+    width: var(--workstel-touch-target);
+    height: var(--workstel-touch-target);
+    margin-top: -2px;
+  }
+}
 .vault-account-name {
   font: inherit;
   font-weight: var(--workstel-weight-semibold);
