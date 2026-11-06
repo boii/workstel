@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
@@ -49,7 +50,7 @@ watch(open, (value) => {
     v-model="open"
     :title="messages.ledgerTitle"
     :subtitle="item ? item.code + ' · ' + item.name + ' (' + item.unit + ')' : ''"
-    :width="680"
+    :width="dialogWidth['2xl']"
   >
     <v-alert
       v-if="failure"

@@ -80,9 +80,9 @@ const label = computed(() =>
 </template>
 <style scoped>
 .filter-group-button {
-  min-width: 44px !important;
-  width: 44px;
-  height: 44px !important;
+  min-width: var(--workstel-touch-target) !important;
+  width: var(--workstel-touch-target);
+  height: var(--workstel-touch-target) !important;
   padding: 0 !important;
 }
 .filter-group-panel {
@@ -95,7 +95,7 @@ const label = computed(() =>
   align-items: center;
   justify-content: space-between;
   gap: var(--workstel-space-3);
-  min-height: 44px;
+  min-height: var(--workstel-touch-target);
   margin-bottom: var(--workstel-space-1_5);
 }
 .filter-group-panel h2 {

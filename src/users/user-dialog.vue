@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../shared/dialog-widths';
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import { t, translate } from '../i18n';
@@ -189,7 +190,7 @@ async function confirmAction() {
     :title="user?.email ?? ''"
     :subtitle="t('userManage')"
     :busy="busy"
-    :width="760"
+    :width="dialogWidth['4xl']"
   >
     <template v-if="user">
       <section
@@ -372,7 +373,7 @@ async function confirmAction() {
     </template>
     <v-dialog
       :model-value="!!confirm"
-      max-width="420"
+      :max-width="dialogWidth.xs"
       @update:model-value="confirm = null"
     >
       <v-card class="user-confirm">
@@ -490,7 +491,7 @@ async function confirmAction() {
   align-items: center;
   justify-content: space-between;
   gap: var(--workstel-space-3);
-  min-height: 40px;
+  min-height: var(--workstel-control-md);
 }
 .user-department-head strong {
   font-size: var(--workstel-font-sm);
@@ -570,7 +571,7 @@ async function confirmAction() {
 .user-confirm p {
   margin-top: var(--workstel-space-2_5);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
@@ -585,14 +586,14 @@ async function confirmAction() {
   .user-actions .v-btn,
   .user-confirm-actions .v-btn,
   .user-vault-transfer .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .user-vault-transfer {
     grid-template-columns: minmax(0, 1fr);
   }
   .user-departments :deep(.v-selection-control),
   .user-row :deep(.v-selection-control) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

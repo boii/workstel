@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
@@ -494,7 +495,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
     >
       <v-icon
         icon="mdi-arrow-left"
-        size="16"
+        size="var(--workstel-icon-sm)"
       />{{ messages.back }}
     </button>
     <ModulePage
@@ -795,7 +796,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           <div class="sales-identity">
             <v-icon
               :icon="accountTypeIcons[account.type]"
-              size="22"
+              size="var(--workstel-icon-lg)"
               class="sales-type-icon"
             />
             <div>
@@ -890,7 +891,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       :title="messages.archiveConfirmTitle"
       :subtitle="detailAccount?.name ?? ''"
       :busy="archiving"
-      :width="460"
+      :width="dialogWidth.md"
     >
       <p>{{ messages.archiveConfirmText }}</p>
       <template #actions>

@@ -206,7 +206,7 @@ function date(value: string) {
             <v-icon
               class="admin-audit-chevron"
               icon="mdi-chevron-down"
-              size="18"
+              size="var(--workstel-icon-md)"
             />
           </summary>
           <dl class="admin-audit-details">
@@ -233,7 +233,7 @@ function date(value: string) {
 <style scoped>
 .admin-audit-notice {
   font-size: var(--workstel-font-xs) !important;
-  line-height: 1.5;
+  line-height: var(--workstel-leading-normal);
   margin-bottom: var(--workstel-space-3);
 }
 .admin-audit-toolbar {
@@ -262,9 +262,9 @@ function date(value: string) {
   grid-template-columns: minmax(0, 1.4fr) 150px minmax(60px, 0.5fr) 95px 80px 18px;
   gap: var(--workstel-space-3);
   align-items: center;
-  min-height: 48px;
+  min-height: var(--workstel-row-sm);
   padding: var(--workstel-space-2) var(--workstel-space-4);
-  line-height: 1.5;
+  line-height: var(--workstel-leading-normal);
   cursor: pointer;
   list-style: none;
 }
@@ -344,14 +344,14 @@ function date(value: string) {
     grid-template-columns: minmax(0, 1fr) auto 44px;
   }
   .admin-audit-refresh {
-    width: 44px;
-    height: 44px;
+    width: var(--workstel-touch-target);
+    height: var(--workstel-touch-target);
   }
   .admin-audit-event summary {
     grid-template-columns: minmax(0, 1fr) auto 18px;
     gap: var(--workstel-space-1) var(--workstel-space-2_5);
     padding: var(--workstel-space-2_5) var(--workstel-space-3);
-    min-height: 64px;
+    min-height: var(--workstel-row-lg);
   }
   .admin-audit-action {
     grid-column: 1;

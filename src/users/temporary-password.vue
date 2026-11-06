@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../shared/dialog-widths';
 import { onUnmounted, ref } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import { t } from '../i18n';
@@ -32,7 +33,7 @@ function close() {
     v-model="open"
     :title="t('tempPasswordTitle')"
     :subtitle="t('tempPasswordFor') + ' ' + email"
-    :width="460"
+    :width="dialogWidth.md"
   >
     <p class="temp-hint">{{ t('tempPasswordHint') }}</p>
     <div class="temp-box">
@@ -59,7 +60,7 @@ function close() {
 <style scoped>
 .temp-hint {
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 .temp-box {

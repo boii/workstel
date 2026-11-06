@@ -113,3 +113,25 @@ All tokens live in `:root` in `src/styles.css`, alongside the colour and type to
 - Shadows: `--workstel-shadow-card` and `--workstel-shadow-header` hold the measured values. Hex alpha approximations (`#55555514`) now use the exact measured rgba values. The skip link gains the card shadow's missing third layer (3% alpha, visible only on focus).
 - Primary: styles use `rgb(var(--v-theme-primary))` instead of repeating `#0096c7`, so the Vuetify theme in `src/main.ts` is the single source.
 - Breakpoints cannot use custom properties in media queries, so they stay literal. The standard set is 360, 560 (container), 680, 720 (container), 760, 900 and 1050px. Prefer 680px for phone layouts. The 359/360 and 400px outliers remain until a visual review.
+
+## Centralized style tokens, second pass — 6 November 2026
+
+Approved by the user. It completes the first pass and covers every group that was still literal.
+
+- **Colours:** small changes the user approved.
+  - Stray greys now use the shared tokens. Top navigation `#666` and the page heading icon `#555` become `--workstel-text-secondary` (#5f6f7b).
+  - The skip link `#007a9e` and the Vault account name `#306c87` become `--workstel-primary-text` (#006f8f).
+  - The info alert text `#0b4f6c` becomes `--workstel-info-text` (#005a75).
+  - The wordmark `#333` and the skip-link white now read the Vuetify theme (`on-surface`, `surface`).
+  - The base text colour is `--workstel-text-primary`. The page background reads `rgb(var(--v-theme-background))`, so `src/main.ts` is the only place it is set.
+  - The account avatar uses `--workstel-avatar-bg` and `--workstel-avatar-text`, in the header and in Settings.
+- **Line height:** `--workstel-leading-tight|normal|relaxed|loose` = 1.4 / 1.5 / 1.6 / 1.7 (54 uses). The outliers 1.15, 1.3, 1.35, 1.45 and 1.8 stay literal.
+- **Letter spacing:** `--workstel-tracking-heading` = −0.7px for page and sign-in headings; the sign-in heading moves from −0.5px. `--workstel-tracking-caps` = 1px for uppercase labels; the eyebrow moves from 1.2px and command palette group headings from 0.04em. `--workstel-tracking-code` = 0.5px for bin codes and plates. Exempt: the wordmark, the masked Vault password, the Vault department mark and the temporary-password code.
+- **Heights:**
+  - `--workstel-touch-target` = 44px (74 uses) and `--workstel-header-height` = 64px.
+  - Controls: `--workstel-control-sm|md|lg|xl` = 36 / 40 / 48 / 52px.
+  - List rows: `--workstel-row-sm|md|lg` = 48 / 56 / 64px.
+  - One-off tile and row heights (58, 84, 87, 92px, the 52px settings row and the 64px room choice buttons) stay literal.
+- **Icons:** `--workstel-icon-xs|sm|md|lg|xl|2xl` = 14 / 16 / 18 / 22 / 28 / 32px, passed as `v-icon size="var(--workstel-icon-sm)"`. Sizes 11, 15, 20, 30 and 36px (one to four uses each) and avatar sizes stay literal.
+- **Dialog widths:** `dialogWidth` in `src/shared/dialog-widths.ts` holds every width (420–960px) at its current value. That includes the Vuetify default and the ModuleDialog default. Reducing the number of steps is a separate visual decision.
+- **Stacking:** `--workstel-z-floating` = 5 and `--workstel-z-skip-link` = 3000.

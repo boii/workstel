@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import VaultDialog from './VaultDialog.vue';
 import { vaultRpc, parseAudit } from '../live-api';
@@ -82,7 +83,7 @@ onUnmounted(() => {
     v-model="open"
     :title="messages.auditTitle"
     :subtitle="filtered.length + ' / ' + events.length + ' ' + messages.auditEvents"
-    :width="960"
+    :width="dialogWidth['5xl']"
     fullscreen-on-mobile
   >
     <template #toolbar>
@@ -155,7 +156,7 @@ onUnmounted(() => {
       >
         <v-icon
           icon="mdi-history"
-          size="28"
+          size="var(--workstel-icon-xl)"
         />
         <p>{{ events.length ? messages.auditNoResults : messages.auditEmpty }}</p>
         <v-btn
@@ -201,7 +202,7 @@ onUnmounted(() => {
               <v-icon
                 class="vault-audit-chevron"
                 icon="mdi-chevron-down"
-                size="18"
+                size="var(--workstel-icon-md)"
               />
             </summary>
             <dl class="vault-audit-details">
@@ -229,7 +230,7 @@ onUnmounted(() => {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   margin: 0 0 var(--workstel-space-3);
-  line-height: 1.5;
+  line-height: var(--workstel-leading-normal);
 }
 .vault-audit-controls {
   display: grid;
@@ -255,12 +256,12 @@ onUnmounted(() => {
 }
 .vault-audit-event summary {
   box-sizing: border-box;
-  line-height: 1.5;
+  line-height: var(--workstel-leading-normal);
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) 150px minmax(60px, 0.5fr) 95px 80px 18px;
   gap: var(--workstel-space-3);
   align-items: center;
-  min-height: 48px;
+  min-height: var(--workstel-row-sm);
   padding: var(--workstel-space-2) var(--workstel-space-5);
   cursor: pointer;
   list-style: none;
@@ -352,13 +353,13 @@ onUnmounted(() => {
     grid-column: 1/-1;
   }
   .vault-audit-controls :deep(.v-field__input) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .vault-audit-event summary {
     grid-template-columns: minmax(0, 1fr) auto 18px;
     gap: var(--workstel-space-1) var(--workstel-space-2_5);
     padding: var(--workstel-space-2_5) var(--workstel-space-4);
-    min-height: 64px;
+    min-height: var(--workstel-row-lg);
   }
   .vault-audit-action {
     grid-column: 1;

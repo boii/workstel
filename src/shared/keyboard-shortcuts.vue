@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from './dialog-widths';
 import { computed } from 'vue';
 import { t } from '../i18n';
 import type { ShortcutRow } from '../core/use-shortcuts';
@@ -10,7 +11,7 @@ const heading = computed(() => props.title ?? t('shortcuts'));
 <template>
   <v-dialog
     v-model="open"
-    max-width="420"
+    :max-width="dialogWidth.xs"
     :aria-label="heading"
   >
     <v-card class="shortcut-panel">

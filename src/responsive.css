@@ -23,7 +23,7 @@
   max-width: 100%;
   white-space: normal;
   height: auto;
-  min-height: 36px;
+  min-height: var(--workstel-control-sm);
 }
 .module-page-actions .v-btn__content,
 .v-card-actions .v-btn__content {
@@ -75,17 +75,17 @@
 }
 @media (max-width: 680px), (pointer: coarse) {
   .v-btn:not(.v-btn--icon) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .v-btn--icon {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--workstel-touch-target);
+    min-height: var(--workstel-touch-target);
   }
   .v-field__input {
     font-size: 16px;
   }
   .v-selection-control {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 @media (max-width: 680px) {
@@ -164,9 +164,9 @@
     position: fixed;
     right: var(--workstel-page-gutter, 16px);
     bottom: calc(16px + env(safe-area-inset-bottom));
-    z-index: 5;
+    z-index: var(--workstel-z-floating);
     flex: 0 0 auto;
-    height: 52px !important;
+    height: var(--workstel-control-xl) !important;
     padding-inline: var(--workstel-space-5);
     border-radius: var(--workstel-radius-pill);
     /* Measured header shadow token (DESIGN_REFERENCE.md). */
@@ -202,8 +202,8 @@
     margin-left: 0;
   }
   .module-page .row-secondary-action.v-btn {
-    width: 44px;
-    min-width: 44px !important;
+    width: var(--workstel-touch-target);
+    min-width: var(--workstel-touch-target) !important;
     padding: 0 !important;
   }
   .module-page .row-secondary-action .v-btn__content {

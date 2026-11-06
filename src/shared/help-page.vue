@@ -82,7 +82,7 @@ async function copyVersion() {
         <h2 id="help-vault">
           <v-icon
             icon="mdi-key-outline"
-            size="18"
+            size="var(--workstel-icon-md)"
           />{{ t('helpVault') }}
         </h2>
         <ul class="help-tips">
@@ -96,7 +96,7 @@ async function copyVersion() {
         <p class="help-warning">
           <v-icon
             icon="mdi-shield-alert-outline"
-            size="16"
+            size="var(--workstel-icon-sm)"
           />{{ t('helpVaultWarning') }}
         </p>
         <v-btn
@@ -207,7 +207,7 @@ async function copyVersion() {
   gap: var(--workstel-space-2);
   font-size: var(--workstel-font-md);
   font-weight: var(--workstel-weight-semibold);
-  line-height: 1.4;
+  line-height: var(--workstel-leading-tight);
 }
 .help-card h2 .v-icon {
   color: var(--workstel-primary-text);
@@ -225,7 +225,7 @@ async function copyVersion() {
   gap: var(--workstel-space-3);
   padding: var(--workstel-space-2) 0;
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .help-step-number {
   display: grid;
@@ -243,7 +243,7 @@ async function copyVersion() {
   position: relative;
   padding: var(--workstel-space-1_5) 0 var(--workstel-space-1_5) 18px;
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .help-tips li::before {
   content: '';
@@ -265,7 +265,7 @@ async function copyVersion() {
   background: var(--workstel-warning-bg);
   color: var(--workstel-warning-text);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .help-warning .v-icon {
   flex-shrink: 0;
@@ -287,7 +287,7 @@ async function copyVersion() {
   display: none;
 }
 .help-faq :deep(.v-expansion-panel-title) {
-  min-height: 48px;
+  min-height: var(--workstel-row-sm);
   padding: var(--workstel-space-2_5) 0;
   font-size: var(--workstel-font-sm);
   font-weight: var(--workstel-weight-semibold);
@@ -298,7 +298,7 @@ async function copyVersion() {
 .help-faq :deep(.v-expansion-panel-text__wrapper) {
   padding: 0 0 var(--workstel-space-3);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 .help-shortcuts li {
@@ -329,7 +329,7 @@ kbd {
 .help-muted {
   margin-top: var(--workstel-space-2);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 .help-version {
@@ -378,7 +378,7 @@ kbd {
     padding: 17px;
   }
   .help-card .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

@@ -11,7 +11,7 @@
 }
 .vehicle-notice {
   font-size: var(--workstel-font-xs) !important;
-  line-height: 1.5;
+  line-height: var(--workstel-leading-normal);
   margin-bottom: var(--workstel-space-3);
 }
 .vehicle-toolbar {
@@ -39,7 +39,7 @@
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--workstel-space-4);
-  min-height: 64px;
+  min-height: var(--workstel-row-lg);
   padding: var(--workstel-space-2) var(--workstel-space-3) var(--workstel-space-2)
     var(--workstel-space-4);
 }
@@ -75,7 +75,7 @@
   font:
     var(--workstel-font-sm) 'Noto Sans',
     sans-serif;
-  letter-spacing: 0.5px;
+  letter-spacing: var(--workstel-tracking-code);
 }
 .vehicle-identity small,
 .vehicle-last small {
@@ -94,7 +94,7 @@
   border-radius: var(--workstel-radius-sm);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .vehicle-result--pass {
   background: var(--workstel-success-bg);
@@ -128,10 +128,10 @@
     flex-wrap: wrap;
   }
   .vehicle-actions .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .vehicle-actions .v-btn--icon {
-    width: 44px;
+    width: var(--workstel-touch-target);
     margin-left: auto;
   }
 }

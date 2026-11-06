@@ -225,7 +225,7 @@ function onKeydown(event: KeyboardEvent) {
             <v-icon
               v-if="index === active && !fullscreen"
               icon="mdi-keyboard-return"
-              size="16"
+              size="var(--workstel-icon-sm)"
               class="palette-enter"
             />
           </div>
@@ -286,7 +286,7 @@ function onKeydown(event: KeyboardEvent) {
   margin: var(--workstel-space-2_5) var(--workstel-space-2) var(--workstel-space-1);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-semibold);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--workstel-tracking-caps);
   text-transform: uppercase;
   color: var(--workstel-text-secondary);
 }
@@ -294,11 +294,11 @@ function onKeydown(event: KeyboardEvent) {
   display: flex;
   align-items: center;
   gap: var(--workstel-space-3);
-  min-height: 44px;
+  min-height: var(--workstel-touch-target);
   padding: var(--workstel-space-1_5) var(--workstel-space-2_5);
   border-radius: var(--workstel-radius-md);
   cursor: pointer;
-  color: rgba(0, 0, 0, 0.87);
+  color: var(--workstel-text-primary);
 }
 .palette-option > .v-icon {
   color: var(--workstel-text-secondary);
@@ -370,6 +370,6 @@ kbd {
   flex-shrink: 0;
 }
 .palette-cancel {
-  min-height: 44px;
+  min-height: var(--workstel-touch-target);
 }
 </style>

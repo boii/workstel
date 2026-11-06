@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import VaultDialog from '../components/VaultDialog.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
@@ -522,7 +523,7 @@ onMounted(() => {
     >
       <v-icon
         icon="mdi-arrow-left"
-        size="16"
+        size="var(--workstel-icon-sm)"
       />{{ messages.back }}</button
     ><ModulePage
       :title="messages.title"
@@ -671,7 +672,7 @@ onMounted(() => {
         >
           <v-icon
             icon="mdi-lock-outline"
-            size="14"
+            size="var(--workstel-icon-xs)"
           />
           {{ messages.unavailable }}
         </p>
@@ -866,7 +867,7 @@ onMounted(() => {
       v-model="archiveOpen"
       :title="messages.archiveTitle"
       :busy="busy"
-      :width="440"
+      :width="dialogWidth.sm"
     >
       <v-alert
         v-if="failure"

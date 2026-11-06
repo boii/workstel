@@ -51,7 +51,7 @@ async function submit() {
     >
       <v-icon
         icon="mdi-lock-alert-outline"
-        size="18"
+        size="var(--workstel-icon-md)"
       />{{ t('changePasswordRequired') }}
     </p>
     <v-alert
@@ -120,7 +120,7 @@ async function submit() {
   background: var(--workstel-warning-bg);
   color: var(--workstel-warning-text);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .password-required .v-icon {
   flex-shrink: 0;
@@ -135,7 +135,7 @@ async function submit() {
 }
 @media (max-width: 680px) {
   .password-actions .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

@@ -77,7 +77,7 @@ Frontend permission states must mirror server capabilities, without replacing se
 Vue + TypeScript + Vite + Vuetify; use shared/ModulePage.vue and the global Vuetify theme.
 Quicksand UI, Noto Sans tables, MDI icons; primary #0096C7, background #F2F5F8, white cards, 6px radius.
 Use the exact measured shadow tokens in DESIGN_REFERENCE.md.
-Write styles with the `:root` tokens in src/styles.css: `--workstel-font-*`, `--workstel-weight-*`, `--workstel-space-*`, `--workstel-radius-*`, `--workstel-shadow-*`, the status and surface colours, and `rgb(var(--v-theme-primary))` for the primary colour. Do not write these values as literals in module styles.
+Write styles with the `:root` tokens in src/styles.css: `--workstel-font-*`, `--workstel-weight-*`, `--workstel-space-*`, `--workstel-radius-*`, `--workstel-shadow-*`, `--workstel-leading-*`, `--workstel-tracking-*`, `--workstel-icon-*` (as `v-icon size="var(--workstel-icon-sm)"`), the height tokens (`--workstel-touch-target`, `--workstel-control-*`, `--workstel-row-*`, `--workstel-header-height`), `--workstel-z-*`, the text, avatar, status and surface colours, and `rgb(var(--v-theme-primary))` for the primary colour. Take dialog widths from `dialogWidth` in src/shared/dialog-widths.ts. Do not write these values as literals in module styles or templates.
 No sidebar, marketing banners, decorative animations, duplicate headers or fabricated metrics.
 Desktop uses the shared thin header. Mobile uses one-column cards, full-width search and navigation beneath the top header row.
 Pages include a title, one primary action, search/filter where needed, content and pagination.

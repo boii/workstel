@@ -356,7 +356,7 @@ const departmentItems = computed(() => [
     >
       <v-icon
         icon="mdi-arrow-left"
-        size="16"
+        size="var(--workstel-icon-sm)"
       />{{ messages.back }}
     </button>
     <ModulePage
@@ -577,7 +577,7 @@ const departmentItems = computed(() => [
                   }}<v-icon
                     v-if="sortKey === 'room'"
                     :icon="sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up'"
-                    size="14"
+                    size="var(--workstel-icon-xs)"
                   />
                 </button>
               </th>
@@ -600,7 +600,7 @@ const departmentItems = computed(() => [
                   }}<v-icon
                     v-if="sortKey === 'status'"
                     :icon="sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up'"
-                    size="14"
+                    size="var(--workstel-icon-xs)"
                   />
                 </button>
               </th>
@@ -620,7 +620,7 @@ const departmentItems = computed(() => [
                   }}<v-icon
                     v-if="sortKey === 'time'"
                     :icon="sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up'"
-                    size="14"
+                    size="var(--workstel-icon-xs)"
                   />
                 </button>
               </th>
@@ -760,7 +760,7 @@ const departmentItems = computed(() => [
                         ? 'mdi-pause-circle-outline'
                         : taskIcons[room.openTask.type]
                     "
-                    size="14"
+                    size="var(--workstel-icon-xs)"
                   />{{ formatDuration(elapsedSeconds(room.openTask, now)) }}</span
                 >
                 <small>{{ shortName(room.openTask.attendantEmail) }}</small>

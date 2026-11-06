@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from './dialog-widths';
 import { onMounted, ref } from 'vue';
 import { locale, t, translate } from '../i18n';
 import type { ModuleManifest } from '../core/module';
@@ -102,7 +103,7 @@ function changedLabel(state: ModuleState) {
       >
         <v-icon
           :icon="module.icon || 'mdi-view-module-outline'"
-          size="22"
+          size="var(--workstel-icon-lg)"
         />
         <div class="switches-text">
           <strong :id="'switch-' + module.id">{{ translate(module.title) }}</strong>
@@ -131,7 +132,7 @@ function changedLabel(state: ModuleState) {
     </ul>
     <v-dialog
       :model-value="!!pendingOff"
-      max-width="420"
+      :max-width="dialogWidth.xs"
       @update:model-value="pendingOff = null"
     >
       <v-card class="switches-confirm">
@@ -171,7 +172,7 @@ function changedLabel(state: ModuleState) {
 .switches-heading h2 {
   font-size: var(--workstel-font-md);
   font-weight: var(--workstel-weight-semibold);
-  line-height: 1.4;
+  line-height: var(--workstel-leading-tight);
 }
 .switches-badge {
   padding: 1px var(--workstel-space-2);
@@ -180,12 +181,12 @@ function changedLabel(state: ModuleState) {
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .switches-hint {
   margin-top: var(--workstel-space-1_5);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 .switches-list {
@@ -197,7 +198,7 @@ function changedLabel(state: ModuleState) {
   display: flex;
   align-items: center;
   gap: var(--workstel-space-3);
-  min-height: 56px;
+  min-height: var(--workstel-row-md);
   padding: var(--workstel-space-2) 0;
   border-top: 1px solid var(--workstel-border);
 }
@@ -228,7 +229,7 @@ function changedLabel(state: ModuleState) {
   color: var(--workstel-success-text);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .switches-state--off {
   background: var(--workstel-surface-subtle);
@@ -247,7 +248,7 @@ function changedLabel(state: ModuleState) {
 .switches-confirm p {
   margin-top: var(--workstel-space-2_5);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 .switches-confirm-actions {
@@ -262,10 +263,10 @@ function changedLabel(state: ModuleState) {
     flex-wrap: wrap;
   }
   .switches-confirm-actions .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .switches-list :deep(.v-selection-control) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

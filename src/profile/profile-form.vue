@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../shared/dialog-widths';
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import OptionalFields from '../shared/optional-fields.vue';
@@ -57,7 +58,7 @@ async function submit() {
     sheet
     :title="t('editProfile')"
     :busy="saving"
-    :width="460"
+    :width="dialogWidth.md"
   >
     <v-form
       id="profile-form"

@@ -110,7 +110,7 @@ const unit = computed(() => props.item?.unit ?? '');
         </div>
         <v-icon
           icon="mdi-arrow-right"
-          size="18"
+          size="var(--workstel-icon-md)"
         />
         <div aria-live="polite">
           <small>{{ messages.newBalance }}</small>

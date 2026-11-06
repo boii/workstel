@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import OptionalFields from '../../../shared/optional-fields.vue';
@@ -88,7 +89,7 @@ const fieldError = (field: InspectionField) => {
     :title="messages.inspectionTitle"
     :subtitle="vehicle ? vehicle.name + ' · ' + vehicle.plateNumber : ''"
     :busy="saving"
-    :width="620"
+    :width="dialogWidth.xl"
   >
     <v-form
       id="inspection-form"
@@ -280,7 +281,7 @@ const fieldError = (field: InspectionField) => {
   align-items: center;
   justify-content: space-between;
   gap: var(--workstel-space-3);
-  min-height: 56px;
+  min-height: var(--workstel-row-md);
   padding: var(--workstel-space-2) var(--workstel-space-2) var(--workstel-space-2)
     var(--workstel-space-3);
   font-size: var(--workstel-font-sm);
@@ -308,7 +309,7 @@ const fieldError = (field: InspectionField) => {
     margin-top: var(--workstel-space-5);
   }
   .inspection-checklist-heading .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

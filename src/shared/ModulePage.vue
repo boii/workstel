@@ -119,7 +119,7 @@ defineEmits<{ retry: [] }>();
 .module-page p {
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
-  line-height: 1.7;
+  line-height: var(--workstel-leading-loose);
   margin-top: var(--workstel-space-2);
 }
 .module-page-toolbar {
@@ -181,7 +181,7 @@ defineEmits<{ retry: [] }>();
     justify-content: flex-start;
   }
   .module-page-actions :deep(.v-btn) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

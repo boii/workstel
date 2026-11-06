@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from './dialog-widths';
 import { computed, ref } from 'vue';
 import { locale, t } from '../i18n';
 import type { MessageKey } from '../i18n';
@@ -83,7 +84,7 @@ function granted(assignment: StaffAssignment) {
       <div class="settings-profile">
         <v-avatar
           size="48"
-          color="#E8EDF0"
+          color="var(--workstel-avatar-bg)"
           ><span class="settings-initials">{{ initials }}</span></v-avatar
         >
         <div class="settings-profile-text">
@@ -213,7 +214,7 @@ function granted(assignment: StaffAssignment) {
     <ModuleDialog
       v-model="passwordOpen"
       :title="t('changePasswordTitle')"
-      :width="460"
+      :width="dialogWidth.md"
     >
       <ChangePassword
         v-if="passwordOpen"
@@ -251,7 +252,7 @@ function granted(assignment: StaffAssignment) {
 .settings-card h2 {
   font-size: var(--workstel-font-md);
   font-weight: var(--workstel-weight-semibold);
-  line-height: 1.4;
+  line-height: var(--workstel-leading-tight);
 }
 .settings-card-heading {
   display: flex;
@@ -266,7 +267,7 @@ function granted(assignment: StaffAssignment) {
 .settings-card-heading > span,
 .settings-muted {
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 .settings-profile {
@@ -279,7 +280,7 @@ function granted(assignment: StaffAssignment) {
 .settings-initials {
   font-size: var(--workstel-font-md);
   font-weight: var(--workstel-weight-bold);
-  color: #526774;
+  color: var(--workstel-avatar-text);
 }
 .settings-profile-text {
   display: flex;
@@ -330,7 +331,7 @@ function granted(assignment: StaffAssignment) {
   align-items: center;
   justify-content: space-between;
   gap: var(--workstel-space-2) var(--workstel-space-4);
-  min-height: 48px;
+  min-height: var(--workstel-row-sm);
   padding: var(--workstel-space-2) 0;
   border-top: 1px solid var(--workstel-border);
 }
@@ -362,7 +363,7 @@ function granted(assignment: StaffAssignment) {
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .settings-card > .settings-muted {
   margin-top: var(--workstel-space-3);
@@ -385,10 +386,10 @@ function granted(assignment: StaffAssignment) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .settings-language .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .settings-row .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .settings-access li {
     flex-direction: column;

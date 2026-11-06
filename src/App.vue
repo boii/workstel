@@ -429,7 +429,7 @@ function logout() {
           ><div class="login-symbol">
             <v-icon
               icon="mdi-office-building-outline"
-              size="32"
+              size="var(--workstel-icon-2xl)"
             />
           </div>
           <div class="eyebrow">{{ t('hotelUpper') }}</div>
@@ -439,7 +439,7 @@ function logout() {
             v-if="runtime.demo || auth.googleEnabled.value"
             color="primary"
             block
-            height="44"
+            height="var(--workstel-touch-target)"
             prepend-icon="mdi-shield-account-outline"
             class="sso-button"
             :loading="auth.busy.value"
@@ -457,7 +457,7 @@ function logout() {
           <div class="login-note">
             <v-icon
               icon="mdi-shield-check-outline"
-              size="16"
+              size="var(--workstel-icon-sm)"
             />
             {{ t('authorized') }}
           </div>
@@ -628,7 +628,7 @@ function logout() {
                   :aria-label="t('account')"
                   ><v-avatar
                     size="32"
-                    color="#E8EDF0"
+                    color="var(--workstel-avatar-bg)"
                     ><span class="avatar-label">{{ initialsOf(accountName) }}</span></v-avatar
                   ></v-btn
                 ></template
@@ -683,7 +683,7 @@ function logout() {
                             ? 'mdi-account-multiple-outline'
                             : 'mdi-view-dashboard-outline'
                 "
-                size="28"
+                size="var(--workstel-icon-xl)"
               />{{ view === 'Not found' ? t('pageNotFound') : translate(view) }}
             </h1>
             <span
@@ -823,7 +823,7 @@ function logout() {
             >
               <v-icon
                 icon="mdi-star-outline"
-                size="32"
+                size="var(--workstel-icon-2xl)"
               />
               <h2>{{ t('noFavorites') }}</h2>
               <p>{{ t('noFavoritesHint') }}</p>
@@ -841,7 +841,7 @@ function logout() {
             >
               <v-icon
                 icon="mdi-lock-outline"
-                size="32"
+                size="var(--workstel-icon-2xl)"
               />
               <h2>{{ t('noAccessibleModules') }}</h2>
               <p>{{ t('noAccessibleModulesHint') }}</p>
@@ -852,7 +852,7 @@ function logout() {
             >
               <v-icon
                 icon="mdi-magnify"
-                size="32"
+                size="var(--workstel-icon-2xl)"
               />
               <h2>{{ t('noModules') }}</h2>
               <p>{{ t('noModulesHint') }}</p>

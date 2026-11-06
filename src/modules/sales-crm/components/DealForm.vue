@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import OptionalFields from '../../../shared/optional-fields.vue';
@@ -144,7 +145,7 @@ const fieldError = (field: keyof DealInput) =>
     :title="deal ? messages.editDeal : messages.addDeal"
     :subtitle="deal ? deal.accountName : ''"
     :busy="saving"
-    :width="620"
+    :width="dialogWidth.xl"
   >
     <v-form
       id="sales-deal-form"

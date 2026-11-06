@@ -58,9 +58,42 @@
   --workstel-shadow-header:
     0 2px 30px -1px rgba(85, 85, 85, 0.08), 0 4px 30px rgba(85, 85, 85, 0.06),
     0 1px 30px rgba(85, 85, 85, 0.03);
+  /* Base text colour (measured) and the account avatar used in the header and Settings. */
+  --workstel-text-primary: rgba(0, 0, 0, 0.87);
+  --workstel-avatar-bg: #e8edf0;
+  --workstel-avatar-text: #526774;
+  /* Line heights: compact labels and rows, body text, descriptions, long help text. */
+  --workstel-leading-tight: 1.4;
+  --workstel-leading-normal: 1.5;
+  --workstel-leading-relaxed: 1.6;
+  --workstel-leading-loose: 1.7;
+  /* Letter spacing: display headings, uppercase labels, and codes such as plates. */
+  --workstel-tracking-heading: -0.7px;
+  --workstel-tracking-caps: 1px;
+  --workstel-tracking-code: 0.5px;
+  /* Icon sizes, passed to v-icon as size="var(--workstel-icon-*)". */
+  --workstel-icon-xs: 14px;
+  --workstel-icon-sm: 16px;
+  --workstel-icon-md: 18px;
+  --workstel-icon-lg: 22px;
+  --workstel-icon-xl: 28px;
+  --workstel-icon-2xl: 32px;
+  /* Heights: the header, buttons and toggles, mobile touch targets, and list rows. */
+  --workstel-header-height: 64px;
+  --workstel-touch-target: 44px;
+  --workstel-control-sm: 36px;
+  --workstel-control-md: 40px;
+  --workstel-control-lg: 48px;
+  --workstel-control-xl: 52px;
+  --workstel-row-sm: 48px;
+  --workstel-row-md: 56px;
+  --workstel-row-lg: 64px;
+  /* Stacking: the floating primary action, and the skip link above everything. */
+  --workstel-z-floating: 5;
+  --workstel-z-skip-link: 3000;
   font-family: Quicksand, sans-serif;
-  color: rgba(0, 0, 0, 0.87);
-  background: #f2f5f8;
+  color: var(--workstel-text-primary);
+  background: rgb(var(--v-theme-background));
   font-synthesis: none;
   /* Keep the scrollbar space reserved so short and long pages share one layout width. */
   scrollbar-gutter: stable;
@@ -87,11 +120,11 @@ button:focus-visible {
   position: fixed;
   top: 8px;
   left: 8px;
-  z-index: 3000;
+  z-index: var(--workstel-z-skip-link);
   padding: var(--workstel-space-2_5) var(--workstel-space-3_5);
   border-radius: var(--workstel-radius-md);
-  background: #ffffff;
-  color: #007a9e;
+  background: rgb(var(--v-theme-surface));
+  color: var(--workstel-primary-text);
   font-size: var(--workstel-font-sm);
   box-shadow: var(--workstel-shadow-card);
   transform: translateY(calc(-100% - 16px));
@@ -124,8 +157,8 @@ p {
 }
 .v-btn--icon {
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: var(--workstel-control-md);
+  height: var(--workstel-control-md);
 }
 .v-field__input {
   font-size: var(--workstel-font-md);
@@ -150,7 +183,7 @@ p {
   border-radius: 0 !important;
 }
 .choice-group.v-btn-toggle > .v-btn {
-  min-height: 40px;
+  min-height: var(--workstel-control-md);
   border: 1px solid var(--workstel-border) !important;
   border-radius: var(--workstel-radius-md) !important;
   background: rgb(var(--v-theme-surface));
@@ -159,7 +192,7 @@ p {
   border-color: currentColor !important;
 }
 .v-alert--variant-tonal.text-info .v-alert__content {
-  color: #0b4f6c;
+  color: var(--workstel-info-text);
 }
 .portal-header {
   box-shadow: var(--workstel-shadow-header) !important;
@@ -170,7 +203,7 @@ p {
   gap: var(--workstel-space-6);
   width: 100%;
   padding: 0 30px;
-  height: 64px;
+  height: var(--workstel-header-height);
 }
 .wordmark {
   display: flex;
@@ -179,7 +212,7 @@ p {
   letter-spacing: -1px;
   font-weight: var(--workstel-weight-bold);
   white-space: nowrap;
-  color: #333;
+  color: rgb(var(--v-theme-on-surface));
 }
 .wordmark > .v-icon {
   font-size: 27px;
@@ -207,7 +240,7 @@ p {
   align-items: center;
   gap: 7px;
   font-size: var(--workstel-font-sm);
-  color: #666;
+  color: var(--workstel-text-secondary);
   border-bottom: 2px solid transparent;
   white-space: nowrap;
   transition:
@@ -264,8 +297,8 @@ p {
 }
 @media (max-width: 1050px) {
   .palette-button {
-    width: 40px;
-    min-width: 40px !important;
+    width: var(--workstel-control-md);
+    min-width: var(--workstel-control-md) !important;
     padding: 0 var(--workstel-space-2) !important;
   }
   .palette-button .v-btn__content {
@@ -277,14 +310,14 @@ p {
 }
 @media (max-width: 680px) {
   .palette-button {
-    width: 44px;
-    min-width: 44px !important;
-    height: 44px !important;
+    width: var(--workstel-touch-target);
+    min-width: var(--workstel-touch-target) !important;
+    height: var(--workstel-touch-target) !important;
   }
 }
 .avatar-label {
   font-size: var(--workstel-font-xs);
-  color: #526774;
+  color: var(--workstel-avatar-text);
   font-weight: var(--workstel-weight-bold);
 }
 .workspace-content {
@@ -304,12 +337,12 @@ p {
   gap: var(--workstel-space-3);
   font-size: var(--workstel-font-xl);
   font-weight: var(--workstel-weight-regular);
-  letter-spacing: -0.7px;
+  letter-spacing: var(--workstel-tracking-heading);
   min-width: 0;
   line-height: 1.35;
 }
 .page-heading h1 .v-icon {
-  color: #555;
+  color: var(--workstel-text-secondary);
 }
 .page-heading > .v-btn {
   margin-left: auto;
@@ -317,7 +350,7 @@ p {
 .demo-label {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
-  letter-spacing: 1px;
+  letter-spacing: var(--workstel-tracking-caps);
   border: 1px solid var(--workstel-border);
   border-radius: var(--workstel-radius-sm);
   padding: var(--workstel-space-1) var(--workstel-space-1_5);
@@ -346,7 +379,7 @@ p {
   display: none;
 }
 .category-tabs {
-  height: 36px !important;
+  height: var(--workstel-control-sm) !important;
   gap: var(--workstel-space-2);
   max-width: 100%;
   flex-shrink: 0;
@@ -403,13 +436,13 @@ p {
 .module-open h2 {
   font-size: var(--workstel-font-md);
   font-weight: var(--workstel-weight-semibold);
-  line-height: 1.4;
+  line-height: var(--workstel-leading-tight);
   margin-bottom: 5px;
 }
 .module-open p {
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .favorite-button {
   margin: var(--workstel-space-2_5) var(--workstel-space-1_5) 0 0;
@@ -424,7 +457,7 @@ p {
   text-align: center;
   padding: 45px;
   color: var(--workstel-text-secondary);
-  line-height: 1.7;
+  line-height: var(--workstel-leading-loose);
 }
 .empty-state h2 {
   font-size: var(--workstel-font-lg);
@@ -527,7 +560,7 @@ footer small {
   display: block;
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  letter-spacing: 1.2px;
+  letter-spacing: var(--workstel-tracking-caps);
   color: var(--workstel-text-secondary);
   margin: var(--workstel-space-2_5) 0;
 }
@@ -539,7 +572,7 @@ footer small {
 .detail-panel p {
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
-  line-height: 1.7;
+  line-height: var(--workstel-leading-loose);
   margin-bottom: var(--workstel-space-5);
 }
 .detail-panel .v-alert {
@@ -569,7 +602,7 @@ footer small {
 .field-label {
   display: block;
   font-size: var(--workstel-font-sm);
-  line-height: 1.4;
+  line-height: var(--workstel-leading-tight);
   margin: var(--workstel-space-3_5) 0 var(--workstel-space-1);
 }
 .info-panel {
@@ -583,7 +616,7 @@ footer small {
 }
 .info-panel p {
   font-size: var(--workstel-font-md);
-  line-height: 1.7;
+  line-height: var(--workstel-leading-loose);
   margin-bottom: var(--workstel-space-5);
 }
 .login-header {
@@ -616,8 +649,8 @@ footer small {
 .login-panel h1 {
   font-size: var(--workstel-font-xl);
   font-weight: var(--workstel-weight-medium);
-  line-height: 1.4;
-  letter-spacing: -0.5px;
+  line-height: var(--workstel-leading-tight);
+  letter-spacing: var(--workstel-tracking-heading);
   margin-bottom: var(--workstel-space-3);
 }
 .login-panel p {
@@ -650,7 +683,7 @@ footer small {
 }
 .demo-access > span {
   font-size: var(--workstel-font-xs);
-  letter-spacing: 1px;
+  letter-spacing: var(--workstel-tracking-caps);
   color: var(--workstel-text-secondary);
 }
 .demo-access .v-btn {
@@ -682,8 +715,8 @@ footer small {
     display: none;
   }
   .switch-button {
-    width: 40px;
-    min-width: 40px !important;
+    width: var(--workstel-control-md);
+    min-width: var(--workstel-control-md) !important;
     padding: 0 var(--workstel-space-2) !important;
   }
   .switch-button .v-btn__content,
@@ -751,7 +784,7 @@ footer small {
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .module-coming-soon:has(.module-open:hover) {
   background: white;
@@ -782,7 +815,7 @@ footer small {
 }
 .password-login .v-btn {
   margin-top: var(--workstel-space-6);
-  min-height: 44px;
+  min-height: var(--workstel-touch-target);
 }
 @media (max-width: 680px) {
   .header-inner {
@@ -803,7 +836,7 @@ footer small {
   }
   .top-nav {
     order: 2;
-    height: 44px;
+    height: var(--workstel-touch-target);
     width: 100%;
     gap: var(--workstel-space-6);
   }
@@ -815,9 +848,9 @@ footer small {
     margin: 0;
   }
   .switch-button {
-    width: 44px;
-    min-width: 44px !important;
-    height: 44px !important;
+    width: var(--workstel-touch-target);
+    min-width: var(--workstel-touch-target) !important;
+    height: var(--workstel-touch-target) !important;
   }
   .workspace-content {
     padding: 26px 18px var(--workstel-space-5);
@@ -851,8 +884,8 @@ footer small {
   .mobile-category-filter {
     display: inline-flex;
     flex: 0 0 44px;
-    width: 44px;
-    height: 44px !important;
+    width: var(--workstel-touch-target);
+    height: var(--workstel-touch-target) !important;
   }
   .module-grid {
     grid-template-columns: 1fr;
@@ -898,18 +931,18 @@ footer small {
     align-items: flex-start;
   }
   .header-actions .v-btn--icon {
-    width: 44px;
-    min-height: 44px;
+    width: var(--workstel-touch-target);
+    min-height: var(--workstel-touch-target);
   }
   .login-language > span {
     display: none;
   }
   .top-nav > button {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .favorite-button.v-btn--icon {
-    min-width: 44px;
-    height: 44px;
+    min-width: var(--workstel-touch-target);
+    height: var(--workstel-touch-target);
     margin: var(--workstel-space-2) var(--workstel-space-1) 0 0;
   }
   .task-row > div {
@@ -933,7 +966,7 @@ footer small {
 
 @media (max-width: 680px) {
   .choice-group.v-btn-toggle > .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 

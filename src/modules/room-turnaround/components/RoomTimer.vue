@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
@@ -84,7 +85,7 @@ const control = (action: TaskAction) =>
         : ''
     "
     :busy="busy"
-    :width="520"
+    :width="dialogWidth.base"
   >
     <template v-if="room">
       <v-alert
@@ -104,7 +105,7 @@ const control = (action: TaskAction) =>
         <span class="hk-running-type"
           ><v-icon
             :icon="taskIcons[task.type]"
-            size="18"
+            size="var(--workstel-icon-md)"
           />{{ messages[taskKeys[task.type]] }} · {{ messages[taskStatusKeys[task.status]] }}</span
         >
         <span class="hk-running-time">{{ formatDuration(elapsedSeconds(task, now)) }}</span>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
@@ -117,7 +118,7 @@ function resetFilters() {
     >
       <v-icon
         icon="mdi-arrow-left"
-        size="16"
+        size="var(--workstel-icon-sm)"
       />{{ messages.back }}</button
     ><ModulePage
       :title="messages.title"
@@ -266,7 +267,7 @@ function resetFilters() {
     <VaultDialog
       v-model="archiveOpen"
       :title="messages.archiveTitle"
-      :width="440"
+      :width="dialogWidth.sm"
     >
       <p class="vault-field-hint vault-panel-intro">{{ messages.archiveHint }}</p>
       <template #actions

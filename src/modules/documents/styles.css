@@ -11,7 +11,7 @@
 }
 .documents-notice {
   font-size: var(--workstel-font-xs) !important;
-  line-height: 1.5;
+  line-height: var(--workstel-leading-normal);
   margin-bottom: var(--workstel-space-3);
 }
 .documents-toolbar {
@@ -39,7 +39,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--workstel-space-4);
-  min-height: 64px;
+  min-height: var(--workstel-row-lg);
   padding: var(--workstel-space-2_5) var(--workstel-space-3) var(--workstel-space-2_5)
     var(--workstel-space-4);
 }
@@ -111,10 +111,10 @@
     justify-content: flex-start;
   }
   .documents-actions .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .documents-actions .v-btn--icon {
-    width: 44px;
+    width: var(--workstel-touch-target);
     margin-left: auto;
   }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
@@ -53,7 +54,7 @@ const issues = (entry: Inspection) =>
     v-model="open"
     :title="messages.historyTitle"
     :subtitle="vehicle ? vehicle.name + ' · ' + vehicle.plateNumber : ''"
-    :width="620"
+    :width="dialogWidth.xl"
   >
     <v-alert
       v-if="failure"

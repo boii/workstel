@@ -98,7 +98,7 @@ function fieldError(field: VaultField) {
         <p class="vault-field-hint vault-password-policy vault-panel-intro">
           <v-icon
             icon="mdi-office-building-outline"
-            size="14"
+            size="var(--workstel-icon-xs)"
           />
           {{ messages.scopeHint }}
         </p>
@@ -172,7 +172,7 @@ function fieldError(field: VaultField) {
         <p class="vault-field-hint vault-password-policy">
           <v-icon
             icon="mdi-lock-outline"
-            size="14"
+            size="var(--workstel-icon-xs)"
           />
           {{ passwordServiceAvailable ? messages.separatePasswordHint : messages.passwordHint }}
         </p>

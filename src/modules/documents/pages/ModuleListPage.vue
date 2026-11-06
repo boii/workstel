@@ -191,7 +191,7 @@ const departmentItems = computed(() => [
     >
       <v-icon
         icon="mdi-arrow-left"
-        size="16"
+        size="var(--workstel-icon-sm)"
       />{{ messages.back }}
     </button>
     <ModulePage
@@ -298,7 +298,7 @@ const departmentItems = computed(() => [
           <div class="documents-identity">
             <v-icon
               :icon="categoryIcons[document.category]"
-              size="22"
+              size="var(--workstel-icon-lg)"
             />
             <div>
               <strong>{{ document.title }}</strong>

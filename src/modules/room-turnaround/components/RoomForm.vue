@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import { errorMessage, useRoomTurnaroundMessages } from '../composables/useRoomTurnaroundMessages';
@@ -52,7 +53,7 @@ const fieldError = (field: keyof RoomInput) =>
     sheet
     :title="room ? messages.editRoom : messages.addRoom"
     :busy="saving"
-    :width="460"
+    :width="dialogWidth.md"
   >
     <v-form
       id="hk-room-form"

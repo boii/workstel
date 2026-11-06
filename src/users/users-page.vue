@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../shared/dialog-widths';
 import { computed, onMounted, ref } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import { locale, t } from '../i18n';
@@ -213,7 +214,7 @@ function forgetPassword() {
       v-model="createOpen"
       :title="t('addUser')"
       :busy="creating"
-      :width="460"
+      :width="dialogWidth.md"
     >
       <v-form
         id="user-create-form"
@@ -307,7 +308,7 @@ function forgetPassword() {
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--workstel-space-4);
-  min-height: 64px;
+  min-height: var(--workstel-row-lg);
   padding: var(--workstel-space-2) var(--workstel-space-3) var(--workstel-space-2)
     var(--workstel-space-4);
 }
@@ -342,7 +343,7 @@ function forgetPassword() {
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
 }
 .users-badge--developer {
   background: var(--workstel-info-bg);
@@ -354,7 +355,7 @@ function forgetPassword() {
 }
 .users-hint {
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
 }
 @media (max-width: 680px) {
@@ -368,7 +369,7 @@ function forgetPassword() {
   .users-toolbar > .v-btn {
     margin-left: 0;
     width: 100%;
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .users-list li {
     grid-template-columns: minmax(0, 1fr);
@@ -379,7 +380,7 @@ function forgetPassword() {
     justify-content: flex-start;
   }
   .users-list .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

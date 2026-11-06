@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import VaultDialog from './VaultDialog.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { vaultRpc } from '../live-api';
@@ -244,7 +245,7 @@ onUnmounted(() => {
         <p class="vault-field-hint vault-share-warning">
           <v-icon
             icon="mdi-alert-outline"
-            size="14"
+            size="var(--workstel-icon-xs)"
           />{{ messages.departmentShareHint }}
         </p>
         <div class="vault-share-departments">
@@ -298,7 +299,7 @@ onUnmounted(() => {
     </template>
     <v-dialog
       v-model="confirmTransfer"
-      max-width="420"
+      :max-width="dialogWidth.xs"
     >
       <v-card class="vault-transfer-confirm">
         <h2>{{ messages.transferConfirm }}</h2>
@@ -385,7 +386,7 @@ onUnmounted(() => {
 .vault-transfer-confirm p {
   margin-top: var(--workstel-space-2_5);
   font-size: var(--workstel-font-sm);
-  line-height: 1.6;
+  line-height: var(--workstel-leading-relaxed);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
 }
@@ -399,10 +400,10 @@ onUnmounted(() => {
 @media (max-width: 680px) {
   .vault-transfer-actions .v-btn,
   .vault-transfer-confirm-actions .v-btn {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
   .vault-share-section :deep(.v-selection-control) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

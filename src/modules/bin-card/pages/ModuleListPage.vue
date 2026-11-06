@@ -207,7 +207,7 @@ const departmentItems = computed(() => [
     >
       <v-icon
         icon="mdi-arrow-left"
-        size="16"
+        size="var(--workstel-icon-sm)"
       />{{ messages.back }}
     </button>
     <ModulePage

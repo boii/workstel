@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import { t } from '../i18n';
+import { dialogWidth } from './dialog-widths';
 
 const open = defineModel<boolean>({ required: true });
 const props = withDefaults(
@@ -13,7 +14,7 @@ const props = withDefaults(
     /** Short forms open on phones as a bottom sheet sized to their content. */
     sheet?: boolean;
   }>(),
-  { subtitle: '', busy: false, width: 560, sheet: false },
+  { subtitle: '', busy: false, width: dialogWidth.lg, sheet: false },
 );
 const { width: viewport } = useDisplay();
 const phone = computed(() => viewport.value <= 680);
@@ -76,7 +77,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
 .module-dialog-title h2 {
   font-size: var(--workstel-font-lg);
   font-weight: var(--workstel-weight-medium);
-  line-height: 1.4;
+  line-height: var(--workstel-leading-tight);
   overflow-wrap: anywhere;
 }
 .module-dialog-title p {
@@ -91,7 +92,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   overflow-y: auto;
   overscroll-behavior: contain;
   font-size: var(--workstel-font-sm) !important;
-  line-height: 1.5 !important;
+  line-height: var(--workstel-leading-normal) !important;
 }
 .module-dialog-actions {
   display: flex;
@@ -116,8 +117,8 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   }
   /* Vuetify sets the button height inline from the global VBtn default. */
   .module-dialog-heading > .v-btn {
-    width: 44px !important;
-    height: 44px !important;
+    width: var(--workstel-touch-target) !important;
+    height: var(--workstel-touch-target) !important;
   }
   .module-dialog-body {
     padding: var(--workstel-space-3_5) var(--workstel-space-4) !important;
@@ -127,7 +128,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   }
   /* Slot buttons carry the parent's scope, so they are reached with :deep(). */
   .module-dialog-actions :deep(.v-btn) {
-    min-height: 44px;
+    min-height: var(--workstel-touch-target);
   }
 }
 </style>

@@ -12,6 +12,7 @@ import '@fontsource/noto-sans/400.css';
 import './styles.css';
 import './responsive.css';
 import './shared/stack-table.css';
+import { dialogWidth } from './shared/dialog-widths';
 import App from './App.vue';
 import { router } from './router';
 const vuetify = createVuetify({
@@ -38,7 +39,7 @@ const vuetify = createVuetify({
     VSelect: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
     VTextarea: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
     VAutocomplete: { variant: 'filled', density: 'compact', hideDetails: 'auto' },
-    VDialog: { maxWidth: 520 },
+    VDialog: { maxWidth: dialogWidth.base },
   },
 });
 const app = createApp(App).use(vuetify).use(router);

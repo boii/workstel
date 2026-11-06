@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { dialogWidth } from '../../../shared/dialog-widths';
 import { ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
@@ -104,7 +105,7 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
     :subtitle="
       account ? messages[accountTypeKeys[account.type]] + ' · ' + account.departmentName : ''
     "
-    :width="720"
+    :width="dialogWidth['3xl']"
   >
     <template v-if="account">
       <v-alert
@@ -137,7 +138,7 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
             :aria-label="messages.call + ' ' + account.contactPhone"
             ><v-icon
               icon="mdi-phone-outline"
-              size="16"
+              size="var(--workstel-icon-sm)"
             />{{ account.contactPhone }}</a
           >
           <a
@@ -146,7 +147,7 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
             :aria-label="messages.sendEmail + ' ' + account.contactEmail"
             ><v-icon
               icon="mdi-email-outline"
-              size="16"
+              size="var(--workstel-icon-sm)"
             />{{ account.contactEmail }}</a
           >
         </div>
@@ -262,7 +263,7 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
             >
               <v-icon
                 :icon="activityIcons[activity.type]"
-                size="18"
+                size="var(--workstel-icon-md)"
               />
               <div>
                 <small
