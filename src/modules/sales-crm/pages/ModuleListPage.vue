@@ -3,6 +3,7 @@ import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useUndoNotice } from '../../../core/use-optimistic-archive';
 import ModuleDialog from '../../../shared/module-dialog.vue';
@@ -693,46 +694,42 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
 
       <ul
         v-if="tab === 'pipeline'"
-        class="sales-list"
+        class="list-rows"
       >
-        <li
+        <ListRow
           v-for="deal in deals"
           :key="deal.id"
           class="sales-row"
+          icon="mdi-handshake-outline"
         >
-          <div class="sales-identity">
-            <div>
-              <strong>{{ deal.title }}</strong>
-              <button
-                type="button"
-                class="sales-link"
-                :aria-label="messages.viewAccount + ' — ' + deal.accountName"
-                @click="openAccount(deal.accountId)"
-              >
-                {{ deal.accountName }}
-              </button>
-              <small>
-                {{ deal.value ? formatMoney(deal.value) : messages.noValue }} ·
-                {{ messages[segmentKeys[deal.segment]] }}
-                <template v-if="deal.arrivalDate">
-                  · {{ formatStay(deal.arrivalDate, deal.departureDate) }}</template
-                >
-                <template v-if="deal.roomNights">
-                  · {{ deal.roomNights }} {{ messages.roomNightsUnit }}</template
-                >
-                <template v-if="hotelScope.length > 1"> · {{ deal.departmentName }}</template>
-              </small>
-              <small
-                v-if="deal.stage === 'lost' && deal.lostReason"
-                class="sales-lost-reason"
-                >{{ messages.lostReason }}: {{ deal.lostReason }}</small
-              >
-            </div>
-          </div>
-          <!-- Status column, as in Bin Card and Vehicle Checklist: stage, then the follow-up. -->
-          <div class="sales-state">
+          <strong>{{ deal.title }}</strong>
+          <button
+            type="button"
+            class="sales-link"
+            :aria-label="messages.viewAccount + ' — ' + deal.accountName"
+            @click="openAccount(deal.accountId)"
+          >
+            {{ deal.accountName }}
+          </button>
+          <small>
+            {{ deal.value ? formatMoney(deal.value) : messages.noValue }} ·
+            {{ messages[segmentKeys[deal.segment]] }}
+            <template v-if="deal.arrivalDate">
+              · {{ formatStay(deal.arrivalDate, deal.departureDate) }}</template
+            >
+            <template v-if="deal.roomNights">
+              · {{ deal.roomNights }} {{ messages.roomNightsUnit }}</template
+            >
+            <template v-if="hotelScope.length > 1"> · {{ deal.departmentName }}</template>
+          </small>
+          <small
+            v-if="deal.stage === 'lost' && deal.lostReason"
+            class="sales-lost-reason"
+            >{{ messages.lostReason }}: {{ deal.lostReason }}</small
+          >
+          <template #status>
             <span
-              class="sales-stage"
+              class="list-row-chip sales-stage"
               :class="'sales-stage--' + deal.stage"
               >{{ messages[stageKeys[deal.stage]] }}</span
             ><span
@@ -753,8 +750,8 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
               class="sales-follow-up"
               >{{ messages.closedOn }} {{ formatDay(hotelToday(new Date(deal.closedAt))) }}</span
             >
-          </div>
-          <div class="sales-actions">
+          </template>
+          <template #actions>
             <v-btn
               v-if="can(deal.departmentId, 'canWrite')"
               color="primary"
@@ -782,48 +779,41 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
                   :title="messages.viewAccount"
                   @click="openAccount(deal.accountId)" /></v-list
             ></v-menu>
-          </div>
-        </li>
+          </template>
+        </ListRow>
       </ul>
       <ul
         v-else
-        class="sales-list"
+        class="list-rows"
       >
-        <li
+        <ListRow
           v-for="account in accounts"
           :key="account.id"
           class="sales-row"
-          :class="{ 'sales-row--archived': account.status === 'archived' }"
+          :icon="accountTypeIcons[account.type]"
+          :archived="account.status === 'archived'"
         >
-          <div class="sales-identity">
-            <v-icon
-              :icon="accountTypeIcons[account.type]"
-              size="var(--workstel-icon-lg)"
-              class="sales-type-icon"
-            />
-            <div>
-              <strong>{{ account.name }}</strong>
-              <span
-                v-if="account.contactName || account.contactPhone"
-                class="sales-contact-line"
-                >{{ [account.contactName, account.contactPhone].filter(Boolean).join(' · ') }}</span
-              >
-              <small>
-                <span class="sales-chip">{{ messages[accountTypeKeys[account.type]] }}</span>
-                {{ account.openDeals }} {{ messages.openDeals.toLowerCase() }}
-                <template v-if="account.openValue">
-                  · {{ formatMoney(account.openValue) }}</template
-                >
-                <template v-if="account.lastActivityOn">
-                  · {{ messages.lastActivity }} {{ formatDay(account.lastActivityOn) }}</template
-                >
-                <template v-if="hotelScope.length > 1"> · {{ account.departmentName }}</template>
-              </small>
-            </div>
-          </div>
-          <div class="sales-actions">
+          <strong>{{ account.name }}</strong>
+          <span
+            v-if="account.contactName || account.contactPhone"
+            class="sales-contact-line"
+            >{{ [account.contactName, account.contactPhone].filter(Boolean).join(' · ') }}</span
+          >
+          <small>
+            <span class="sales-chip">{{ messages[accountTypeKeys[account.type]] }}</span>
+            {{ account.openDeals }} {{ messages.openDeals.toLowerCase() }}
+            <template v-if="account.openValue"> · {{ formatMoney(account.openValue) }}</template>
+            <template v-if="account.lastActivityOn">
+              · {{ messages.lastActivity }} {{ formatDay(account.lastActivityOn) }}</template
+            >
+            <template v-if="hotelScope.length > 1"> · {{ account.departmentName }}</template>
+          </small>
+          <template
+            v-if="account.nextFollowUp"
+            #status
+          >
+            <small>{{ messages.nextFollowUp }}</small>
             <span
-              v-if="account.nextFollowUp"
               class="sales-follow-up"
               :class="'sales-follow-up--' + followUpState(account.nextFollowUp, today)"
               ><v-icon
@@ -831,16 +821,19 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
                 size="15"
               /><span class="sr-only">{{ messages.nextFollowUp }}: </span
               >{{ formatDay(account.nextFollowUp) }}</span
-            ><v-btn
+            >
+          </template>
+          <template #actions>
+            <v-btn
               color="primary"
-              variant="tonal"
+              variant="outlined"
               append-icon="mdi-chevron-right"
               :aria-label="messages.viewAccount + ' — ' + account.name"
               @click="openAccount(account.id)"
               >{{ messages.viewAccount }}</v-btn
             >
-          </div>
-        </li>
+          </template>
+        </ListRow>
       </ul>
       <v-btn
         v-if="nextCursor"

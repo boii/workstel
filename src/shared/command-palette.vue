@@ -274,7 +274,7 @@ function onKeydown(event: KeyboardEvent) {
   flex: 1;
 }
 .palette-search :deep(input) {
-  font-size: 16px;
+  font-size: 16px; /* token-exempt: 16px touch input stops iOS zoom */
 }
 .palette-results {
   flex: 1;

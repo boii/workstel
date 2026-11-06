@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
@@ -288,35 +289,26 @@ const departmentItems = computed(() => [
           >{{ messages.add }}</v-btn
         >
       </template>
-      <ul class="documents-list">
-        <li
+      <ul class="list-rows">
+        <ListRow
           v-for="document in documents"
           :key="document.id"
           class="documents-row"
-          :class="{ 'documents-row--archived': document.status === 'archived' }"
+          :icon="categoryIcons[document.category]"
+          :archived="document.status === 'archived'"
         >
-          <div class="documents-identity">
-            <v-icon
-              :icon="categoryIcons[document.category]"
-              size="var(--workstel-icon-lg)"
-            />
-            <div>
-              <strong>{{ document.title }}</strong>
-              <span
-                v-if="document.description"
-                class="documents-description"
-                >{{ document.description }}</span
-              >
-              <small>
-                <span class="documents-category">{{
-                  messages[categoryKeys[document.category]]
-                }}</span>
-                {{ document.departmentName }} · {{ messages.updated }}
-                {{ formatDate(document.updatedAt) }}
-              </small>
-            </div>
-          </div>
-          <div class="documents-actions">
+          <strong>{{ document.title }}</strong>
+          <span
+            v-if="document.description"
+            class="documents-description"
+            >{{ document.description }}</span
+          >
+          <small>
+            <span class="documents-category">{{ messages[categoryKeys[document.category]] }}</span>
+            {{ document.departmentName }} · {{ messages.updated }}
+            {{ formatDate(document.updatedAt) }}
+          </small>
+          <template #actions>
             <v-btn
               v-if="document.status === 'active'"
               color="primary"
@@ -352,8 +344,8 @@ const departmentItems = computed(() => [
                   :title="document.status === 'active' ? messages.archive : messages.restore"
                   @click="toggleArchive(document)" /></v-list
             ></v-menu>
-          </div>
-        </li>
+          </template>
+        </ListRow>
       </ul>
       <v-btn
         v-if="nextCursor"

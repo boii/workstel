@@ -103,21 +103,21 @@
   border-radius: var(--workstel-radius-md);
   font-size: var(--workstel-font-xs);
   font-weight: var(--workstel-weight-bold);
-  letter-spacing: 0.3px;
-  color: #285a6e;
-  background: #e4eef3;
+  letter-spacing: 0.3px; /* token-exempt: department mark category style */
+  color: #285a6e; /* token-exempt: department category colour */
+  background: #e4eef3; /* token-exempt: department category colour */
 }
 .vault-department-mark--mint {
-  color: #276957;
-  background: #e2f0ec;
+  color: #276957; /* token-exempt: department category colour */
+  background: #e2f0ec; /* token-exempt: department category colour */
 }
 .vault-department-mark--peach {
-  color: #8a5034;
-  background: #f7ebe3;
+  color: #8a5034; /* token-exempt: department category colour */
+  background: #f7ebe3; /* token-exempt: department category colour */
 }
 .vault-department-mark--yellow {
-  color: #6b5a22;
-  background: #f5f1e0;
+  color: #6b5a22; /* token-exempt: department category colour */
+  background: #f5f1e0; /* token-exempt: department category colour */
 }
 .vault-compact-domain {
   display: inline-flex;
@@ -148,7 +148,7 @@
   height: 30px;
 }
 .vault-credential-line .v-icon {
-  font-size: 16px;
+  font-size: 16px; /* token-exempt: 16px touch input stops iOS zoom */
 }
 .vault-username-value {
   overflow: hidden;
@@ -166,7 +166,7 @@
   font:
     var(--workstel-font-sm) 'Noto Sans',
     sans-serif;
-  letter-spacing: 2px;
+  letter-spacing: 2px; /* token-exempt: masked password dots */
 }
 .vault-password-value--revealed {
   letter-spacing: normal;

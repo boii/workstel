@@ -306,7 +306,7 @@ function date(value: string) {
   color: var(--workstel-text-secondary);
 }
 .admin-audit-outcome > span {
-  font-size: 7px;
+  font-size: 7px; /* token-exempt: status dot glyph */
 }
 .admin-audit-outcome--success > span {
   color: var(--workstel-success-text);

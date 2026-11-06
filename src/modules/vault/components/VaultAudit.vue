@@ -305,7 +305,7 @@ onUnmounted(() => {
   color: var(--workstel-text-secondary);
 }
 .vault-audit-outcome > span {
-  font-size: 7px;
+  font-size: 7px; /* token-exempt: status dot glyph */
 }
 .vault-audit-outcome--success > span {
   color: rgb(var(--v-theme-success));

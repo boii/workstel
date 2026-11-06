@@ -59,7 +59,7 @@
   overflow-wrap: anywhere;
 }
 .hk-mine-time {
-  font-size: 28px;
+  font-size: 28px; /* token-exempt: timer figure */
   font-weight: var(--workstel-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--workstel-primary-text);
@@ -275,7 +275,7 @@
   font-weight: var(--workstel-weight-semibold);
 }
 .hk-running-time {
-  font-size: 44px;
+  font-size: 44px; /* token-exempt: timer figure */
   font-weight: var(--workstel-weight-semibold);
   line-height: 1.15;
   font-variant-numeric: tabular-nums;

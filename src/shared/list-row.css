@@ -1,0 +1,115 @@
+/* Module record lists (shared/list-row.vue). Modules style only the content of each
+   region; the row layout, separators, padding and narrow behaviour are defined here. */
+.list-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid var(--workstel-border);
+  border-radius: var(--workstel-radius-md);
+  overflow: hidden;
+}
+.list-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) auto;
+  align-items: center;
+  gap: var(--workstel-space-4);
+  min-height: var(--workstel-row-lg);
+  padding: var(--workstel-space-2_5) var(--workstel-space-3) var(--workstel-space-2_5)
+    var(--workstel-space-4);
+}
+.list-row--no-status {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.list-row + .list-row {
+  border-top: 1px solid var(--workstel-border);
+}
+.list-row--archived {
+  background: var(--workstel-surface-muted);
+}
+.list-row-identity {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--workstel-space-3);
+  min-width: 0;
+}
+.list-row-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--workstel-primary-text);
+}
+.list-row-text,
+.list-row-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--workstel-space-0_5);
+  min-width: 0;
+}
+.list-row-text strong {
+  font-size: var(--workstel-font-sm);
+  font-weight: var(--workstel-weight-semibold);
+  overflow-wrap: anywhere;
+}
+.list-row-text small,
+.list-row-status small {
+  font-size: var(--workstel-font-xs);
+  color: var(--workstel-text-secondary);
+  overflow-wrap: anywhere;
+}
+/* Status chip; modules add a modifier for its colour (mapped to the status tokens). */
+.list-row-chip {
+  display: inline-block;
+  padding: 1px var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
+  font-size: var(--workstel-font-xs);
+  font-weight: var(--workstel-weight-bold);
+  line-height: var(--workstel-leading-relaxed);
+  white-space: nowrap;
+}
+.list-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--workstel-space-2);
+}
+/* Narrow lists: identity on the first line; status and actions share the second line, with
+   actions on the right. Secondary row actions become 44px icon buttons that keep their
+   accessible names and tooltips. */
+@container (max-width: 720px) {
+  .list-row,
+  .list-row--no-status {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--workstel-space-1_5) var(--workstel-space-2_5);
+    padding: var(--workstel-space-3) var(--workstel-space-2) var(--workstel-space-2_5)
+      var(--workstel-space-3_5);
+  }
+  .list-row-identity {
+    grid-column: 1 / -1;
+  }
+  .list-row--no-status .list-row-actions {
+    grid-column: 2;
+  }
+  .list-row-actions {
+    gap: var(--workstel-space-0_5);
+  }
+  .list-row-actions .row-secondary-action.v-btn {
+    width: var(--workstel-touch-target);
+    min-width: var(--workstel-touch-target) !important;
+    padding: 0 !important;
+  }
+  .list-row-actions .row-secondary-action .v-btn__content {
+    display: none;
+  }
+  .list-row-actions .row-secondary-action .v-btn__prepend {
+    margin: 0;
+  }
+}
+@media (max-width: 760px) {
+  .list-row-actions .v-btn {
+    min-height: var(--workstel-touch-target);
+  }
+  .list-row-actions .v-btn--icon {
+    width: var(--workstel-touch-target);
+  }
+}

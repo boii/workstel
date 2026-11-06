@@ -25,60 +25,10 @@
 .documents-toolbar > * {
   min-width: 0;
 }
-.documents-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid var(--workstel-border);
-  border-radius: var(--workstel-radius-md);
-  overflow: hidden;
-}
-.documents-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--workstel-space-4);
-  min-height: var(--workstel-row-lg);
-  padding: var(--workstel-space-2_5) var(--workstel-space-3) var(--workstel-space-2_5)
-    var(--workstel-space-4);
-}
-.documents-row + .documents-row {
-  border-top: 1px solid var(--workstel-border);
-}
-.documents-row--archived {
-  background: var(--workstel-surface-muted);
-}
-.documents-identity {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--workstel-space-3);
-  min-width: 0;
-}
-.documents-identity > .v-icon {
-  color: var(--workstel-primary-text);
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.documents-identity > div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--workstel-space-0_5);
-  min-width: 0;
-}
-.documents-identity strong {
-  font-size: var(--workstel-font-sm);
-  font-weight: var(--workstel-weight-semibold);
-  overflow-wrap: anywhere;
-}
 .documents-description {
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;
-}
-.documents-identity small {
-  font-size: var(--workstel-font-xs);
-  color: var(--workstel-text-secondary);
 }
 .documents-category {
   display: inline-block;
@@ -88,12 +38,6 @@
   background: var(--workstel-surface-subtle);
   font-weight: var(--workstel-weight-bold);
 }
-.documents-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--workstel-space-2);
-}
 @media (max-width: 760px) {
   .documents-toolbar,
   .documents-toolbar:not(:has(> :nth-child(4))) {
@@ -101,20 +45,5 @@
   }
   .documents-search {
     grid-column: 1 / -1;
-  }
-  .documents-row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--workstel-space-2);
-    padding: var(--workstel-space-3);
-  }
-  .documents-actions {
-    justify-content: flex-start;
-  }
-  .documents-actions .v-btn {
-    min-height: var(--workstel-touch-target);
-  }
-  .documents-actions .v-btn--icon {
-    width: var(--workstel-touch-target);
-    margin-left: auto;
   }
 }

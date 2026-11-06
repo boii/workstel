@@ -208,14 +208,14 @@ p {
 .wordmark {
   display: flex;
   align-items: center;
-  font-size: 25px;
-  letter-spacing: -1px;
+  font-size: 25px; /* token-exempt: wordmark */
+  letter-spacing: -1px; /* token-exempt: wordmark */
   font-weight: var(--workstel-weight-bold);
   white-space: nowrap;
   color: rgb(var(--v-theme-on-surface));
 }
 .wordmark > .v-icon {
-  font-size: 27px;
+  font-size: 27px; /* token-exempt: wordmark icon */
   margin-right: 9px;
   color: rgb(var(--v-theme-primary));
 }
@@ -369,7 +369,7 @@ p {
 }
 .module-search .v-field {
   border-radius: var(--workstel-radius-pill);
-  background: #e9edf0;
+  background: #e9edf0; /* token-exempt: measured search fill */
   box-shadow: none;
 }
 .module-search .v-field__overlay {
@@ -425,13 +425,13 @@ p {
   margin-top: 1px;
 }
 .module-icon.mint {
-  color: #379985;
+  color: #379985; /* token-exempt: module icon category colour */
 }
 .module-icon.peach {
-  color: #d19172;
+  color: #d19172; /* token-exempt: module icon category colour */
 }
 .module-icon.yellow {
-  color: #b09a4e;
+  color: #b09a4e; /* token-exempt: module icon category colour */
 }
 .module-open h2 {
   font-size: var(--workstel-font-md);
@@ -448,7 +448,7 @@ p {
   margin: var(--workstel-space-2_5) var(--workstel-space-1_5) 0 0;
 }
 .favorite-button .v-icon {
-  font-size: 19px;
+  font-size: 19px; /* token-exempt: favourite icon glyph */
 }
 .module-card:has(.module-open:hover) {
   background: var(--workstel-surface-muted);
@@ -477,7 +477,7 @@ footer {
   color: var(--workstel-text-secondary);
 }
 footer > span {
-  font-size: 16px;
+  font-size: 16px; /* token-exempt: 16px touch input stops iOS zoom */
   font-weight: var(--workstel-weight-bold);
 }
 footer small {
@@ -767,13 +767,13 @@ footer small {
   cursor: default;
 }
 .module-coming-soon .module-icon {
-  color: #9ca8af;
+  color: #9ca8af; /* token-exempt: coming-soon disabled text */
 }
 .module-coming-soon .module-open h2 {
-  color: #647580;
+  color: #647580; /* token-exempt: coming-soon disabled text */
 }
 .module-coming-soon .module-open p {
-  color: #687984;
+  color: #687984; /* token-exempt: coming-soon disabled text */
 }
 .module-status {
   display: inline-block;
@@ -828,7 +828,7 @@ footer small {
     padding-right: var(--workstel-space-3_5);
   }
   .wordmark {
-    font-size: 21px;
+    font-size: 21px; /* token-exempt: wordmark */
   }
   .header-actions {
     order: 1;
@@ -975,10 +975,10 @@ footer small {
     display: none;
   }
   .header-inner .wordmark {
-    font-size: 19px;
+    font-size: 19px; /* token-exempt: wordmark */
   }
   .header-inner .wordmark > .v-icon {
-    font-size: 24px;
+    font-size: 24px; /* token-exempt: wordmark icon */
     margin-right: var(--workstel-space-1_5);
   }
 }

@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
@@ -306,29 +307,28 @@ const departmentItems = computed(() => [
           >{{ messages.add }}</v-btn
         >
       </template>
-      <ul class="bin-list">
-        <li
+      <ul class="list-rows">
+        <ListRow
           v-for="item in items"
           :key="item.id"
           class="bin-row"
-          :class="{ 'bin-row--archived': item.status === 'archived' }"
+          icon="mdi-package-variant-closed"
+          :archived="item.status === 'archived'"
         >
-          <div class="bin-identity">
-            <span class="bin-code">{{ item.code }}</span>
-            <strong>{{ item.name }}</strong>
-            <small>{{ [item.location, item.departmentName].filter(Boolean).join(' · ') }}</small>
-          </div>
-          <div class="bin-balance">
+          <span class="bin-code">{{ item.code }}</span>
+          <strong>{{ item.name }}</strong>
+          <small>{{ [item.location, item.departmentName].filter(Boolean).join(' · ') }}</small>
+          <template #status>
             <small>{{ messages.balance }}</small>
-            <strong>{{ formatQuantity(item.balance) }} {{ item.unit }}</strong>
+            <strong class="bin-balance">{{ formatQuantity(item.balance) }} {{ item.unit }}</strong>
             <span
               v-if="stockLevel(item) !== 'ok'"
-              class="bin-level"
+              class="list-row-chip bin-level"
               :class="'bin-level--' + stockLevel(item)"
               >{{ stockLevel(item) === 'out' ? messages.stockOut : messages.stockLow }}</span
             >
-          </div>
-          <div class="bin-actions">
+          </template>
+          <template #actions>
             <v-btn
               v-if="item.status === 'active' && can(item.departmentId, 'canWrite')"
               color="primary"
@@ -364,8 +364,8 @@ const departmentItems = computed(() => [
                   :title="item.status === 'active' ? messages.archive : messages.restore"
                   @click="toggleArchive(item)" /></v-list
             ></v-menu>
-          </div>
-        </li>
+          </template>
+        </ListRow>
       </ul>
       <v-btn
         v-if="nextCursor"

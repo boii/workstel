@@ -108,57 +108,6 @@
 .sales-toolbar > * {
   min-width: 0;
 }
-.sales-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid var(--workstel-border);
-  border-radius: var(--workstel-radius-md);
-  overflow: hidden;
-}
-.sales-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) auto;
-  align-items: center;
-  gap: var(--workstel-space-4);
-  min-height: var(--workstel-row-lg);
-  padding: var(--workstel-space-2_5) var(--workstel-space-3) var(--workstel-space-2_5)
-    var(--workstel-space-4);
-}
-.sales-row + .sales-row {
-  border-top: 1px solid var(--workstel-border);
-}
-.sales-row--archived {
-  background: var(--workstel-surface-muted);
-}
-.sales-identity {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--workstel-space-3);
-  min-width: 0;
-}
-.sales-identity > div {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--workstel-space-0_5);
-  min-width: 0;
-}
-.sales-identity strong {
-  font-size: var(--workstel-font-sm);
-  font-weight: var(--workstel-weight-semibold);
-  overflow-wrap: anywhere;
-}
-.sales-identity small {
-  font-size: var(--workstel-font-xs);
-  color: var(--workstel-text-secondary);
-}
-.sales-type-icon {
-  color: var(--workstel-primary-text);
-  flex-shrink: 0;
-  margin-top: 1px;
-}
 .sales-link {
   border: 0;
   padding: 0;
@@ -223,22 +172,10 @@
   background: var(--workstel-neutral-bg);
   color: var(--workstel-text-secondary);
 }
-.sales-state {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--workstel-space-1);
-  min-width: 0;
-}
-.sales-state .sales-stage {
+.list-row .sales-stage {
   min-width: 0;
   margin-top: 0;
-}
-.sales-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--workstel-space-2);
+  padding: 1px var(--workstel-space-2);
 }
 .sales-follow-up {
   display: inline-flex;
@@ -388,12 +325,6 @@
   }
   .sales-search {
     grid-column: 1 / -1;
-  }
-  .sales-actions .v-btn {
-    min-height: var(--workstel-touch-target);
-  }
-  .sales-actions .v-btn--icon {
-    width: var(--workstel-touch-target);
   }
   .sales-tile > strong {
     font-size: var(--workstel-font-lg);

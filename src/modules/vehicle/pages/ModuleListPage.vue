@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
+import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import { runtime } from '../../../config/runtime';
@@ -292,29 +293,22 @@ const departmentItems = computed(() => [
           >{{ messages.add }}</v-btn
         >
       </template>
-      <ul class="vehicle-list">
-        <li
+      <ul class="list-rows">
+        <ListRow
           v-for="vehicle in vehicles"
           :key="vehicle.id"
           class="vehicle-row"
-          :class="{ 'vehicle-row--archived': vehicle.status === 'archived' }"
+          icon="mdi-car-outline"
+          :archived="vehicle.status === 'archived'"
         >
-          <div class="vehicle-identity">
-            <v-icon
-              icon="mdi-car-outline"
-              size="var(--workstel-icon-lg)"
-            />
-            <div>
-              <strong>{{ vehicle.name }}</strong>
-              <span class="vehicle-plate">{{ vehicle.plateNumber }}</span>
-              <small>{{ vehicle.departmentName }}</small>
-            </div>
-          </div>
-          <div class="vehicle-last">
+          <strong>{{ vehicle.name }}</strong>
+          <span class="vehicle-plate">{{ vehicle.plateNumber }}</span>
+          <small>{{ vehicle.departmentName }}</small>
+          <template #status>
             <small>{{ messages.lastInspection }}</small>
             <template v-if="vehicle.lastInspectedAt">
               <span
-                class="vehicle-result"
+                class="list-row-chip vehicle-result"
                 :class="'vehicle-result--' + vehicle.lastResult"
                 >{{ vehicle.lastResult === 'pass' ? messages.pass : messages.attention }}</span
               ><span class="vehicle-time">{{ formatTime(vehicle.lastInspectedAt) }}</span>
@@ -324,8 +318,8 @@ const departmentItems = computed(() => [
               class="vehicle-time"
               >{{ messages.notInspected }}</span
             >
-          </div>
-          <div class="vehicle-actions">
+          </template>
+          <template #actions>
             <v-btn
               v-if="vehicle.status === 'active' && can(vehicle.departmentId, 'canWrite')"
               color="primary"
@@ -361,8 +355,8 @@ const departmentItems = computed(() => [
                   :title="vehicle.status === 'active' ? messages.archive : messages.restore"
                   @click="toggleArchive(vehicle)" /></v-list
             ></v-menu>
-          </div>
-        </li>
+          </template>
+        </ListRow>
       </ul>
       <v-btn
         v-if="nextCursor"

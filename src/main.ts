@@ -12,6 +12,7 @@ import '@fontsource/noto-sans/400.css';
 import './styles.css';
 import './responsive.css';
 import './shared/stack-table.css';
+import './shared/list-row.css';
 import { dialogWidth } from './shared/dialog-widths';
 import App from './App.vue';
 import { router } from './router';

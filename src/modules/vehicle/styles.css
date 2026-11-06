@@ -25,52 +25,6 @@
 .vehicle-toolbar:not(:has(> :nth-child(3))) {
   grid-template-columns: minmax(0, 1fr) minmax(0, 200px);
 }
-.vehicle-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid var(--workstel-border);
-  border-radius: var(--workstel-radius-md);
-  overflow: hidden;
-}
-.vehicle-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--workstel-space-4);
-  min-height: var(--workstel-row-lg);
-  padding: var(--workstel-space-2) var(--workstel-space-3) var(--workstel-space-2)
-    var(--workstel-space-4);
-}
-.vehicle-row + .vehicle-row {
-  border-top: 1px solid var(--workstel-border);
-}
-.vehicle-row--archived {
-  background: var(--workstel-surface-muted);
-}
-.vehicle-identity {
-  display: flex;
-  align-items: center;
-  gap: var(--workstel-space-3);
-  min-width: 0;
-}
-.vehicle-identity > .v-icon {
-  color: var(--workstel-primary-text);
-  flex-shrink: 0;
-}
-.vehicle-identity > div,
-.vehicle-last {
-  display: flex;
-  flex-direction: column;
-  gap: var(--workstel-space-0_5);
-  min-width: 0;
-}
-.vehicle-identity strong {
-  font-size: var(--workstel-font-sm);
-  font-weight: var(--workstel-weight-semibold);
-  overflow-wrap: anywhere;
-}
 .vehicle-plate {
   font:
     var(--workstel-font-sm) 'Noto Sans',
@@ -78,23 +32,8 @@
   letter-spacing: var(--workstel-tracking-code);
 }
 .vehicle-identity small,
-.vehicle-last small {
-  font-size: var(--workstel-font-xs);
-  color: var(--workstel-text-secondary);
-}
-.vehicle-last {
-  align-items: flex-start;
-}
 .vehicle-time {
   font-size: var(--workstel-font-sm);
-}
-.vehicle-result {
-  display: inline-block;
-  padding: 1px var(--workstel-space-2);
-  border-radius: var(--workstel-radius-sm);
-  font-size: var(--workstel-font-xs);
-  font-weight: var(--workstel-weight-bold);
-  line-height: var(--workstel-leading-relaxed);
 }
 .vehicle-result--pass {
   background: var(--workstel-success-bg);
@@ -104,12 +43,6 @@
   background: var(--workstel-warning-bg);
   color: var(--workstel-warning-text);
 }
-.vehicle-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--workstel-space-2);
-}
 @media (max-width: 760px) {
   .vehicle-toolbar,
   .vehicle-toolbar:not(:has(> :nth-child(3))) {
@@ -117,21 +50,5 @@
   }
   .vehicle-search {
     grid-column: 1 / -1;
-  }
-  .vehicle-row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--workstel-space-2);
-    padding: var(--workstel-space-3);
-  }
-  .vehicle-actions {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-  .vehicle-actions .v-btn {
-    min-height: var(--workstel-touch-target);
-  }
-  .vehicle-actions .v-btn--icon {
-    width: var(--workstel-touch-target);
-    margin-left: auto;
   }
 }

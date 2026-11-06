@@ -79,7 +79,7 @@ function close() {
   font:
     600 16px 'Noto Sans',
     monospace;
-  letter-spacing: 1px;
+  letter-spacing: 1px; /* token-exempt: temporary-password code */
   overflow-wrap: anywhere;
 }
 </style>

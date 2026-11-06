@@ -144,4 +144,19 @@ Approved by the user after a signed-in production review of all six modules at d
 - **Row status:** status sits in the row's status column between the identity and the actions, with its supporting date or value. Sales CRM moved the deal stage from the start of the row into that column, above the follow-up date, as Bin Card and Vehicle Checklist already did. In lists narrower than 720px, the identity takes the first line, and status and actions share the second. Tabular modules (Vault, Room Turnaround) keep status in a table column.
 - **Filters:** every secondary filter belongs to the module's `FilterGroup`, so it folds into the Filters button on phones and counts in its badge. Bin Card's "Low stock only" checkbox is now a Stock select ("All stock levels" / "Low stock only"; Indonesian "Stok", "Semua tingkat stok", "Hanya stok menipis"). Reset filters clears it. The Bin Card toolbar uses the same 180px filter columns as Documents and Sales CRM.
 
-Still open from the review: three row padding variants, Documents' left-aligned Open button on phones, leading row icons in only some modules, Vehicle Checklist's 200px filter columns, and Vault's count wording. Vault also keeps its own toolbar (Access, Filters toggle, refresh, shortcuts).
+Still open from the review: Vehicle Checklist's 200px filter columns, and Vault's count wording. Vault also keeps its own toolbar (Access, Filters toggle, refresh, shortcuts).
+
+## Style guard and shared list rows — 6 November 2026
+
+- **Token guard:** `npm run styles:check` runs in `npm run build`, so it also runs in `npm run check` and the Pages build. It scans every `.css` file and every Vue `<style>` block and template, and rejects:
+  - colours, font sizes, weights and line heights that have a token;
+  - letter spacing, pixel radii and on-scale spacing;
+  - 44px touch sizes and numeric z-index;
+  - icon sizes on the scale, hex colour props and numeric dialog widths.
+    The 33 documented exceptions (wordmark, timer figures, 16px touch inputs, category colours, and others) are marked `token-exempt: <reason>`. `scripts/style-tokens.test.ts` covers the rules.
+- **Shared list rows:** `src/shared/list-row.vue` and `src/shared/list-row.css` replace the four copies of the row layout in Bin Card, Vehicle Checklist, Documents and Sales CRM (pipeline and accounts).
+  - Every row has the same columns (identity 1.4fr, status 0.8fr, actions), padding (10/12/10/16px), separators and archived fill, and a shared `list-row-chip` for status.
+  - Every row has a leading icon. Bin Card uses the module's package icon, and Sales deals use the handshake icon; Vehicle, Documents and Sales accounts keep theirs.
+  - In lists narrower than 720px, the identity takes the first line, and status and actions share the second, with actions on the right. This includes Documents, whose Open button was left-aligned on phones.
+  - The Sales accounts row action changed from tonal to outlined, like other row actions.
+  - Vehicle's columns moved from 1.3fr / 1fr to the shared 1.4fr / 0.8fr. Bin and Vehicle rows gained 2px of vertical padding to match the others.
