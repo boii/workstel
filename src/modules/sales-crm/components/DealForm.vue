@@ -146,6 +146,7 @@ const fieldError = (field: keyof DealInput) =>
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="deal ? messages.editDeal : messages.addDeal"
     :subtitle="deal ? deal.accountName : ''"
     :busy="saving"

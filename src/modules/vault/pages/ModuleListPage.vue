@@ -4,7 +4,7 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
-import VaultDialog from '../components/VaultDialog.vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import VaultAccountList from '../components/VaultAccountList.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import { locale } from '../../../i18n';
@@ -200,11 +200,11 @@ function resetFilters() {
       :entry="editing"
       @save="saveEntry"
     />
-    <VaultDialog
+    <ModuleDialog
       v-model="detailOpen"
+      class="vault-dialog"
       :title="detail?.name ?? messages.details"
       :subtitle="messages.details"
-      sheet
     >
       <template v-if="detail">
         <p class="vault-detail-subtitle">
@@ -264,9 +264,10 @@ function resetFilters() {
           >{{ messages.edit }}</v-btn
         >
       </template>
-    </VaultDialog>
-    <VaultDialog
+    </ModuleDialog>
+    <ModuleDialog
       v-model="archiveOpen"
+      class="vault-dialog"
       :title="messages.archiveTitle"
       :width="dialogWidth.sm"
     >
@@ -282,7 +283,7 @@ function resetFilters() {
           >{{ messages.archive }}</v-btn
         ></template
       >
-    </VaultDialog>
+    </ModuleDialog>
     <v-snackbar
       :model-value="!!feedback"
       @update:model-value="!$event && (feedback = null)"

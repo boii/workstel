@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VaultDialog from './VaultDialog.vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import type { VaultEntry } from '../types';
 import { getSupabase } from '../../../auth/client';
@@ -177,8 +177,9 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <VaultDialog
+  <ModuleDialog
     v-model="open"
+    class="vault-dialog"
     :title="
       mode === 'verify'
         ? messages.verifyIdentity
@@ -335,5 +336,5 @@ onUnmounted(() => {
         >{{ messages.retry }}</v-btn
       >
     </template>
-  </VaultDialog>
+  </ModuleDialog>
 </template>

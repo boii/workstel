@@ -78,6 +78,7 @@ const fieldError = (field: keyof AccountInput) =>
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="account ? messages.editAccount : messages.addAccount"
     :busy="saving"
     :dirty="dirty"

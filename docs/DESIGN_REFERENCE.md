@@ -195,3 +195,13 @@ Approved by the user after a 390px review of the Sales CRM deal form.
 - **Footer:** on phones, the footer's last non-text button takes the remaining width in full-screen dialogs as well as in sheets (Save deal went from 94px to 276px at 390px). `VaultDialog` does the same in full screen (Audit log).
 - **Safe area:** full-screen `ModuleDialog` and `VaultDialog` cards pad their bottom by `env(safe-area-inset-bottom)`, as sheets already did, so footers stay clear of the iPhone home indicator. The rule lives in `src/shared/dialog-sheet.css`.
 - **Opening:** on phones, full-screen dialogs slide up from the bottom (`dialog-bottom-transition`) like sheets. Desktop dialogs and Vault's centred phone popups keep the default transition.
+
+## Two phone dialog layouts — 6 November 2026
+
+Approved by the user. On phones there are now two dialog layouts, chosen by content length rather than by module: a **bottom sheet** for short content and **full screen** for long forms and views that grow with records. Desktop dialogs stay centred popups.
+
+- **Bottom sheet is the default.** `ModuleDialog` opens as a bottom sheet on phones unless it has `fullscreen`. The `sheet` option is gone. Full screen is used by the Sales CRM deal form, account form and account detail, the Vehicle inspection form and history, the Bin Card ledger, the user access dialog, and Vault Sharing and Audit log.
+- **Vault uses `ModuleDialog`.** `VaultDialog` is removed. `ModuleDialog` gained its `#toolbar` slot (used by the Audit log filters) and announces subtitle changes politely. Vault dialogs carry `class="vault-dialog"`, which scopes the Vault content styles. The full-width footer action, safe-area padding and "Discard changes?" guard now apply to Vault through the one component.
+- **Vault on phones:** the confirm archive, add/edit account and password (verify, set, reveal) dialogs were content-sized centred popups. They are now bottom sheets, like the matching dialogs in other modules. Sharing, whose recipient list grows up to 50, is now full screen. Account details and the ownership transfer confirmation were already sheets, and Audit log was already full screen.
+- **Desktop:** Vault dialog widths are unchanged. The desktop close button is now the shared 40 × 36px icon button instead of Vault's 36 × 36px, and the footer buttons keep Vuetify's 64px minimum width.
+- **Still custom:** the command palette, which is full screen on phones.

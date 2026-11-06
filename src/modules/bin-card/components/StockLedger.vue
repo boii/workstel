@@ -48,6 +48,7 @@ watch(open, (value) => {
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="messages.ledgerTitle"
     :subtitle="item ? item.code + ' · ' + item.name + ' (' + item.unit + ')' : ''"
     :width="dialogWidth['2xl']"

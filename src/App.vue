@@ -951,7 +951,6 @@ function logout() {
 
     <ModuleDialog
       v-model="creating"
-      sheet
       :title="t('createTask')"
       :subtitle="t('taskHint')"
       :width="dialogWidth.md"

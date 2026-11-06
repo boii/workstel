@@ -52,6 +52,7 @@ const issues = (entry: Inspection) =>
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="messages.historyTitle"
     :subtitle="vehicle ? vehicle.name + ' · ' + vehicle.plateNumber : ''"
     :width="dialogWidth.xl"

@@ -212,7 +212,6 @@ function forgetPassword() {
     />
     <ModuleDialog
       v-model="createOpen"
-      sheet
       :title="t('addUser')"
       :busy="creating"
       :width="dialogWidth.md"

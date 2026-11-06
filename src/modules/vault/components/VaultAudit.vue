@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import VaultDialog from './VaultDialog.vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import { vaultRpc, parseAudit } from '../live-api';
 import type { AuditEvent } from '../live-api';
 import type { StaffAssignment } from '../../../auth/useAuth';
@@ -79,12 +79,13 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <VaultDialog
+  <ModuleDialog
     v-model="open"
+    class="vault-dialog"
     :title="messages.auditTitle"
     :subtitle="filtered.length + ' / ' + events.length + ' ' + messages.auditEvents"
     :width="dialogWidth['5xl']"
-    fullscreen-on-mobile
+    fullscreen
   >
     <template #toolbar>
       <p class="vault-audit-hint">{{ messages.auditHint }}</p>
@@ -223,7 +224,7 @@ onUnmounted(() => {
         </li>
       </ol>
     </div>
-  </VaultDialog>
+  </ModuleDialog>
 </template>
 <style scoped>
 .vault-audit-hint {

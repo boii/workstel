@@ -44,7 +44,6 @@ async function submit() {
 <template>
   <ModuleDialog
     v-model="open"
-    sheet
     :title="messages.importRooms"
     :busy="saving"
   >

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { dialogWidth } from '../../../shared/dialog-widths';
-import VaultDialog from './VaultDialog.vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { vaultRpc } from '../live-api';
 import type { VaultEntry } from '../types';
@@ -164,8 +164,10 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <VaultDialog
+  <ModuleDialog
     v-model="open"
+    class="vault-dialog"
+    fullscreen
     :title="messages.shareTitle"
     :subtitle="entry.name"
     :busy="busy"
@@ -297,9 +299,9 @@ onUnmounted(() => {
         </div>
       </section>
     </template>
-    <VaultDialog
+    <ModuleDialog
       v-model="confirmTransfer"
-      sheet
+      class="vault-dialog"
       :title="messages.transferConfirm"
       :width="dialogWidth.md"
     >
@@ -319,7 +321,7 @@ onUnmounted(() => {
           >{{ messages.transfer }}</v-btn
         >
       </template>
-    </VaultDialog>
+    </ModuleDialog>
     <template #actions>
       <v-btn
         variant="text"
@@ -336,7 +338,7 @@ onUnmounted(() => {
         >{{ messages.share }}</v-btn
       >
     </template>
-  </VaultDialog>
+  </ModuleDialog>
 </template>
 <style scoped>
 .vault-share-section {

@@ -883,7 +883,6 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
     />
     <ModuleDialog
       v-model="archiveConfirmOpen"
-      sheet
       :title="messages.archiveConfirmTitle"
       :subtitle="detailAccount?.name ?? ''"
       :busy="archiving"

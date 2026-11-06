@@ -133,7 +133,6 @@ function changedLabel(state: ModuleState) {
     </ul>
     <ModuleDialog
       :model-value="!!pendingOff"
-      sheet
       :title="t('moduleDisableTitle')"
       :width="dialogWidth.md"
       @update:model-value="pendingOff = null"

@@ -50,7 +50,6 @@ const fieldError = (field: keyof RoomInput) =>
 <template>
   <ModuleDialog
     v-model="open"
-    sheet
     :title="room ? messages.editRoom : messages.addRoom"
     :busy="saving"
     :width="dialogWidth.md"

@@ -97,7 +97,6 @@ function save() {
   <ModuleDialog
     v-model="dialog"
     :title="messages.create"
-    sheet
   >
     <v-form
       id="template-record-form"

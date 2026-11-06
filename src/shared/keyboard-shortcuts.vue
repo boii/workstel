@@ -12,7 +12,6 @@ const heading = computed(() => props.title ?? t('shortcuts'));
 <template>
   <ModuleDialog
     v-model="open"
-    sheet
     :title="heading"
     :width="dialogWidth.xs"
   >

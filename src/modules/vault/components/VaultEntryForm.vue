@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VaultDialog from './VaultDialog.vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import { nextTick, ref, watch } from 'vue';
 import { useVaultMessages } from '../composables/useVaultMessages';
 import { departmentIds } from '../types';
@@ -84,8 +84,9 @@ function fieldError(field: VaultField) {
 }
 </script>
 <template>
-  <VaultDialog
+  <ModuleDialog
     v-model="open"
+    class="vault-dialog"
     :title="entry ? messages.edit : messages.add"
     :busy="saving"
   >
@@ -209,5 +210,5 @@ function fieldError(field: VaultField) {
         >{{ messages.save }}</v-btn
       >
     </template>
-  </VaultDialog>
+  </ModuleDialog>
 </template>

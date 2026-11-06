@@ -11,17 +11,20 @@ const props = withDefaults(
     subtitle?: string;
     busy?: boolean;
     width?: number;
-    /** Short forms open on phones as a bottom sheet sized to their content. */
-    sheet?: boolean;
+    /**
+     * On phones a dialog opens as a bottom sheet sized to its content. Long forms and views
+     * whose length grows with records (histories, ledgers, audit logs) fill the screen instead.
+     */
+    fullscreen?: boolean;
     /** The form has unsaved input: closing it without saving asks first. */
     dirty?: boolean;
   }>(),
-  { subtitle: '', busy: false, width: dialogWidth.lg, sheet: false, dirty: false },
+  { subtitle: '', busy: false, width: dialogWidth.lg, fullscreen: false, dirty: false },
 );
 const { width: viewport } = useDisplay();
 const phone = computed(() => viewport.value <= 680);
-const fullscreen = computed(() => phone.value && !props.sheet);
-const bottomSheet = computed(() => phone.value && props.sheet);
+const fullPhone = computed(() => phone.value && props.fullscreen);
+const bottomSheet = computed(() => phone.value && !props.fullscreen);
 const confirmDiscard = ref(false);
 // Close, Escape, an outside click, phone Back and the form's own Cancel all come here.
 function requestClose() {
@@ -42,7 +45,7 @@ watch(open, (value) => {
     :model-value="open"
     :max-width="props.width"
     :persistent="busy"
-    :fullscreen="fullscreen"
+    :fullscreen="fullPhone"
     :class="{ 'dialog-sheet': bottomSheet }"
     :transition="phone ? 'dialog-bottom-transition' : undefined"
     scrollable
@@ -50,20 +53,37 @@ watch(open, (value) => {
     @update:model-value="(value: boolean) => (value ? (open = true) : requestClose())"
   >
     <v-card class="module-dialog">
-      <header class="module-dialog-heading">
-        <div class="module-dialog-title">
-          <h2>{{ title }}</h2>
-          <p v-if="subtitle">{{ subtitle }}</p>
+      <header class="module-dialog-header">
+        <div class="module-dialog-heading">
+          <div class="module-dialog-title">
+            <h2>{{ title }}</h2>
+            <p
+              v-if="subtitle"
+              aria-live="polite"
+            >
+              {{ subtitle }}
+            </p>
+          </div>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            :aria-label="t('close')"
+            :disabled="busy"
+            @click="requestClose"
+          />
         </div>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          :aria-label="t('close')"
-          :disabled="busy"
-          @click="requestClose"
-        />
+        <div
+          v-if="$slots.toolbar"
+          class="module-dialog-toolbar"
+        >
+          <slot name="toolbar" />
+        </div>
       </header>
-      <v-card-text class="module-dialog-body"><slot /></v-card-text>
+      <v-card-text
+        class="module-dialog-body"
+        :class="{ 'module-dialog-body--flush': $slots.toolbar }"
+        ><slot
+      /></v-card-text>
       <footer
         v-if="$slots.actions"
         class="module-dialog-actions"
@@ -77,7 +97,6 @@ watch(open, (value) => {
     <ModuleDialog
       v-if="dirty || confirmDiscard"
       v-model="confirmDiscard"
-      sheet
       :title="t('discardTitle')"
       :width="dialogWidth.md"
     >
@@ -103,14 +122,20 @@ watch(open, (value) => {
   flex-direction: column;
   overflow: hidden !important;
 }
+.module-dialog-header {
+  border-bottom: 1px solid var(--workstel-border);
+  flex-shrink: 0;
+}
 .module-dialog-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--workstel-space-3);
   padding: var(--workstel-space-3_5) var(--workstel-space-5);
-  border-bottom: 1px solid var(--workstel-border);
-  flex-shrink: 0;
+}
+/* Filters or search that stay above a scrolling list, such as the Vault audit log. */
+.module-dialog-toolbar {
+  padding: 0 var(--workstel-space-5) var(--workstel-space-3_5);
 }
 .module-dialog-title {
   min-width: 0;
@@ -134,6 +159,9 @@ watch(open, (value) => {
   overscroll-behavior: contain;
   font-size: var(--workstel-font-sm) !important;
   line-height: var(--workstel-leading-normal) !important;
+}
+.module-dialog-body.module-dialog-body--flush {
+  padding: 0 !important;
 }
 .module-dialog-actions {
   display: flex;
@@ -159,7 +187,10 @@ watch(open, (value) => {
     width: var(--workstel-touch-target) !important;
     height: var(--workstel-touch-target) !important;
   }
-  .module-dialog-body {
+  .module-dialog-toolbar {
+    padding: 0 var(--workstel-space-4) var(--workstel-space-3);
+  }
+  .module-dialog-body:not(.module-dialog-body--flush) {
     padding: var(--workstel-space-3_5) var(--workstel-space-4) !important;
   }
   .module-dialog-actions {
@@ -168,6 +199,9 @@ watch(open, (value) => {
   /* Slot buttons carry the parent's scope, so they are reached with :deep(). */
   .module-dialog-actions :deep(.v-btn) {
     min-height: var(--workstel-touch-target);
+  }
+  .module-dialog-actions :deep(.v-btn--icon) {
+    min-width: var(--workstel-touch-target);
   }
 }
 </style>

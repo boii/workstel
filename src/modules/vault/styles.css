@@ -400,10 +400,10 @@
   .vault-module .vault-toolbar > .v-input:first-child {
     grid-column: 1 / -1;
   }
-  .vault-panel .v-btn {
+  .vault-dialog .v-btn {
     min-height: var(--workstel-touch-target);
   }
-  .vault-panel .v-btn--icon {
+  .vault-dialog .v-btn--icon {
     min-width: var(--workstel-touch-target);
   }
   .vault-form-grid {
@@ -432,82 +432,15 @@
   }
 }
 
-/* Shared Vault surfaces: one spacing, typography and scrolling contract. */
-.vault-panel {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden !important;
-}
-.vault-panel-header {
-  border-bottom: 1px solid var(--workstel-border);
-  flex-shrink: 0;
-}
-.vault-panel-toolbar {
-  padding: 0 var(--workstel-space-5) var(--workstel-space-3_5);
-}
-.vault-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--workstel-space-3);
-  padding: var(--workstel-space-3_5) var(--workstel-space-5);
-  flex-shrink: 0;
-}
-.vault-panel-title {
-  min-width: 0;
-}
-.vault-panel-title h2 {
-  font-size: var(--workstel-font-lg);
-  font-weight: var(--workstel-weight-medium);
-  line-height: var(--workstel-leading-tight);
-  overflow-wrap: anywhere;
-}
-.vault-panel-title p {
-  margin: 3px 0 0;
-  color: var(--workstel-text-secondary);
-  font-size: var(--workstel-font-sm);
-  line-height: var(--workstel-leading-tight);
-  overflow-wrap: anywhere;
-}
-.vault-panel-heading > .v-btn {
-  width: 36px;
-  height: var(--workstel-control-sm);
-  flex-shrink: 0;
-}
-.vault-panel-body {
-  padding: var(--workstel-space-4) var(--workstel-space-5) !important;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  font-size: var(--workstel-font-sm) !important;
-  line-height: var(--workstel-leading-normal) !important;
-}
-.vault-panel-actions {
-  margin: 0;
-  color: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: var(--workstel-space-2);
-  padding: var(--workstel-space-3) var(--workstel-space-5);
-  border-top: 1px solid var(--workstel-border);
-  flex-shrink: 0;
-}
-.vault-panel-actions > .v-btn {
-  min-width: 0;
-}
-.vault-panel-body.vault-panel-body--flush {
-  padding: 0 !important;
-}
-.vault-panel .vault-field-hint {
+/* Vault dialog content. The dialog frame is the shared ModuleDialog. */
+.vault-dialog .vault-field-hint {
   margin: var(--workstel-space-2) 0;
   line-height: var(--workstel-leading-normal);
 }
-.vault-panel .vault-panel-intro {
+.vault-dialog .vault-panel-intro {
   margin: 0 0 var(--workstel-space-3);
 }
-.vault-panel .v-alert {
+.vault-dialog .v-alert {
   font-size: var(--workstel-font-sm);
 }
 .vault-account-fields .field-label {
@@ -564,37 +497,37 @@
 .vault-panel-share-list .v-list-item__append {
   padding-inline-start: var(--workstel-space-2);
 }
-.vault-panel .vault-details {
+.vault-dialog .vault-details {
   display: grid;
   grid-template-columns: 110px minmax(0, 1fr);
   gap: var(--workstel-space-2_5) var(--workstel-space-3);
   font-size: var(--workstel-font-sm);
 }
-.vault-panel .vault-details dt,
-.vault-panel .vault-details dd {
+.vault-dialog .vault-details dt,
+.vault-dialog .vault-details dd {
   margin: 0;
   line-height: var(--workstel-leading-normal);
 }
-.vault-panel .vault-details dt {
+.vault-dialog .vault-details dt {
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
 }
-.vault-panel .vault-details dd {
+.vault-dialog .vault-details dd {
   overflow-wrap: anywhere;
   min-width: 0;
 }
-.vault-panel .vault-history-title {
+.vault-dialog .vault-history-title {
   margin: var(--workstel-space-4) 0 0;
   padding-top: var(--workstel-space-3);
   font-size: var(--workstel-font-sm);
 }
-.vault-panel .vault-detail-subtitle {
+.vault-dialog .vault-detail-subtitle {
   margin: 0 0 var(--workstel-space-3);
 }
-.vault-panel .vault-history {
+.vault-dialog .vault-history {
   margin-top: var(--workstel-space-2);
 }
-.vault-panel .vault-history li {
+.vault-dialog .vault-history li {
   padding: var(--workstel-space-1_5) 0;
 }
 .vault-module .vault-notice {
@@ -607,43 +540,13 @@
   gap: var(--workstel-space-2);
 }
 @media (max-width: 680px) {
-  .vault-panel-toolbar {
-    padding: 0 var(--workstel-space-4) var(--workstel-space-3);
-  }
-  .vault-panel-heading {
-    padding: var(--workstel-space-3) var(--workstel-space-4);
-    gap: var(--workstel-space-2);
-  }
-  .vault-panel-title h2 {
-    font-size: var(--workstel-font-lg);
-  }
-  .vault-panel-heading > .v-btn {
-    width: var(--workstel-touch-target);
-    height: var(--workstel-touch-target);
-  }
-  .vault-panel-body {
-    padding: var(--workstel-space-3_5) var(--workstel-space-4) !important;
-  }
-  .vault-panel-actions {
-    padding: var(--workstel-space-2_5) var(--workstel-space-4);
-  }
-  .vault-panel-actions > .v-btn {
+  .vault-dialog .v-field__input {
     min-height: var(--workstel-touch-target);
   }
-  .vault-panel-actions > .v-btn--icon {
-    min-width: var(--workstel-touch-target);
-  }
-  /* Full-screen footers give the main action the remaining width, like ModuleDialog. */
-  .v-dialog--fullscreen .vault-panel-actions > .v-btn:last-child:not(.v-btn--variant-text) {
-    flex: 1 1 auto;
-  }
-  .vault-panel .v-field__input {
-    min-height: var(--workstel-touch-target);
-  }
-  .vault-panel .vault-form-grid {
+  .vault-dialog .vault-form-grid {
     gap: 0;
   }
-  .vault-panel .vault-details {
+  .vault-dialog .vault-details {
     grid-template-columns: 95px minmax(0, 1fr);
     gap: var(--workstel-space-2_5);
   }

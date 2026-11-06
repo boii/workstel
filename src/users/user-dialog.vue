@@ -187,6 +187,7 @@ async function confirmAction() {
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="user?.email ?? ''"
     :subtitle="t('userManage')"
     :busy="busy"
@@ -373,7 +374,6 @@ async function confirmAction() {
     </template>
     <ModuleDialog
       :model-value="!!confirm"
-      sheet
       :title="
         t(
           confirm === 'block'

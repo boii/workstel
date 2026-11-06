@@ -55,7 +55,6 @@ async function submit() {
 <template>
   <ModuleDialog
     v-model="open"
-    sheet
     :title="t('editProfile')"
     :busy="saving"
     :width="dialogWidth.md"

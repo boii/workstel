@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import VaultDialog from '../components/VaultDialog.vue';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import { vaultRpc as rpc, parseEntries, findAccount } from '../live-api';
 import VaultAccountList from '../components/VaultAccountList.vue';
@@ -747,12 +747,12 @@ onMounted(() => {
       :close-on-submit="false"
       @save="write"
     />
-    <VaultDialog
+    <ModuleDialog
       v-model="detailOpen"
+      class="vault-dialog"
       :title="detail?.name ?? messages.details"
       :subtitle="messages.details"
       :busy="busy"
-      sheet
     >
       <v-skeleton-loader
         v-if="detailLoading"
@@ -863,9 +863,10 @@ onMounted(() => {
           >{{ messages.edit }}</v-btn
         >
       </template>
-    </VaultDialog>
-    <VaultDialog
+    </ModuleDialog>
+    <ModuleDialog
       v-model="archiveOpen"
+      class="vault-dialog"
       :title="messages.archiveTitle"
       :busy="busy"
       :width="dialogWidth.sm"
@@ -893,7 +894,7 @@ onMounted(() => {
           >{{ messages.archive }}</v-btn
         >
       </template>
-    </VaultDialog>
+    </ModuleDialog>
     <VaultSecretDialog
       v-if="secretTarget"
       v-model="secretOpen"

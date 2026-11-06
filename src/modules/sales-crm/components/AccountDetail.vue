@@ -101,6 +101,7 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="account?.name ?? ''"
     :subtitle="
       account ? messages[accountTypeKeys[account.type]] + ' · ' + account.departmentName : ''

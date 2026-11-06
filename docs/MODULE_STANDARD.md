@@ -82,6 +82,7 @@ Render record lists as `<ul class="list-rows">` with `ListRow` from src/shared/l
 No sidebar, marketing banners, decorative animations, duplicate headers or fabricated metrics.
 Desktop uses the shared thin header. Mobile uses one-column cards, full-width search and navigation beneath the top header row.
 Pages include a title, one primary action, search/filter where needed, content and pagination.
+Open every dialog with `ModuleDialog` from src/shared/module-dialog.vue. On phones it is a bottom sheet; add `fullscreen` only for long forms and views whose length grows with records. Pass `dirty` from forms with several fields, and close Cancel through the `close` function of the `#actions` slot.
 Loading uses skeletons; errors have safe messages and retry; distinguish empty data from no search results.
 Forms have visible labels, inline validation, saving state, submit protection, success feedback and cancellation.
 Verify denied access, expired sessions, offline/network failures and conflicting edits when backend exists.

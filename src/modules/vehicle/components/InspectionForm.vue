@@ -91,6 +91,7 @@ const fieldError = (field: InspectionField) => {
 <template>
   <ModuleDialog
     v-model="open"
+    fullscreen
     :title="messages.inspectionTitle"
     :subtitle="vehicle ? vehicle.name + ' · ' + vehicle.plateNumber : ''"
     :busy="saving"

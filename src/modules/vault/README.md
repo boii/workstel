@@ -4,11 +4,11 @@ The production implementation uses authenticated Supabase RPCs for account metad
 
 ## Layout contract
 
-Use `VaultDialog.vue` for Vault overlays. It owns the compact title, close control,
-scrollable body and fixed action footer. Standard forms and account details use 560px maximum width;
-confirmations use 440px, and Audit log uses 960px. Account details open
-as a bottom sheet on phones (`sheet`), and Audit log fills the mobile screen. Short forms remain content-sized with a
-scrollable body when space is limited.
+Vault overlays use the shared `ModuleDialog` (src/shared/module-dialog.vue) with `class="vault-dialog"`,
+which scopes the Vault content styles. The dialog owns the title, close control, scrollable body,
+optional `#toolbar` and fixed action footer. Standard forms and account details use 560px maximum width;
+confirmations use 440px, and Audit log uses 960px. On phones every Vault dialog opens as a bottom
+sheet, except Sharing and Audit log, which fill the screen (`fullscreen`) because their lists grow.
 
 Shared styles use 20px horizontal gutters on desktop and 16px on mobile, 20/19px
 dialog titles, 36px desktop actions and at least 44px mobile touch targets. Keep

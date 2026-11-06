@@ -82,7 +82,6 @@ const fieldError = (field: keyof ActivityInput) =>
 <template>
   <ModuleDialog
     v-model="open"
-    sheet
     :title="messages.logActivity"
     :subtitle="accountName"
     :busy="saving"
