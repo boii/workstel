@@ -17,30 +17,6 @@
 .vault-compact-page .vault-breadcrumb {
   margin-bottom: var(--workstel-space-2_5);
 }
-.vault-compact-toolbar {
-  display: flex;
-  align-items: center;
-  gap: var(--workstel-space-2);
-}
-.vault-compact-toolbar > * {
-  min-width: 0;
-}
-.vault-compact-search {
-  flex: 1;
-}
-.vault-access-filter {
-  flex: 0 1 235px;
-}
-.vault-compact-filters {
-  display: flex;
-  gap: var(--workstel-space-3);
-  margin-top: var(--workstel-space-3);
-}
-.vault-compact-filters > * {
-  flex: 1;
-  min-width: 0;
-  max-width: 320px;
-}
 .vault-compact-service-hint {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
@@ -260,36 +236,26 @@
   .vault-inline-secret {
     max-width: 100%;
   }
-  .vault-compact-toolbar {
-    flex-wrap: wrap;
-  }
-  .vault-compact-search {
-    flex-basis: 100%;
-  }
-  .vault-access-filter {
-    flex: 1;
-  }
-  .vault-compact-toolbar > .v-btn {
-    min-height: var(--workstel-touch-target);
-  }
-  .vault-compact-filters {
-    flex-wrap: wrap;
-  }
-  .vault-compact-filters > * {
-    flex-basis: 140px;
-    max-width: none;
-  }
 }
 .vault-notice {
   font-size: var(--workstel-font-sm) !important;
   line-height: var(--workstel-leading-loose);
   margin-bottom: var(--workstel-space-5);
 }
+/* Same grid as the other module toolbars: search, then 180px filter columns. */
 .vault-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr);
-  align-items: center;
-  gap: var(--workstel-space-3);
+  grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 180px));
+  gap: var(--workstel-space-2);
+}
+.vault-toolbar:not(:has(> :nth-child(4))) {
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 180px));
+}
+.vault-toolbar:has(> :nth-child(5)) {
+  grid-template-columns: minmax(0, 1fr) repeat(4, minmax(0, 180px));
+}
+.vault-toolbar > * {
+  min-width: 0;
 }
 .vault-account-name {
   font: inherit;
@@ -368,15 +334,6 @@
   overflow: hidden;
   clip-path: inset(50%);
 }
-@media (max-width: 900px) {
-  .vault-toolbar {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.vault-toolbar > * {
-  min-width: 0;
-}
 .vault-entry-form {
   display: flex;
   flex-direction: column;
@@ -397,9 +354,6 @@
 }
 
 @media (max-width: 680px) {
-  .vault-module .vault-toolbar > .v-input:first-child {
-    grid-column: 1 / -1;
-  }
   .vault-dialog .v-btn {
     min-height: var(--workstel-touch-target);
   }
@@ -409,9 +363,6 @@
   .vault-form-grid {
     grid-template-columns: 1fr;
     gap: 0;
-  }
-  .vault-toolbar {
-    gap: var(--workstel-space-2_5);
   }
   .vault-history li {
     flex-direction: column;
@@ -423,7 +374,6 @@
   .vault-share-form > * {
     width: 100%;
   }
-  .vault-toolbar .v-field__input,
   .vault-share-form .v-field__input {
     min-height: var(--workstel-touch-target);
   }
@@ -535,9 +485,6 @@
   padding-block: var(--workstel-space-2);
   font-size: var(--workstel-font-xs) !important;
   line-height: var(--workstel-leading-normal);
-}
-.vault-module .vault-toolbar {
-  gap: var(--workstel-space-2);
 }
 @media (max-width: 680px) {
   .vault-dialog .v-field__input {

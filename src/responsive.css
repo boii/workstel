@@ -41,27 +41,33 @@
 @container (max-width: 720px) {
   .module-page
     .module-page-toolbar
-    :is(.vehicle-toolbar, .bin-toolbar, .documents-toolbar, .sales-toolbar, .hk-toolbar) {
+    :is(
+      .vehicle-toolbar,
+      .bin-toolbar,
+      .documents-toolbar,
+      .sales-toolbar,
+      .hk-toolbar,
+      .vault-toolbar
+    ) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .module-page :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search) {
+  .module-page
+    :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search, .vault-search) {
     grid-column: 1 / -1;
   }
 }
 @container (max-width: 400px) {
   .module-page
     .module-page-toolbar
-    :is(.vehicle-toolbar, .bin-toolbar, .documents-toolbar, .sales-toolbar, .hk-toolbar) {
+    :is(
+      .vehicle-toolbar,
+      .bin-toolbar,
+      .documents-toolbar,
+      .sales-toolbar,
+      .hk-toolbar,
+      .vault-toolbar
+    ) {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .module-page .vault-compact-search {
-    flex-basis: 100%;
-  }
-  .module-page .vault-compact-toolbar {
-    flex-wrap: wrap;
-  }
-  .module-page .vault-access-filter {
-    flex: 1 1 140px;
   }
 }
 @media (max-width: 680px), (pointer: coarse) {
@@ -104,15 +110,20 @@
 @media (max-width: 680px) {
   .module-page
     .module-page-toolbar
-    :is(.vehicle-toolbar, .bin-toolbar, .documents-toolbar, .sales-toolbar, .hk-toolbar):has(
-      > .filter-group-button
-    ) {
+    :is(
+      .vehicle-toolbar,
+      .bin-toolbar,
+      .documents-toolbar,
+      .sales-toolbar,
+      .hk-toolbar,
+      .vault-toolbar
+    ):has(> .filter-group-button) {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
   .module-page
     .module-page-toolbar
-    :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search) {
+    :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search, .vault-search) {
     grid-column: auto;
   }
   /* Centre the 44px button on the 40px search field. */

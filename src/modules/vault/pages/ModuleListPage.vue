@@ -8,6 +8,7 @@ import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import VaultAccountList from '../components/VaultAccountList.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import FilterGroup from '../../../shared/filter-group.vue';
 import { locale } from '../../../i18n';
 import { useVault } from '../composables/useVault';
 import { useVaultMessages } from '../composables/useVaultMessages';
@@ -103,6 +104,13 @@ function toggleDetailArchive(entry: VaultEntry) {
   detailId.value = null;
   void toggleArchive(entry);
 }
+const filterCount = computed(
+  () => (department.value !== 'all' ? 1 : 0) + (status.value !== 'active' ? 1 : 0),
+);
+function resetFilterGroup() {
+  department.value = 'all';
+  status.value = 'active';
+}
 function resetFilters() {
   search.value = '';
   department.value = 'all';
@@ -121,7 +129,9 @@ function resetFilters() {
       />{{ messages.back }}</button
     ><ModulePage
       :title="messages.title"
-      :description="filtered.length + ' ' + messages.records"
+      :description="
+        filtered.length + ' ' + (filtered.length === 1 ? messages.accountOne : messages.records)
+      "
       :empty="!filtered.length"
       :empty-title="entries.length ? messages.noResults : messages.emptyTitle"
       :empty-description="entries.length ? messages.noResultsHint : messages.emptyDescription"
@@ -149,26 +159,34 @@ function resetFilters() {
         >
         <div class="vault-toolbar">
           <v-text-field
-            v-model="search"
+            :model-value="search"
+            class="vault-search"
             :aria-label="messages.search"
             :placeholder="messages.search"
             prepend-inner-icon="mdi-magnify"
-            hide-details
-          /><v-select
-            v-model="department"
-            :label="messages.department"
-            :items="departmentOptions"
-            hide-details
-          /><v-select
-            v-model="status"
-            :label="messages.status"
-            :items="[
-              { value: 'active', title: messages.active },
-              { value: 'archived', title: messages.archived },
-              { value: 'all', title: messages.all },
-            ]"
-            hide-details
+            single-line
+            clearable
+            @update:model-value="search = $event ?? ''"
           />
+          <FilterGroup
+            :count="filterCount"
+            @reset="resetFilterGroup"
+          >
+            <v-select
+              v-model="department"
+              :label="messages.department"
+              :items="departmentOptions"
+            />
+            <v-select
+              v-model="status"
+              :label="messages.status"
+              :items="[
+                { value: 'active', title: messages.active },
+                { value: 'archived', title: messages.archived },
+                { value: 'all', title: messages.all },
+              ]"
+            />
+          </FilterGroup>
         </div>
       </template>
       <template #empty-action

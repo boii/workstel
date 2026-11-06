@@ -139,11 +139,6 @@ function website(value: string) {
               :aria-label="messages.actions + ' — ' + entry.name"
           /></template>
           <v-list-item
-            prepend-icon="mdi-information-outline"
-            :title="messages.details"
-            @click="$emit('detail', entry)"
-          />
-          <v-list-item
             v-if="canEdit(entry)"
             prepend-icon="mdi-pencil-outline"
             :title="messages.edit"

@@ -29,18 +29,11 @@ test('shortcut copy is typed in both shell locales and rendered where it is used
   assert.ok(app.includes("t('skipToContent')"), 'shell renders the skip link');
 });
 
-test('Vault shortcut and empty-state copy exists in both module locales', () => {
-  for (const key of [
-    'shortcutsTitle',
-    'shortcutSearch',
-    'shortcutNewAccount',
-    'shortcutClose',
-    'filteredOnlyLoaded',
-  ] as const) {
-    assert.ok(en[key].trim(), key + ' has English module copy');
-    assert.ok(id[key].trim(), key + ' has Indonesian module copy');
-  }
-  assert.ok(vault.includes('messages.value.shortcutNewAccount'), 'vault renders its shortcuts');
+test('Vault has no page shortcuts and keeps empty-state copy in both module locales', () => {
+  assert.ok(en.filteredOnlyLoaded.trim(), 'filteredOnlyLoaded has English module copy');
+  assert.ok(id.filteredOnlyLoaded.trim(), 'filteredOnlyLoaded has Indonesian module copy');
+  assert.ok(!vault.includes('useShortcuts'), 'vault registers no keyboard shortcuts');
+  assert.ok(vault.includes('FilterGroup'), 'vault filters use the shared FilterGroup');
   assert.ok(vault.includes('activeFilters'), 'the empty state explains active filters');
 });
 

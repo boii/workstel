@@ -302,11 +302,10 @@ const shortcutRows = computed(() => [
   { keys: '?', label: t('shortcutList') },
   { keys: 'Esc', label: t('shortcutClose') },
 ]);
-// Help lists every shortcut, including the Vault-only "new account" key registered by that page.
+// Help lists the shell shortcuts; module pages may add their own.
 const helpShortcutRows = computed(() => [
   { keys: paletteKeys, label: t('paletteShortcut') },
   { keys: '/', label: t('helpSearchShortcut') },
-  { keys: 'N', label: t('helpNewAccount') },
   { keys: '?', label: t('shortcutList') },
   { keys: 'Esc', label: t('shortcutClose') },
 ]);

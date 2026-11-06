@@ -8,7 +8,7 @@ import VaultAccountList from '../components/VaultAccountList.vue';
 import VaultAudit from '../components/VaultAudit.vue';
 import VaultSharing from '../components/VaultSharing.vue';
 import VaultSecretDialog from '../components/VaultSecretDialog.vue';
-import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
+import FilterGroup from '../../../shared/filter-group.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import { secretOperation } from '../secret-api';
@@ -18,10 +18,6 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultEntryForm from '../components/VaultEntryForm.vue';
 import type { VaultEntry, VaultEntryInput, DepartmentId } from '../types';
 import { departmentIds } from '../types';
-import { useShortcuts } from '../../../core/use-shortcuts';
-import type { ShortcutRow } from '../../../core/use-shortcuts';
-import { focusFieldInput } from '../../../core/focus-field';
-import type { FocusableField } from '../../../core/focus-field';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
@@ -68,10 +64,7 @@ const status = ref<'active' | 'archived' | 'all'>('active');
 const department = ref<string | null>(null);
 const auditOpen = ref(false);
 const access = ref<'all' | 'mine' | 'shared'>('all');
-const filtersOpen = ref(false),
-  secretReset = ref(0),
-  searchField = ref<FocusableField | null>(null),
-  shortcutsOpen = ref(false),
+const secretReset = ref(0),
   searching = ref(false);
 const SEARCH_DELAY = 300;
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
@@ -151,39 +144,24 @@ const activeFilters = computed(() => {
     });
   return rows;
 });
-const anyPanelOpen = computed(
+/** Secondary filters inside the shared FilterGroup; search stays outside it. */
+const filterCount = computed(
   () =>
-    formOpen.value ||
-    !!detail.value ||
-    detailLoading.value ||
-    !!secretTarget.value ||
-    !!sharingTarget.value ||
-    auditOpen.value,
+    (access.value !== 'all' ? 1 : 0) +
+    (status.value !== 'active' ? 1 : 0) +
+    (department.value ? 1 : 0),
 );
-function focusAccountSearch() {
-  focusFieldInput(searchField.value);
+function resetFilterGroup() {
+  access.value = 'all';
+  status.value = 'active';
+  department.value = null;
+  void load();
 }
-function closeTopmostPanel() {
-  if (busy.value) return;
-  if (formOpen.value) formOpen.value = false;
-  else if (detail.value || detailLoading.value) closeDetail();
-  else if (sharingTarget.value) sharingTarget.value = null;
-  else if (secretTarget.value) secretTarget.value = null;
-  else if (auditOpen.value) auditOpen.value = false;
-  else if (shortcutsOpen.value) shortcutsOpen.value = false;
-}
-useShortcuts(() => [
-  { key: '/', run: focusAccountSearch },
-  { key: 'n', when: () => canWrite.value && !anyPanelOpen.value, run: () => edit() },
-  { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
-  { key: 'Escape', allowInInputs: true, run: closeTopmostPanel },
-]);
-const shortcutRows = computed<ShortcutRow[]>(() => [
-  { keys: '/', label: messages.value.shortcutSearch },
-  ...(canWrite.value ? [{ keys: 'n', label: messages.value.shortcutNewAccount }] : []),
-  { keys: '?', label: messages.value.shortcuts },
-  { keys: 'Esc', label: messages.value.shortcutClose },
-]);
+/** Header count; "+" marks that more accounts are available to load. */
+const countLabel = computed(() => {
+  const count = visibleEntries.value.length;
+  return `${count}${next.value ? '+' : ''} ${count === 1 && !next.value ? messages.value.accountOne : messages.value.records}`;
+});
 watch([detail, formOpen, secretTarget, sharingTarget, auditOpen], () => {
   secretReset.value++;
 });
@@ -522,7 +500,7 @@ onMounted(() => {
       />{{ messages.back }}</button
     ><ModulePage
       :title="messages.title"
-      :description="`${visibleEntries.length} / ${entries.length} ${messages.loadedAccounts}`"
+      :description="countLabel"
       :loading="showSkeleton"
       :error="formOpen ? '' : failure"
       :empty="!visibleEntries.length && !loading && !searching"
@@ -555,112 +533,58 @@ onMounted(() => {
         >
       </template>
       <template #toolbar>
-        <v-form
-          class="vault-compact-toolbar"
-          @submit.prevent="load()"
-        >
+        <div class="vault-toolbar">
           <v-text-field
-            ref="searchField"
-            v-model="search"
-            class="vault-compact-search"
+            :model-value="search"
+            class="vault-search"
+            :placeholder="messages.search"
+            :aria-label="messages.search"
             prepend-inner-icon="mdi-magnify"
-            hide-details
-            density="compact"
-            :label="messages.search"
-            maxlength="150"
-            @keydown.enter.prevent="load()"
-          >
-            <template #append-inner
-              ><v-btn
-                icon="mdi-arrow-right"
-                variant="text"
-                size="x-small"
-                :loading="loading || searching"
-                :aria-label="messages.searchAction"
-                @click="load()"
-            /></template>
-          </v-text-field>
-          <v-select
-            v-model="access"
-            class="vault-access-filter"
-            hide-details
-            density="compact"
-            :label="messages.access"
-            :items="[
-              { value: 'all', title: messages.allAccounts },
-              { value: 'mine', title: messages.ownedByMe },
-              { value: 'shared', title: messages.sharedWithMe },
-            ]"
-          />
-          <v-btn
-            variant="text"
-            prepend-icon="mdi-filter-variant"
-            :active="filtersOpen"
-            :aria-expanded="filtersOpen"
-            aria-controls="vault-additional-filters"
-            @click="filtersOpen = !filtersOpen"
-            >{{ messages.filters }}</v-btn
-          >
-          <v-btn
-            v-if="hasFilters"
-            icon="mdi-filter-remove-outline"
-            variant="text"
-            :aria-label="messages.reset"
-            :title="messages.reset"
-            @click="resetFilters"
-          />
-          <v-btn
-            icon="mdi-refresh"
-            variant="text"
-            :aria-label="messages.refresh"
-            :title="messages.refresh"
-            :loading="loading"
-            @click="load(false, true)"
-          />
-          <v-btn
-            icon="mdi-keyboard-outline"
-            variant="text"
-            :aria-label="messages.shortcutHelp"
-            :title="messages.shortcutHelp"
-            @click="shortcutsOpen = true"
-          />
-        </v-form>
-        <div
-          v-if="filtersOpen"
-          id="vault-additional-filters"
-          class="vault-compact-filters"
-        >
-          <v-select
-            v-if="hotels.length > 1"
-            v-model="hotelId"
-            hide-details
-            density="compact"
-            :label="messages.hotel"
-            :items="hotels"
-            :disabled="busy || formOpen"
-            @update:model-value="changedHotel"
-          />
-          <v-select
-            v-model="status"
-            hide-details
-            density="compact"
-            :label="messages.status"
-            :items="[
-              { value: 'active', title: messages.active },
-              { value: 'archived', title: messages.archived },
-              { value: 'all', title: messages.all },
-            ]"
-            @update:model-value="load()"
-          />
-          <v-select
-            v-model="department"
-            hide-details
-            density="compact"
-            :items="departments"
-            :label="messages.department"
+            :loading="searching"
+            single-line
             clearable
-            @update:model-value="load()"
+            maxlength="150"
+            @update:model-value="search = $event ?? ''"
+            @keydown.enter.prevent="load()"
           />
+          <FilterGroup
+            :count="filterCount"
+            @reset="resetFilterGroup"
+          >
+            <v-select
+              v-model="access"
+              :label="messages.access"
+              :items="[
+                { value: 'all', title: messages.allAccounts },
+                { value: 'mine', title: messages.ownedByMe },
+                { value: 'shared', title: messages.sharedWithMe },
+              ]"
+            />
+            <v-select
+              v-model="status"
+              :label="messages.status"
+              :items="[
+                { value: 'active', title: messages.active },
+                { value: 'archived', title: messages.archived },
+                { value: 'all', title: messages.all },
+              ]"
+              @update:model-value="load()"
+            />
+            <v-select
+              v-model="department"
+              :items="[{ value: null, title: messages.allDepartments }, ...departments]"
+              :label="messages.department"
+              @update:model-value="load()"
+            />
+            <v-select
+              v-if="hotels.length > 1"
+              v-model="hotelId"
+              :label="messages.hotel"
+              :items="hotels"
+              :disabled="busy || formOpen"
+              @update:model-value="changedHotel"
+            />
+          </FilterGroup>
         </div>
         <p
           v-if="!secretAvailable"
@@ -670,7 +594,7 @@ onMounted(() => {
             icon="mdi-lock-outline"
             size="var(--workstel-icon-xs)"
           />
-          {{ messages.unavailable }}
+          {{ messages.passwordHint }}
         </p>
       </template>
       <template #empty-action>
@@ -678,7 +602,11 @@ onMounted(() => {
           v-if="activeFilters.length"
           class="vault-empty-filters"
         >
-          <span class="vault-field-hint">{{ messages.filteredOnlyLoaded }}</span>
+          <span
+            v-if="next"
+            class="vault-field-hint"
+            >{{ messages.filteredOnlyLoaded }}</span
+          >
           <div class="vault-empty-chips">
             <v-chip
               v-for="filter in activeFilters"
@@ -722,15 +650,13 @@ onMounted(() => {
       v-if="next"
       class="vault-compact-footer"
     >
-      <span>{{ visibleEntries.length }} / {{ entries.length }} {{ messages.loadedAccounts }}</span>
       <v-btn
-        v-if="next"
         variant="text"
         :loading="loading"
         @click="load(true)"
         >{{ messages.loadMore }}</v-btn
       >
-      <span v-if="access !== 'all' && next">{{ messages.accessLoadedHint }}</span>
+      <span v-if="access !== 'all'">{{ messages.accessLoadedHint }}</span>
     </div>
     <VaultEntryForm
       v-model="formOpen"
@@ -781,11 +707,12 @@ onMounted(() => {
               }).format(new Date(detail.updatedAt))
             }}
           </dd>
-          <dt>{{ messages.password }}</dt>
-          <dd>{{ secretAvailable ? messages.passwordActions : messages.unavailable }}</dd>
         </dl>
-        <p class="vault-field-hint">
-          {{ secretAvailable ? messages.encryptedHint : messages.passwordHint }}
+        <p
+          v-if="secretAvailable"
+          class="vault-field-hint"
+        >
+          {{ messages.encryptedHint }}
         </p>
       </template>
       <template
@@ -870,11 +797,6 @@ onMounted(() => {
       :message="notice"
       :undo="undoAction"
       @close="showNotice('')"
-    />
-    <KeyboardShortcuts
-      v-model="shortcutsOpen"
-      :rows="shortcutRows"
-      :title="messages.shortcutsTitle"
     />
   </div>
 </template>

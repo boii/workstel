@@ -144,7 +144,9 @@ Approved by the user after a signed-in production review of all six modules at d
 - **Row status:** status sits in the row's status column between the identity and the actions, with its supporting date or value. Sales CRM moved the deal stage from the start of the row into that column, above the follow-up date, as Bin Card and Vehicle Checklist already did. In lists narrower than 720px, the identity takes the first line, and status and actions share the second. Tabular modules (Vault, Room Turnaround) keep status in a table column.
 - **Filters:** every secondary filter belongs to the module's `FilterGroup`, so it folds into the Filters button on phones and counts in its badge. Bin Card's "Low stock only" checkbox is now a Stock select ("All stock levels" / "Low stock only"; Indonesian "Stok", "Semua tingkat stok", "Hanya stok menipis"). Reset filters clears it. The Bin Card toolbar uses the same 180px filter columns as Documents and Sales CRM.
 
-Still open from the review: Vehicle Checklist's 200px filter columns, and Vault's count wording. Vault also keeps its own toolbar (Access, Filters toggle, refresh, shortcuts).
+Still open from the review: Vehicle Checklist's 200px filter columns.
+
+Vault relayout (6 November 2026): Vault now uses the shared toolbar — search, then Access, Status, Department and (with several hotels) Hotel inside `FilterGroup`. Its own Filters toggle, refresh, reset icon, in-field search button and keyboard shortcuts (page keys and the Help "N" row) are removed. The heading count reads "N accounts" ("N+" while more can be loaded); the footer holds only Load more. The row menu no longer repeats Details (the account name opens them), and account details drop the Password row that repeated the hint below it.
 
 ## Style guard and shared list rows — 6 November 2026
 

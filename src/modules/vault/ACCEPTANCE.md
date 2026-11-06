@@ -33,8 +33,9 @@ Do not mark the complete Password Vault production-ready based on metadata tests
 ## Compact account list — 2 November 2026
 
 Implemented a compact desktop account list and two-line mobile rows using the
-existing Vuetify theme. Search, access filtering and refresh share one toolbar;
-status/department/hotel filters expand on demand. Account details open in a
+existing Vuetify theme. Search sits beside the shared `FilterGroup` (access,
+status, department, hotel), which folds into one Filters button on phones. Vault
+registers no keyboard shortcuts. Account details open in a
 focus-trapped right-side dialog, full-screen on mobile. Metadata edit, password
 write, sharing and archive/restore remain subject to the existing capabilities.
 

@@ -182,8 +182,7 @@ export const english = {
   copy: 'Copy',
   copied: 'Copied',
   copyFailed: 'Copy failed',
-  helpSearchShortcut: 'Search modules, or accounts in Vault',
-  helpNewAccount: 'Add an account in Vault',
+  helpSearchShortcut: 'Search modules',
   helpVaultScope: 'Vault is for hotel work accounts only. Keep personal accounts out of it.',
   faqPersonalQ: 'Can I save my personal accounts?',
   faqPersonalA:
@@ -470,8 +469,7 @@ const indonesian: Record<MessageKey, string> = {
   copy: 'Salin',
   copied: 'Disalin',
   copyFailed: 'Gagal menyalin',
-  helpSearchShortcut: 'Cari modul, atau akun di Vault',
-  helpNewAccount: 'Tambah akun di Vault',
+  helpSearchShortcut: 'Cari modul',
   helpVaultScope: 'Vault khusus untuk akun kerja hotel. Jangan simpan akun pribadi.',
   faqPersonalQ: 'Bisakah saya menyimpan akun pribadi?',
   faqPersonalA:
