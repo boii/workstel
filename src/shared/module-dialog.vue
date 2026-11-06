@@ -83,6 +83,8 @@ watch(open, (value) => {
               {{ subtitle }}
             </p>
           </div>
+          <!-- Optional record menu beside Close, so a dialog without footer actions needs no footer. -->
+          <slot name="header-actions" />
           <v-btn
             icon="mdi-close"
             variant="text"
@@ -161,6 +163,7 @@ watch(open, (value) => {
   padding: 0 var(--workstel-space-5) var(--workstel-space-3_5);
 }
 .module-dialog-title {
+  flex: 1;
   min-width: 0;
 }
 .module-dialog-title h2 {

@@ -2,6 +2,7 @@
 import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import ActionMenu from '../../../shared/action-menu.vue';
 import {
   errorMessage,
   formatDateTime,
@@ -109,7 +110,7 @@ const control = (action: TaskAction) =>
         >
         <span class="hk-running-time">{{ formatDuration(elapsedSeconds(task, now)) }}</span>
         <small
-          >{{ formatTime(task.startedAt) }} · {{ messages.busyBy }}
+          >{{ messages.startedAt }} {{ formatTime(task.startedAt) }} ·
           {{ shortName(task.attendantEmail) }}</small
         >
         <div
@@ -157,21 +158,20 @@ const control = (action: TaskAction) =>
 
       <section
         v-else-if="canWrite && !room.archived"
-        aria-labelledby="hk-choose-heading"
+        aria-labelledby="hk-choose-hint"
       >
-        <h3
-          id="hk-choose-heading"
-          class="hk-section-title"
+        <p
+          id="hk-choose-hint"
+          class="hk-muted"
         >
-          {{ messages.chooseTask }}
-        </h3>
-        <p class="hk-muted">{{ messages.chooseTaskHint }}</p>
+          {{ messages.chooseTaskHint }}
+        </p>
         <div class="hk-choices">
           <v-btn
             v-for="type in taskTypes"
             :key="type"
             color="primary"
-            :variant="type === 'other' ? 'tonal' : 'flat'"
+            variant="tonal"
             size="x-large"
             :prepend-icon="taskIcons[type]"
             :disabled="busy"
@@ -181,7 +181,9 @@ const control = (action: TaskAction) =>
         </div>
       </section>
 
+      <!-- Hidden until the room has a finished cleaning, so a new room shows only the choices. -->
       <section
+        v-if="recent.length"
         class="hk-section"
         aria-labelledby="hk-recent-heading"
       >
@@ -191,16 +193,7 @@ const control = (action: TaskAction) =>
         >
           {{ messages.roomHistory }}
         </h3>
-        <p
-          v-if="!recent.length"
-          class="hk-muted"
-        >
-          {{ messages.noRoomHistory }}
-        </p>
-        <ol
-          v-else
-          class="hk-recent"
-        >
+        <ol class="hk-recent">
           <li
             v-for="entry in recent"
             :key="entry.id"
@@ -219,24 +212,27 @@ const control = (action: TaskAction) =>
         </ol>
       </section>
     </template>
+    <!-- Room management is occasional, so it sits in one menu beside Close; archive waits until no timer runs. -->
     <template
       v-if="room && canManage"
-      #actions
+      #header-actions
     >
-      <v-btn
-        variant="text"
-        :prepend-icon="room.archived ? 'mdi-archive-arrow-up-outline' : 'mdi-archive-outline'"
-        :disabled="busy || !!task"
-        @click="emit('archive')"
-        >{{ room.archived ? messages.restoreRoom : messages.archiveRoom }}</v-btn
-      ><v-btn
-        variant="tonal"
-        color="primary"
-        prepend-icon="mdi-pencil-outline"
+      <ActionMenu
+        :label="messages.roomActions"
         :disabled="busy"
-        @click="emit('edit')"
-        >{{ messages.editRoom }}</v-btn
       >
+        <v-list-item
+          prepend-icon="mdi-pencil-outline"
+          :title="messages.editRoom"
+          @click="emit('edit')"
+        />
+        <v-list-item
+          v-if="!task"
+          :prepend-icon="room.archived ? 'mdi-archive-arrow-up-outline' : 'mdi-archive-outline'"
+          :title="room.archived ? messages.restoreRoom : messages.archiveRoom"
+          @click="emit('archive')"
+        />
+      </ActionMenu>
     </template>
   </ModuleDialog>
 </template>

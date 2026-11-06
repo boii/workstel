@@ -264,3 +264,10 @@ Every icon-only button uses one style: `v-btn` with `icon` and `variant="text"`.
 - **History day:** the date sits beside the tabs instead of on its own row.
 - **No page shortcuts:** Room Turnaround no longer registers `/` and `?` or opens its own shortcut list, like Vault.
 - **Heading menu label:** the room management menu (Add room, Import rooms, Show/Hide archived) is labelled "Manage rooms" ("Kelola kamar") instead of "Room list", which read like a view.
+
+## Room dialog — 7 November 2026
+
+- **Task choices:** Check-out, Make up room and Other are the same tonal primary tiles. Before, two were solid and Other tonal, so the dialog had two competing solid buttons. The "Start the timer" heading is gone; the hint ("Choose the kind of cleaning. The timer starts right away.") labels the choices.
+- **Running timer:** the line under the timer reads "Started 00:22 · siti" instead of "00:22 · Being cleaned by siti", so the start time is not mistaken for a second timer.
+- **Recent cleanings:** the section appears only when the room has a finished cleaning; a new room shows just the choices.
+- **Room management:** Edit room and Archive/Restore room sit in one `ActionMenu` ⋮ ("Room actions") in the dialog header, beside Close, through the new `ModuleDialog` `#header-actions` slot, so the dialog has no footer. Archive is left out of the menu while a timer runs, instead of showing as a disabled button.
