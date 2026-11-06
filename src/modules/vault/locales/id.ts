@@ -114,8 +114,6 @@ export default {
   tooLong: 'Nilai terlalu panjang.',
   archive: 'Arsipkan akun',
   restore: 'Pulihkan akun',
-  archiveTitle: 'Arsipkan akun ini?',
-  archiveHint: 'Akun dapat dipulihkan nanti.',
   saved: 'Detail akun disimpan.',
   archiveDone: 'Akun diarsipkan.',
   restoreDone: 'Akun dipulihkan.',

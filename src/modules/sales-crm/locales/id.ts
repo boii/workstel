@@ -22,9 +22,6 @@ export default {
   moreActions: 'Aksi lain',
   archive: 'Arsipkan akun',
   restore: 'Pulihkan akun',
-  archiveConfirmTitle: 'Arsipkan akun ini?',
-  archiveConfirmText:
-    'Akun dan peluangnya keluar dari pipeline. Riwayat tetap tersimpan dan manajer bisa memulihkannya.',
   searchDeals: 'Cari peluang atau akun',
   searchAccounts: 'Cari akun atau kontak',
   department: 'Departemen',

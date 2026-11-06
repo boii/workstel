@@ -9,6 +9,8 @@ import VaultAudit from '../components/VaultAudit.vue';
 import VaultSharing from '../components/VaultSharing.vue';
 import VaultSecretDialog from '../components/VaultSecretDialog.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import { secretOperation } from '../secret-api';
 import { locale } from '../../../i18n';
 import type { StaffAssignment } from '../../../auth/useAuth';
@@ -34,10 +36,8 @@ const messages = useVaultMessages(),
   editing = ref<VaultEntry | null>(null),
   detail = ref<VaultEntry | null>(null),
   busy = ref(false),
-  feedbackMessage = ref<'saved' | 'archiveDone' | 'restoreDone' | 'transferDone'>('saved'),
-  feedback = ref(false),
-  next = ref<string | null>(null),
-  archiveTarget = ref<VaultEntry | null>(null);
+  next = ref<string | null>(null);
+const { notice, undoAction, show: showNotice } = useUndoNotice();
 const sharingTarget = ref<VaultEntry | null>(null);
 const secretTarget = ref<VaultEntry | null>(null),
   secretMode = ref<'write' | 'reveal'>('reveal'),
@@ -158,7 +158,6 @@ const anyPanelOpen = computed(
     detailLoading.value ||
     !!secretTarget.value ||
     !!sharingTarget.value ||
-    !!archiveTarget.value ||
     auditOpen.value,
 );
 function focusAccountSearch() {
@@ -166,8 +165,7 @@ function focusAccountSearch() {
 }
 function closeTopmostPanel() {
   if (busy.value) return;
-  if (archiveTarget.value) archiveTarget.value = null;
-  else if (formOpen.value) formOpen.value = false;
+  if (formOpen.value) formOpen.value = false;
   else if (detail.value || detailLoading.value) closeDetail();
   else if (sharingTarget.value) sharingTarget.value = null;
   else if (secretTarget.value) secretTarget.value = null;
@@ -323,13 +321,15 @@ function canEdit(entry: VaultEntry) {
   );
 }
 function showError(error: unknown) {
+  failure.value = errorText(error);
+}
+function errorText(error: unknown) {
   const code = error instanceof Error ? error.message : '';
-  failure.value =
-    code === 'ACCESS_DENIED'
-      ? messages.value.forbidden
-      : code === 'VERSION_CONFLICT'
-        ? messages.value.conflict
-        : messages.value.loadError;
+  return code === 'ACCESS_DENIED'
+    ? messages.value.forbidden
+    : code === 'VERSION_CONFLICT'
+      ? messages.value.conflict
+      : messages.value.loadError;
 }
 let request = 0;
 const lifetime = new AbortController();
@@ -443,18 +443,18 @@ async function write(input: VaultEntryInput, id?: string) {
     formOpen.value = false;
     detail.value = null;
     await load(false, true);
-    feedbackMessage.value = 'saved';
-    feedback.value = true;
+    showNotice(messages.value.saved);
   } catch (error) {
     showError(error);
   } finally {
     busy.value = false;
   }
 }
-async function changeStatus(entry: VaultEntry, action: 'archive' | 'restore') {
-  if (busy.value) return;
-  busy.value = true;
-  try {
+// Archive and restore update the list at once and offer Undo, like the other modules.
+const { toggle: toggleArchive } = useOptimisticArchive({
+  rows: entries,
+  statusFilter: () => status.value,
+  commit: async (entry, archived) => {
     const assignment = props.assignments.find(
       (a) => a.hotelId === entry.hotelId && a.departmentCode === entry.departmentId,
     );
@@ -465,18 +465,20 @@ async function changeStatus(entry: VaultEntry, action: 'archive' | 'restore') {
       p_input: {},
       p_account_id: entry.id,
       p_expected_version: entry.version,
-      p_action: action,
+      p_action: archived ? 'archive' : 'restore',
     });
-    detail.value = null;
-    archiveTarget.value = null;
-    await load(false, true);
-    feedbackMessage.value = action === 'archive' ? 'archiveDone' : 'restoreDone';
-    feedback.value = true;
-  } catch (error) {
-    showError(error);
-  } finally {
-    busy.value = false;
-  }
+  },
+  show: showNotice,
+  messages: () => ({
+    archived: messages.value.archiveDone,
+    restored: messages.value.restoreDone,
+  }),
+  errorMessage: errorText,
+  reload: () => load(false, true),
+});
+function toggleDetailArchive(entry: VaultEntry) {
+  closeDetail();
+  void toggleArchive(entry);
 }
 const detailOpen = computed({
   get: () => !!detail.value || detailLoading.value,
@@ -488,8 +490,7 @@ const detailOpen = computed({
 async function transferred() {
   closeDetail();
   await load(false, true);
-  feedbackMessage.value = 'transferDone';
-  feedback.value = true;
+  showNotice(messages.value.transferDone);
 }
 function closeDetail() {
   detailController?.abort();
@@ -497,12 +498,6 @@ function closeDetail() {
   detail.value = null;
   void router.replace({ path: '/vault', query: filterQuery() });
 }
-const archiveOpen = computed({
-  get: () => !!archiveTarget.value,
-  set: (value) => {
-    if (!value) archiveTarget.value = null;
-  },
-});
 onMounted(() => {
   void load();
   void restoreDetail();
@@ -719,8 +714,8 @@ onMounted(() => {
           secretTarget = $event;
         "
         @share="sharingTarget = $event"
-        @archive="archiveTarget = $event"
-        @restore="changeStatus($event, 'restore')"
+        @archive="toggleArchive"
+        @restore="toggleArchive"
       />
     </ModulePage>
     <div
@@ -839,11 +834,7 @@ onMounted(() => {
               detail.status === 'active' ? 'mdi-archive-outline' : 'mdi-archive-arrow-up-outline'
             "
             :title="detail.status === 'active' ? messages.archive : messages.restore"
-            @click="
-              detail.status === 'active'
-                ? (archiveTarget = detail)
-                : changeStatus(detail, 'restore')
-            "
+            @click="toggleDetailArchive(detail)"
           />
         </ActionMenu>
         <v-btn
@@ -854,25 +845,6 @@ onMounted(() => {
           >{{ messages.edit }}</v-btn
         >
       </template>
-    </ModuleDialog>
-    <ModuleDialog
-      v-model="archiveOpen"
-      class="vault-dialog"
-      :title="messages.archiveTitle"
-      :busy="busy"
-      :confirm-label="messages.archive"
-      :cancel-label="messages.cancel"
-      @confirm="archiveTarget && changeStatus(archiveTarget, 'archive')"
-    >
-      <v-alert
-        v-if="failure"
-        type="error"
-        variant="tonal"
-        density="compact"
-        role="alert"
-        >{{ failure }}</v-alert
-      >
-      <p class="vault-field-hint vault-panel-intro">{{ messages.archiveHint }}</p>
     </ModuleDialog>
     <VaultSecretDialog
       v-if="secretTarget"
@@ -894,16 +866,11 @@ onMounted(() => {
       :hotel-id="hotelId"
       :assignments="assignments"
     />
-    <v-snackbar v-model="feedback"
-      >{{ messages[feedbackMessage]
-      }}<template #actions
-        ><v-btn
-          variant="text"
-          @click="feedback = false"
-          >{{ messages.close }}</v-btn
-        ></template
-      ></v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
     <KeyboardShortcuts
       v-model="shortcutsOpen"
       :rows="shortcutRows"

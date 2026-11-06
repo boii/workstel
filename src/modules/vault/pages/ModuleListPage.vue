@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import VaultAccountList from '../components/VaultAccountList.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import { locale } from '../../../i18n';
@@ -26,8 +28,7 @@ const messages = useVaultMessages(),
       void router.push({ path: id ? '/vault/accounts/' + id : '/vault', query: route.query });
     },
   }),
-  archiveId = ref<string | null>(null),
-  feedback = ref<'saved' | 'archiveDone' | 'restoreDone' | null>(null);
+  { notice, undoAction, show: showNotice } = useUndoNotice();
 const departmentKeys = {
   'front-office': 'frontOffice',
   sales: 'sales',
@@ -65,12 +66,6 @@ const detailOpen = computed({
     if (!value) detailId.value = null;
   },
 });
-const archiveOpen = computed({
-  get: () => !!archiveId.value,
-  set: (value) => {
-    if (!value) archiveId.value = null;
-  },
-});
 const departmentOptions = computed(() => [
   { value: 'all', title: messages.value.allDepartments },
   ...departmentIds.map((value) => ({ value, title: messages.value[departmentKeys[value]] })),
@@ -89,19 +84,24 @@ function openForm(entry: VaultEntry | null = null) {
 }
 function saveEntry(input: VaultEntryInput, id?: string) {
   const result = save(input, id);
-  if (result.entry) feedback.value = 'saved';
+  if (result.entry) showNotice(messages.value.saved);
 }
-function archiveEntry() {
-  if (!archiveId.value) return;
-  setStatus(archiveId.value, 'archived');
+// The demo store holds every status, so archived rows stay in it and the list filters them.
+const { toggle: toggleArchive } = useOptimisticArchive({
+  rows: entries,
+  statusFilter: () => 'all',
+  commit: async (entry, archived) => setStatus(entry.id, archived ? 'archived' : 'active', true),
+  show: showNotice,
+  messages: () => ({
+    archived: messages.value.archiveDone,
+    restored: messages.value.restoreDone,
+  }),
+  errorMessage: () => messages.value.loadError,
+  reload: () => undefined,
+});
+function toggleDetailArchive(entry: VaultEntry) {
   detailId.value = null;
-  archiveId.value = null;
-  feedback.value = 'archiveDone';
-}
-function restoreEntry(id: string) {
-  detailId.value = null;
-  setStatus(id, 'active');
-  feedback.value = 'restoreDone';
+  void toggleArchive(entry);
 }
 function resetFilters() {
   search.value = '';
@@ -190,8 +190,8 @@ function resetFilters() {
         :department-name="(id) => messages[departmentKeys[id]]"
         @detail="detailId = $event.id"
         @edit="openForm($event)"
-        @archive="archiveId = $event.id"
-        @restore="restoreEntry($event.id)"
+        @archive="toggleArchive(entries.find((entry) => entry.id === $event.id)!)"
+        @restore="toggleArchive(entries.find((entry) => entry.id === $event.id)!)"
       />
     </ModulePage>
     <VaultEntryForm
@@ -254,7 +254,7 @@ function resetFilters() {
       >
         <v-btn
           variant="text"
-          @click="detail.status === 'active' ? (archiveId = detail.id) : restoreEntry(detail.id)"
+          @click="toggleDetailArchive(detail)"
           >{{ detail.status === 'active' ? messages.archive : messages.restore }}</v-btn
         >
         <v-btn
@@ -264,27 +264,10 @@ function resetFilters() {
         >
       </template>
     </ModuleDialog>
-    <ModuleDialog
-      v-model="archiveOpen"
-      class="vault-dialog"
-      :title="messages.archiveTitle"
-      :confirm-label="messages.archive"
-      :cancel-label="messages.cancel"
-      @confirm="archiveEntry"
-    >
-      <p class="vault-field-hint vault-panel-intro">{{ messages.archiveHint }}</p>
-    </ModuleDialog>
-    <v-snackbar
-      :model-value="!!feedback"
-      @update:model-value="!$event && (feedback = null)"
-      >{{ feedback ? messages[feedback] : ''
-      }}<template #actions
-        ><v-btn
-          variant="text"
-          @click="feedback = null"
-          >{{ messages.close }}</v-btn
-        ></template
-      ></v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
   </div>
 </template>

@@ -6,7 +6,6 @@ import FilterGroup from '../../../shared/filter-group.vue';
 import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useUndoNotice } from '../../../core/use-optimistic-archive';
-import ModuleDialog from '../../../shared/module-dialog.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
@@ -278,16 +277,15 @@ async function openAccount(accountId: string) {
     notice.value = errorMessage(messages.value, error);
   }
 }
-const archiveConfirmOpen = ref(false);
 const archiving = ref(false);
+// Archive and restore apply at once and offer Undo, like the other modules.
 function requestArchive() {
   if (!detailAccount.value) return;
-  if (detailAccount.value.status === 'archived') void setArchived(false);
-  else archiveConfirmOpen.value = true;
+  void setArchived(detailAccount.value.status === 'active');
 }
 async function setArchived(archived: boolean) {
   const account = detailAccount.value;
-  if (!account) return;
+  if (!account || archiving.value) return;
   archiving.value = true;
   try {
     await api.setAccountArchived(hotelId.value, account, archived);
@@ -297,7 +295,6 @@ async function setArchived(archived: boolean) {
       version: account.version + 1,
     };
     detailAccount.value = committed;
-    archiveConfirmOpen.value = false;
     showNotice(
       archived ? messages.value.archivedDone : messages.value.restoredDone,
       () => void undoArchive(committed, archived),
@@ -309,7 +306,7 @@ async function setArchived(archived: boolean) {
     archiving.value = false;
   }
 }
-// Undo reverses a confirmed archive or a restore; the RPC raises the version by one.
+// Undo reverses an archive or a restore; the RPC raises the version by one.
 async function undoArchive(committed: SalesAccount, archived: boolean) {
   try {
     await api.setAccountArchived(hotelId.value, committed, !archived);
@@ -874,17 +871,6 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       @edit-deal="(deal: Deal) => openDealForm(deal)"
       @log="(list: Deal[]) => detailAccount && openActivityForm(detailAccount, list, null)"
     />
-    <ModuleDialog
-      v-model="archiveConfirmOpen"
-      :title="messages.archiveConfirmTitle"
-      :subtitle="detailAccount?.name ?? ''"
-      :busy="archiving"
-      :confirm-label="messages.archive"
-      :cancel-label="messages.cancel"
-      @confirm="setArchived(true)"
-    >
-      <p>{{ messages.archiveConfirmText }}</p>
-    </ModuleDialog>
     <KeyboardShortcuts
       v-model="shortcutsOpen"
       :rows="shortcutRows"

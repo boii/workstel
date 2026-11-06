@@ -111,8 +111,6 @@ export default {
   tooLong: 'This value is too long.',
   archive: 'Archive account',
   restore: 'Restore account',
-  archiveTitle: 'Archive this account?',
-  archiveHint: 'You can restore it later.',
   saved: 'Account details saved.',
   archiveDone: 'Account archived.',
   restoreDone: 'Account restored.',

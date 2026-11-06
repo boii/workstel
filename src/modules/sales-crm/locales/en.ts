@@ -21,9 +21,6 @@ export default {
   moreActions: 'More actions',
   archive: 'Archive account',
   restore: 'Restore account',
-  archiveConfirmTitle: 'Archive this account?',
-  archiveConfirmText:
-    'The account and its deals leave the pipeline. History is kept and a manager can restore it.',
   searchDeals: 'Search deal or account',
   searchAccounts: 'Search account or contact',
   department: 'Department',

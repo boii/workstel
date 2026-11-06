@@ -57,7 +57,7 @@ English is the default interface and coding language. Bahasa Indonesia is an opt
 
 - Command palette: Ctrl/⌘ + K or the header search button opens a palette of shell pages, modules and actions (language, shortcuts, sign out). It is a centred dialog on desktop and fullscreen on screens up to 680px. It never searches module records, so module isolation is unchanged. Only item IDs of the last five picks are stored in the browser.
 - Adaptive tables: `src/shared/stack-table.css` turns a `.stack-table` into compact cards when its `.stack-table-container` is narrower than 560px. Cells carry `data-label`; the naming cell uses `.stack-table-primary`. Used by the Room Turnaround attendant table and the Bin Card ledger.
-- Optimistic archive with Undo: Documents, Vehicle Checklist and Bin Card archive/restore update the list immediately and offer Undo for 6 seconds (`src/core/use-optimistic-archive.ts`, `src/shared/undo-snackbar.vue`). Sales CRM keeps its archive confirmation because deals leave the pipeline, then offers Undo. The server still enforces permissions, versions and rules such as a zero Bin Card balance; a rejected change restores the row. Append-only records (stock entries, sales activities) have no Undo.
+- Optimistic archive with Undo: Documents, Vehicle Checklist and Bin Card archive/restore update the list immediately and offer Undo for 6 seconds (`src/core/use-optimistic-archive.ts`, `src/shared/undo-snackbar.vue`). Since 6 November 2026 this is the only archive pattern: Vault, Sales CRM and Room Turnaround follow it too, with no confirmation dialog (see "One archive pattern" below). The server still enforces permissions, versions and rules such as a zero Bin Card balance; a rejected change restores the row. Append-only records (stock entries, sales activities) have no Undo.
 
 Validation: desktop and 390px mobile were checked in the in-app browser preview in demo mode.
 
@@ -214,3 +214,14 @@ Approved by the user as a consistency pass.
 - **Confirmations:** `ModuleDialog` builds the footer from `confirm-label`: Cancel (or `cancel-label`) and a filled button that emits `confirm`, red when `destructive`, with the loading state while `busy`. Confirmations default to the `md` width. Module switch-off, the user block, reset and transfer confirmation, Vault ownership transfer, Sales account archive, both Vault archive dialogs and "Discard changes?" use it. The Sales and Vault archive buttons change from elevated to flat, and the Vault archive dialogs widen from 440px to the 460px confirmation width.
 - **Phone width:** `src/shared/breakpoints.ts` holds `phoneMaxWidth` (680) and `usePhone()`. `ModuleDialog`, the command palette, `FilterGroup` and the header use it instead of their own `<= 680` checks. CSS media queries still write 680px, because they cannot read a script constant.
 - **Module switch fix:** cancelling "Turn off this module?" left the switch drawn as off while the module stayed on, so the next tap turned it "on" without asking. The switches are now redrawn when the confirmation is cancelled or closed. Found while checking the shared confirmation in demo mode.
+
+## One archive pattern — 6 November 2026
+
+Approved by the user: archive and restore have one pattern in every module, "apply at once, then Undo".
+
+- **Rule:** archive and restore never ask for confirmation. The change applies at once and the module snackbar (`UndoSnackbar`) offers Undo for 6 seconds. Undo sends the record version plus one, because every archive/restore RPC raises the version by one. The server still enforces permissions, versions and module rules; a rejected change shows its error and the list reloads.
+- **Vault:** both "Archive this account?" dialogs (live and demo) are removed. The list row action and the account details menu archive or restore at once; details close first. Vault uses `useOptimisticArchive`, so the row leaves the list immediately and comes back if the server rejects the change. Vault's own snackbar with a Close button is replaced by `UndoSnackbar`, which also shows the saved and transfer notices.
+- **Sales CRM:** the archive confirmation is removed. Archive in account details applies at once and keeps its existing Undo. Deals still leave the pipeline while the account is archived; Undo or Restore brings them back.
+- **Room Turnaround:** archive and restore of a room now offer Undo through `UndoSnackbar`. The rule that a room with an open task cannot be archived is unchanged and still enforced by the server.
+- **Removed copy:** Vault `archiveTitle` and `archiveHint`, Sales CRM `archiveConfirmTitle` and `archiveConfirmText`, in English and Indonesian.
+- The earlier entries above that mention archive confirmations describe the state before this change.

@@ -4,6 +4,8 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
 import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
+import UndoSnackbar from '../../../shared/undo-snackbar.vue';
+import { useUndoNotice } from '../../../core/use-optimistic-archive';
 import { runtime } from '../../../config/runtime';
 import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
@@ -75,7 +77,7 @@ const showArchived = ref(false);
 const rooms = ref<Room[]>([]);
 const loading = ref(true);
 const failure = ref('');
-const notice = ref('');
+const { notice, undoAction, show: showNotice } = useUndoNotice();
 const offset = ref(0);
 const now = useServerClock(() => offset.value);
 const selected = ref<Room | null>(null);
@@ -269,15 +271,30 @@ async function imported(text: string) {
   notice.value = text;
   await load(true);
 }
+// Archive and restore apply at once and offer Undo, like the other modules.
 async function toggleArchive() {
   const room = selected.value;
   if (!room) return;
   try {
     await api.setRoomArchived(hotelId.value, room, !room.archived);
-    notice.value = room.archived ? messages.value.restoredDone : messages.value.archivedDone;
+    // The RPC raises the version by one, which Undo sends as the expected version.
+    const committed: Room = { ...room, archived: !room.archived, version: room.version + 1 };
+    showNotice(
+      room.archived ? messages.value.restoredDone : messages.value.archivedDone,
+      () => void undoArchive(committed),
+    );
     if (!room.archived && !showArchived.value) timerOpen.value = false;
   } catch (error) {
     notice.value = errorMessage(messages.value, error);
+  }
+  await load(true);
+}
+async function undoArchive(committed: Room) {
+  try {
+    await api.setRoomArchived(hotelId.value, committed, !committed.archived);
+    showNotice(committed.archived ? messages.value.restoredDone : messages.value.archivedDone);
+  } catch (error) {
+    showNotice(errorMessage(messages.value, error));
   }
   await load(true);
 }
@@ -958,11 +975,10 @@ const departmentItems = computed(() => [
       v-model="shortcutsOpen"
       :rows="shortcutRows"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="undoAction"
+      @close="showNotice('')"
+    />
   </div>
 </template>

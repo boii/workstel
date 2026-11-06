@@ -84,13 +84,17 @@ export function useVault() {
     log(entry.id, 'created');
     return { entry, errors: {} };
   }
-  function setStatus(id: string, status: 'active' | 'archived') {
+  /**
+   * With `optimistic`, the page already shows the new status and sets the version itself
+   * (see useOptimisticArchive), so the change is recorded even though the row matches.
+   */
+  function setStatus(id: string, status: 'active' | 'archived', optimistic = false) {
     const entry = entries.value.find((item) => item.id === id);
     if (!entry) return;
-    if (entry.status === status) return;
+    if (!optimistic && entry.status === status) return;
     entry.status = status;
     entry.updatedAt = new Date().toISOString();
-    entry.version++;
+    if (!optimistic) entry.version++;
     log(id, status === 'archived' ? 'archived' : 'restored');
   }
   function reset() {
