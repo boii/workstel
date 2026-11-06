@@ -225,3 +225,13 @@ Approved by the user: archive and restore have one pattern in every module, "app
 - **Room Turnaround:** archive and restore of a room now offer Undo through `UndoSnackbar`. The rule that a room with an open task cannot be archived is unchanged and still enforced by the server.
 - **Removed copy:** Vault `archiveTitle` and `archiveHint`, Sales CRM `archiveConfirmTitle` and `archiveConfirmText`, in English and Indonesian.
 - The earlier entries above that mention archive confirmations describe the state before this change.
+
+## Inset full-screen dialogs on phones — 6 November 2026
+
+Approved by the user: full-screen dialogs on phones should read as a popup in the middle, with a gap on every side.
+
+- **Layout:** on phones (≤ 680px), `ModuleDialog` with `fullscreen` no longer uses Vuetify's edge-to-edge full screen. It opens as an inset popup (`dialog-inset` in `src/shared/dialog-sheet.css`) that fills the screen apart from a 12px gap (`--workstel-space-3`) on every side, the same gap other phone popups keep. The top and bottom gaps grow to the safe-area insets where those are larger, so the card clears the notch and the iPhone home indicator. The card keeps its normal rounded corners.
+- **Where:** every `fullscreen` dialog — Vault Audit log and Sharing, Bin Card stock ledger, Vehicle inspection form and history, Sales CRM account details, account form and deal form, and Users manage user — and the command palette, which was the only other dialog that filled the screen on phones.
+- **Opening:** inset popups use the default dialog transition, like desktop dialogs. Bottom sheets still slide up from the bottom.
+- **Footer:** the footer's main action still spans the remaining width on phones, in sheets and inset popups.
+- This replaces the full-screen layout, safe-area padding and opening transition described in "Full-screen dialogs on phones" and "Two phone dialog layouts" above.

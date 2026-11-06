@@ -1,6 +1,7 @@
 /* Phone layouts for ModuleDialog. Dialogs open as bottom sheets; long forms, history lists
-   and audit views (`fullscreen`) fill the screen. The overlay content is teleported to the
-   body, so these rules are global. */
+   and audit views (`fullscreen`) open as an inset popup that fills the screen apart from a
+   gap on every side (`dialog-inset`). The command palette uses the inset popup too. The
+   overlay content is teleported to the body, so these rules are global. */
 @media (max-width: 680px) {
   .v-dialog.dialog-sheet {
     align-items: flex-end;
@@ -15,8 +16,22 @@
     border-radius: var(--workstel-radius-lg) var(--workstel-radius-lg) 0 0 !important;
     padding-bottom: env(safe-area-inset-bottom);
   }
-  /* Keep full-screen footers clear of the iPhone home indicator, as sheets do. */
-  .v-dialog--fullscreen > .v-overlay__content > .v-card.module-dialog {
-    padding-bottom: env(safe-area-inset-bottom);
+  /* The gap matches other phone popups; top and bottom also clear the notch and the
+     iPhone home indicator. */
+  .v-dialog.dialog-inset {
+    --dialog-inset-gap: var(--workstel-space-3);
+    --dialog-inset-top: max(var(--dialog-inset-gap), env(safe-area-inset-top));
+    --dialog-inset-bottom: max(var(--dialog-inset-gap), env(safe-area-inset-bottom));
+  }
+  .v-dialog.dialog-inset > .v-overlay__content {
+    width: calc(100% - 2 * var(--dialog-inset-gap)) !important;
+    max-width: calc(100% - 2 * var(--dialog-inset-gap)) !important;
+    height: calc(100dvh - var(--dialog-inset-top) - var(--dialog-inset-bottom)) !important;
+    max-height: calc(100dvh - var(--dialog-inset-top) - var(--dialog-inset-bottom)) !important;
+    margin: var(--dialog-inset-top) var(--dialog-inset-gap) var(--dialog-inset-bottom) !important;
+  }
+  .v-dialog.dialog-inset > .v-overlay__content > .v-card {
+    height: 100%;
+    max-height: 100%;
   }
 }

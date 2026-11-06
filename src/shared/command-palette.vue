@@ -21,6 +21,7 @@ export interface PaletteItem {
 
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{ items: PaletteItem[] }>();
+// On phones the palette is an inset popup that fills the screen apart from a gap on every side.
 const fullscreen = usePhone();
 const query = ref('');
 const active = ref(0);
@@ -141,10 +142,9 @@ function onKeydown(event: KeyboardEvent) {
 <template>
   <v-dialog
     v-model="open"
-    :fullscreen="fullscreen"
     :max-width="fullscreen ? undefined : 600"
-    :transition="fullscreen ? 'dialog-bottom-transition' : 'dialog-transition'"
     class="palette-dialog"
+    :class="{ 'dialog-inset': fullscreen }"
     :aria-label="t('paletteTitle')"
     scrollable
   >
@@ -246,9 +246,8 @@ function onKeydown(event: KeyboardEvent) {
   align-self: flex-start;
   margin-top: 12vh;
 }
-.palette-dialog :deep(.v-overlay__content.v-dialog--fullscreen),
-.v-dialog--fullscreen :deep(.v-overlay__content) {
-  margin-top: 0;
+.palette-dialog.dialog-inset :deep(.v-overlay__content) {
+  align-self: center;
 }
 .palette {
   display: flex;
@@ -256,10 +255,9 @@ function onKeydown(event: KeyboardEvent) {
   max-height: min(560px, 76vh);
   overflow: hidden;
 }
-.v-dialog--fullscreen .palette {
+.dialog-inset .palette {
   max-height: none;
   height: 100%;
-  border-radius: 0;
 }
 .palette-search {
   display: flex;
