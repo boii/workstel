@@ -401,3 +401,9 @@ In the signed-in production session:
 - **390px:** every row used 12/8/10/14px padding, with actions below the identity and 8px from the right edge. No page overflowed horizontally.
 
 Nothing was saved in production.
+
+## Tonal row actions release — 6 November 2026
+
+Commit cae075c (frontend only) switches the row primary actions (Record, Inspect, Open, Log activity, View account) from outlined to the shared tonal `.row-primary-action` style, and adds record-named `aria-label`s to Record and Inspect. It was fast-forwarded onto `main` and pushed, then published through Wrangler Direct Upload to https://fe03f092.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset (`index-D-pY-J06.js`) matched the local build.
+
+In the signed-in production session, every row primary action in Bin Card (16), Vehicle Checklist (6), Documents (50) and Sales CRM (8) rendered with #006f8f text, no border and a 12% primary tint, and carried an `aria-label`. Nothing was saved in production.
