@@ -6,8 +6,8 @@
   background: transparent;
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
-  margin-bottom: 10px;
-  padding: 4px 0;
+  margin-bottom: var(--workstel-space-2_5);
+  padding: var(--workstel-space-1) 0;
 }
 .sales-module .sr-only {
   position: absolute;
@@ -20,22 +20,22 @@
 .sales-notice {
   font-size: var(--workstel-font-xs) !important;
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: var(--workstel-space-3);
 }
 .sales-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--workstel-space-2);
+  margin-bottom: var(--workstel-space-4);
 }
 .sales-tile {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   min-width: 0;
-  padding: 12px 14px;
+  padding: var(--workstel-space-3) var(--workstel-space-3_5);
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: rgb(var(--v-theme-surface));
   text-align: left;
   font: inherit;
@@ -47,7 +47,7 @@
 }
 .sales-tile > strong {
   font-size: var(--workstel-font-lg);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
@@ -74,10 +74,10 @@
 }
 .sales-pipeline-bar {
   display: flex;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   height: 4px;
-  margin-top: 6px;
-  border-radius: 4px;
+  margin-top: var(--workstel-space-1_5);
+  border-radius: var(--workstel-radius-sm);
   overflow: hidden;
 }
 .sales-pipeline-bar i {
@@ -94,13 +94,13 @@
   background: var(--workstel-info-text);
 }
 .sales-tabs {
-  margin-bottom: 12px;
+  margin-bottom: var(--workstel-space-3);
   border-bottom: 1px solid var(--workstel-border);
 }
 .sales-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 180px));
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .sales-toolbar:not(:has(> :nth-child(4))) {
   grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 180px));
@@ -114,16 +114,17 @@
   padding: 0;
   background: rgb(var(--v-theme-surface));
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   overflow: hidden;
 }
 .sales-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: var(--workstel-space-4);
   min-height: 64px;
-  padding: 10px 12px 10px 16px;
+  padding: var(--workstel-space-2_5) var(--workstel-space-3) var(--workstel-space-2_5)
+    var(--workstel-space-4);
 }
 .sales-row + .sales-row {
   border-top: 1px solid var(--workstel-border);
@@ -134,19 +135,19 @@
 .sales-identity {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   min-width: 0;
 }
 .sales-identity > div {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   min-width: 0;
 }
 .sales-identity strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .sales-identity small {
@@ -182,20 +183,20 @@
 }
 .sales-chip {
   display: inline-block;
-  margin-right: 4px;
-  padding: 0 6px;
-  border-radius: 4px;
+  margin-right: var(--workstel-space-1);
+  padding: 0 var(--workstel-space-1_5);
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-surface-subtle);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 .sales-stage {
   flex-shrink: 0;
   min-width: 84px;
   margin-top: 1px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: var(--workstel-space-0_5) var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   text-align: center;
   white-space: nowrap;
 }
@@ -226,23 +227,23 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .sales-follow-up {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--workstel-space-1);
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   white-space: nowrap;
 }
 .sales-follow-up--overdue {
   color: var(--workstel-danger-text);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 .sales-follow-up--today {
   color: var(--workstel-warning-text);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 /* Forms and the account detail dialog */
 .sales-first-label {
@@ -251,31 +252,31 @@
 .sales-form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 12px;
+  column-gap: var(--workstel-space-3);
 }
 .sales-form-section {
-  margin: 20px 0 8px;
-  padding-top: 14px;
+  margin: var(--workstel-space-5) 0 var(--workstel-space-2);
+  padding-top: var(--workstel-space-3_5);
   border-top: 1px solid var(--workstel-border);
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .sales-detail-section + .sales-detail-section {
   margin-top: 18px;
-  padding-top: 14px;
+  padding-top: var(--workstel-space-3_5);
   border-top: 1px solid var(--workstel-border);
 }
 .sales-detail-section h3 {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-weight: var(--workstel-weight-semibold);
+  margin-bottom: var(--workstel-space-2);
 }
 .sales-detail-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: var(--workstel-space-2);
+  margin-bottom: var(--workstel-space-1);
 }
 .sales-detail-heading h3 {
   margin-bottom: 0;
@@ -287,18 +288,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 16px;
+  gap: var(--workstel-space-1_5) var(--workstel-space-4);
 }
 .sales-contact a {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--workstel-space-1);
   min-height: 32px;
   color: var(--workstel-primary-text);
   overflow-wrap: anywhere;
 }
 .sales-notes {
-  margin-top: 8px;
+  margin-top: var(--workstel-space-2);
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -307,14 +308,15 @@
   margin: 0;
   padding: 0;
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
 }
 .sales-mini-list li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 8px;
-  padding: 8px 6px 8px 12px;
+  gap: var(--workstel-space-2);
+  padding: var(--workstel-space-2) var(--workstel-space-1_5) var(--workstel-space-2)
+    var(--workstel-space-3);
 }
 .sales-mini-list li + li {
   border-top: 1px solid var(--workstel-border);
@@ -325,7 +327,7 @@
   min-width: 0;
 }
 .sales-mini-list strong {
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .sales-mini-list small {
@@ -339,15 +341,15 @@
 }
 .sales-timeline li {
   display: flex;
-  gap: 10px;
-  padding: 8px 0;
+  gap: var(--workstel-space-2_5);
+  padding: var(--workstel-space-2) 0;
 }
 .sales-timeline li + li {
   border-top: 1px dashed var(--workstel-border);
 }
 .sales-timeline .v-icon {
   color: var(--workstel-primary-text);
-  margin-top: 2px;
+  margin-top: var(--workstel-space-0_5);
   flex-shrink: 0;
 }
 .sales-timeline li > div {
@@ -359,7 +361,7 @@
   color: var(--workstel-text-secondary);
 }
 .sales-timeline p {
-  margin: 2px 0;
+  margin: var(--workstel-space-0_5) 0;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -378,8 +380,8 @@
   }
   .sales-row {
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    padding: 12px;
+    gap: var(--workstel-space-2);
+    padding: var(--workstel-space-3);
   }
   .sales-actions {
     justify-content: flex-start;

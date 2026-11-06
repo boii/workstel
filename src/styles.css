@@ -26,6 +26,38 @@
   --workstel-font-md: 15px;
   --workstel-font-lg: 20px;
   --workstel-font-xl: clamp(23px, 2.2vw, 26px);
+  /* Font weights. Quicksand UI text is medium; buttons and headings are bold. */
+  --workstel-weight-regular: 400;
+  --workstel-weight-medium: 500;
+  --workstel-weight-semibold: 600;
+  --workstel-weight-bold: 700;
+  /* Spacing scale for gap, padding and margin: step n = n x 4px, with half steps.
+     Write 2px as 0_5, 6px as 1_5 and so on. Values off this scale stay literal. */
+  --workstel-space-0_5: 2px;
+  --workstel-space-1: 4px;
+  --workstel-space-1_5: 6px;
+  --workstel-space-2: 8px;
+  --workstel-space-2_5: 10px;
+  --workstel-space-3: 12px;
+  --workstel-space-3_5: 14px;
+  --workstel-space-4: 16px;
+  --workstel-space-5: 20px;
+  --workstel-space-6: 24px;
+  --workstel-space-7: 28px;
+  --workstel-space-8: 32px;
+  /* Corner radii: small chips and tags, cards and buttons (measured 6px), bottom sheets,
+     and fully rounded search fields and floating actions. */
+  --workstel-radius-sm: 4px;
+  --workstel-radius-md: 6px;
+  --workstel-radius-lg: 12px;
+  --workstel-radius-pill: 999px;
+  /* Measured elevation (DESIGN_REFERENCE.md): cards and the header/floating actions. */
+  --workstel-shadow-card:
+    0 3px 10px -2px rgba(85, 85, 85, 0.08), 0 2px 20px rgba(85, 85, 85, 0.06),
+    0 1px 30px rgba(85, 85, 85, 0.03);
+  --workstel-shadow-header:
+    0 2px 30px -1px rgba(85, 85, 85, 0.08), 0 4px 30px rgba(85, 85, 85, 0.06),
+    0 1px 30px rgba(85, 85, 85, 0.03);
   font-family: Quicksand, sans-serif;
   color: rgba(0, 0, 0, 0.87);
   background: #f2f5f8;
@@ -48,7 +80,7 @@ button {
   cursor: pointer;
 }
 button:focus-visible {
-  outline: 2px solid #0096c7;
+  outline: 2px solid rgb(var(--v-theme-primary));
   outline-offset: 3px;
 }
 .skip-link {
@@ -56,19 +88,17 @@ button:focus-visible {
   top: 8px;
   left: 8px;
   z-index: 3000;
-  padding: 10px 14px;
-  border-radius: 6px;
+  padding: var(--workstel-space-2_5) var(--workstel-space-3_5);
+  border-radius: var(--workstel-radius-md);
   background: #ffffff;
   color: #007a9e;
   font-size: var(--workstel-font-sm);
-  box-shadow:
-    0 3px 10px -2px #55555514,
-    0 2px 20px #5555550f;
+  box-shadow: var(--workstel-shadow-card);
   transform: translateY(calc(-100% - 16px));
 }
 .skip-link:focus {
   transform: none;
-  outline: 2px solid #0096c7;
+  outline: 2px solid rgb(var(--v-theme-primary));
   outline-offset: 2px;
 }
 h1,
@@ -80,20 +110,17 @@ p {
 .v-application {
   font-family: Quicksand, sans-serif;
   font-size: var(--workstel-font-md);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
 }
 .v-card {
-  border-radius: 6px !important;
-  box-shadow:
-    0 3px 10px -2px #55555514,
-    0 2px 20px #5555550f,
-    0 1px 30px #55555508 !important;
+  border-radius: var(--workstel-radius-md) !important;
+  box-shadow: var(--workstel-shadow-card) !important;
 }
 .v-btn {
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   letter-spacing: 0;
   text-transform: none;
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
 }
 .v-btn--icon {
   border-radius: 50%;
@@ -115,7 +142,7 @@ p {
 }
 /* Choice groups show each option as its own button with an 8px gap, never joined segments. */
 .choice-group.v-btn-toggle {
-  gap: 8px;
+  gap: var(--workstel-space-2);
   height: auto !important;
   flex-wrap: wrap;
   overflow: visible;
@@ -125,7 +152,7 @@ p {
 .choice-group.v-btn-toggle > .v-btn {
   min-height: 40px;
   border: 1px solid var(--workstel-border) !important;
-  border-radius: 6px !important;
+  border-radius: var(--workstel-radius-md) !important;
   background: rgb(var(--v-theme-surface));
 }
 .choice-group.v-btn-toggle > .v-btn.v-btn--active {
@@ -135,15 +162,12 @@ p {
   color: #0b4f6c;
 }
 .portal-header {
-  box-shadow:
-    0 2px 30px -1px #55555514,
-    0 4px 30px #5555550f,
-    0 1px 30px #55555508 !important;
+  box-shadow: var(--workstel-shadow-header) !important;
 }
 .header-inner {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: var(--workstel-space-6);
   width: 100%;
   padding: 0 30px;
   height: 64px;
@@ -153,23 +177,23 @@ p {
   align-items: center;
   font-size: 25px;
   letter-spacing: -1px;
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   white-space: nowrap;
   color: #333;
 }
 .wordmark > .v-icon {
   font-size: 27px;
   margin-right: 9px;
-  color: #0096c7;
+  color: rgb(var(--v-theme-primary));
 }
 .wordmark > span,
 .brand-dot {
-  color: #0096c7;
+  color: rgb(var(--v-theme-primary));
 }
 .hotel-name {
   font-size: var(--workstel-font-sm);
   border-left: 1px solid var(--workstel-border);
-  padding-left: 20px;
+  padding-left: var(--workstel-space-5);
   white-space: nowrap;
 }
 .top-nav {
@@ -200,20 +224,20 @@ p {
   height: 0;
   overflow: hidden;
   visibility: hidden;
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   user-select: none;
   pointer-events: none;
 }
 .top-nav button.active {
-  color: #0096c7;
-  border-color: #0096c7;
-  font-weight: 700;
+  color: rgb(var(--v-theme-primary));
+  border-color: rgb(var(--v-theme-primary));
+  font-weight: var(--workstel-weight-bold);
 }
 .task-count {
   font-size: var(--workstel-font-xs);
   background: var(--workstel-surface-subtle);
-  border-radius: 4px;
-  padding: 2px 5px;
+  border-radius: var(--workstel-radius-sm);
+  padding: var(--workstel-space-0_5) 5px;
 }
 .header-actions {
   margin-left: auto;
@@ -229,20 +253,20 @@ p {
   color: var(--workstel-text-secondary) !important;
 }
 .palette-button-kbd {
-  margin-left: 10px;
-  padding: 1px 6px;
+  margin-left: var(--workstel-space-2_5);
+  padding: 1px var(--workstel-space-1_5);
   font: inherit;
   font-size: var(--workstel-font-xs);
   border: 1px solid var(--workstel-border);
   border-bottom-width: 2px;
-  border-radius: 4px;
+  border-radius: var(--workstel-radius-sm);
   background: white;
 }
 @media (max-width: 1050px) {
   .palette-button {
     width: 40px;
     min-width: 40px !important;
-    padding: 0 8px !important;
+    padding: 0 var(--workstel-space-2) !important;
   }
   .palette-button .v-btn__content {
     display: none;
@@ -261,11 +285,11 @@ p {
 .avatar-label {
   font-size: var(--workstel-font-xs);
   color: #526774;
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 .workspace-content {
   max-width: 1240px;
-  padding: 32px 30px 20px;
+  padding: var(--workstel-space-8) 30px var(--workstel-space-5);
   margin: auto;
 }
 .page-heading {
@@ -277,9 +301,9 @@ p {
 .page-heading h1 {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   font-size: var(--workstel-font-xl);
-  font-weight: 400;
+  font-weight: var(--workstel-weight-regular);
   letter-spacing: -0.7px;
   min-width: 0;
   line-height: 1.35;
@@ -295,15 +319,15 @@ p {
   color: var(--workstel-text-secondary);
   letter-spacing: 1px;
   border: 1px solid var(--workstel-border);
-  border-radius: 4px;
-  padding: 4px 6px;
+  border-radius: var(--workstel-radius-sm);
+  padding: var(--workstel-space-1) var(--workstel-space-1_5);
   white-space: nowrap;
 }
 .module-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: var(--workstel-space-5);
   margin-bottom: 22px;
 }
 .module-search {
@@ -311,7 +335,7 @@ p {
   min-width: 0;
 }
 .module-search .v-field {
-  border-radius: 28px;
+  border-radius: var(--workstel-radius-pill);
   background: #e9edf0;
   box-shadow: none;
 }
@@ -323,13 +347,13 @@ p {
 }
 .category-tabs {
   height: 36px !important;
-  gap: 8px;
+  gap: var(--workstel-space-2);
   max-width: 100%;
   flex-shrink: 0;
 }
 .category-tabs .v-btn {
   font-size: var(--workstel-font-sm);
-  padding: 0 12px;
+  padding: 0 var(--workstel-space-3);
 }
 .mobile-category-filter {
   display: none;
@@ -337,7 +361,7 @@ p {
 .module-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--workstel-space-4);
 }
 .module-card {
   position: relative;
@@ -349,19 +373,20 @@ p {
 .module-open {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap: var(--workstel-space-4);
   text-align: left;
   flex: 1;
   min-width: 0;
   min-height: 104px;
-  padding: 20px 8px 20px 20px;
+  padding: var(--workstel-space-5) var(--workstel-space-2) var(--workstel-space-5)
+    var(--workstel-space-5);
   width: 100%;
 }
 .module-icon {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  color: #0096c7;
+  color: rgb(var(--v-theme-primary));
   width: 42px;
   height: 42px;
   margin-top: 1px;
@@ -377,7 +402,7 @@ p {
 }
 .module-open h2 {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   line-height: 1.4;
   margin-bottom: 5px;
 }
@@ -387,7 +412,7 @@ p {
   line-height: 1.6;
 }
 .favorite-button {
-  margin: 10px 6px 0 0;
+  margin: var(--workstel-space-2_5) var(--workstel-space-1_5) 0 0;
 }
 .favorite-button .v-icon {
   font-size: 19px;
@@ -403,7 +428,7 @@ p {
 }
 .empty-state h2 {
   font-size: var(--workstel-font-lg);
-  margin: 12px 0;
+  margin: var(--workstel-space-3) 0;
 }
 .empty-state p {
   font-size: var(--workstel-font-sm);
@@ -413,14 +438,14 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 32px;
+  margin-top: var(--workstel-space-8);
   padding-top: 15px;
   border-top: 1px solid var(--workstel-border);
   color: var(--workstel-text-secondary);
 }
 footer > span {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 footer small {
   font-size: var(--workstel-font-xs);
@@ -432,11 +457,11 @@ footer small {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: var(--workstel-space-2_5);
 }
 .panel-heading h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .panel-heading > span {
   font-size: var(--workstel-font-sm);
@@ -445,16 +470,16 @@ footer small {
 .task-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   border-top: 1px solid var(--workstel-border);
-  padding: 12px 0;
+  padding: var(--workstel-space-3) 0;
 }
 .task-row > .v-checkbox-btn {
   flex: 0 0 36px;
 }
 .task-row strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .task-row small {
   display: block;
@@ -480,14 +505,14 @@ footer small {
 }
 .notification-card p {
   font-size: var(--workstel-font-sm);
-  margin: 12px 0;
+  margin: var(--workstel-space-3) 0;
 }
 .notification-card small {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
 .detail-panel {
-  padding: 32px;
+  padding: var(--workstel-space-8);
   position: relative;
 }
 .close-button {
@@ -501,32 +526,32 @@ footer small {
 .eyebrow {
   display: block;
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   letter-spacing: 1.2px;
   color: var(--workstel-text-secondary);
-  margin: 10px 0;
+  margin: var(--workstel-space-2_5) 0;
 }
 .detail-panel h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 500;
-  margin-bottom: 10px;
+  font-weight: var(--workstel-weight-medium);
+  margin-bottom: var(--workstel-space-2_5);
 }
 .detail-panel p {
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
   line-height: 1.7;
-  margin-bottom: 20px;
+  margin-bottom: var(--workstel-space-5);
 }
 .detail-panel .v-alert {
   font-size: var(--workstel-font-sm);
 }
 .detail-panel dl {
   font-size: var(--workstel-font-sm);
-  margin: 20px 0;
+  margin: var(--workstel-space-5) 0;
 }
 .detail-panel dt {
   color: var(--workstel-text-secondary);
-  margin-top: 14px;
+  margin-top: var(--workstel-space-3_5);
 }
 .detail-panel dd {
   margin: 5px 0;
@@ -545,21 +570,21 @@ footer small {
   display: block;
   font-size: var(--workstel-font-sm);
   line-height: 1.4;
-  margin: 14px 0 4px;
+  margin: var(--workstel-space-3_5) 0 var(--workstel-space-1);
 }
 .info-panel {
-  padding: 28px;
+  padding: var(--workstel-space-7);
   overflow-wrap: anywhere;
 }
 .info-panel h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
   margin-bottom: 15px;
 }
 .info-panel p {
   font-size: var(--workstel-font-md);
   line-height: 1.7;
-  margin-bottom: 20px;
+  margin-bottom: var(--workstel-space-5);
 }
 .login-header {
   height: 76px;
@@ -576,7 +601,7 @@ footer small {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 50px 20px;
+  padding: 50px var(--workstel-space-5);
   min-height: calc(100dvh - 76px);
 }
 .login-panel {
@@ -585,15 +610,15 @@ footer small {
   max-width: 450px;
 }
 .login-symbol {
-  color: #0096c7;
+  color: rgb(var(--v-theme-primary));
   margin-bottom: 22px;
 }
 .login-panel h1 {
   font-size: var(--workstel-font-xl);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
   line-height: 1.4;
   letter-spacing: -0.5px;
-  margin-bottom: 12px;
+  margin-bottom: var(--workstel-space-3);
 }
 .login-panel p {
   font-size: var(--workstel-font-sm);
@@ -601,7 +626,7 @@ footer small {
   color: var(--workstel-text-secondary);
 }
 .sso-button {
-  margin-top: 28px;
+  margin-top: var(--workstel-space-7);
 }
 .sso-alert {
   font-size: var(--workstel-font-sm);
@@ -618,7 +643,7 @@ footer small {
 .demo-access {
   border-top: 1px solid var(--workstel-border);
   margin-top: 27px;
-  padding-top: 20px;
+  padding-top: var(--workstel-space-5);
   display: flex;
   align-items: flex-start;
   flex-direction: column;
@@ -630,7 +655,7 @@ footer small {
 }
 .demo-access .v-btn {
   font-size: var(--workstel-font-sm);
-  margin: 6px 0;
+  margin: var(--workstel-space-1_5) 0;
   padding: 0;
 }
 .demo-access small {
@@ -647,11 +672,11 @@ footer small {
     display: none;
   }
   .header-inner {
-    gap: 20px;
+    gap: var(--workstel-space-5);
     padding: 0 23px;
   }
   .top-nav {
-    gap: 16px;
+    gap: var(--workstel-space-4);
   }
   .help-button {
     display: none;
@@ -659,7 +684,7 @@ footer small {
   .switch-button {
     width: 40px;
     min-width: 40px !important;
-    padding: 0 8px !important;
+    padding: 0 var(--workstel-space-2) !important;
   }
   .switch-button .v-btn__content,
   .switch-button .v-btn__append {
@@ -695,13 +720,13 @@ footer small {
   border-bottom: 2px solid transparent;
 }
 .top-nav > button.active {
-  border-bottom-color: #0096c7;
+  border-bottom-color: rgb(var(--v-theme-primary));
   color: var(--workstel-primary-text);
 }
 .login-language {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-sm);
 }
@@ -719,13 +744,13 @@ footer small {
 }
 .module-status {
   display: inline-block;
-  margin-top: 8px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  margin-top: var(--workstel-space-2);
+  padding: var(--workstel-space-0_5) var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   line-height: 1.6;
 }
 .module-coming-soon:has(.module-open:hover) {
@@ -753,10 +778,10 @@ footer small {
   color: var(--workstel-text-secondary);
 }
 .password-login {
-  margin-top: 24px;
+  margin-top: var(--workstel-space-6);
 }
 .password-login .v-btn {
-  margin-top: 24px;
+  margin-top: var(--workstel-space-6);
   min-height: 44px;
 }
 @media (max-width: 680px) {
@@ -764,10 +789,10 @@ footer small {
     height: 112px;
     flex-wrap: wrap;
     gap: 0;
-    padding: 8px 18px 0;
+    padding: var(--workstel-space-2) 18px 0;
     align-content: space-between;
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: var(--workstel-space-3_5);
+    padding-right: var(--workstel-space-3_5);
   }
   .wordmark {
     font-size: 21px;
@@ -780,7 +805,7 @@ footer small {
     order: 2;
     height: 44px;
     width: 100%;
-    gap: 24px;
+    gap: var(--workstel-space-6);
   }
   .switch-button .v-btn__content,
   .switch-button .v-btn__append {
@@ -795,12 +820,12 @@ footer small {
     height: 44px !important;
   }
   .workspace-content {
-    padding: 26px 18px 20px;
-    padding-top: 24px;
+    padding: 26px 18px var(--workstel-space-5);
+    padding-top: var(--workstel-space-6);
   }
   .page-heading {
     margin-bottom: 22px;
-    gap: 12px;
+    gap: var(--workstel-space-3);
     flex-wrap: wrap;
   }
   .page-heading h1 {
@@ -809,7 +834,7 @@ footer small {
   }
 
   .module-toolbar {
-    gap: 8px;
+    gap: var(--workstel-space-2);
     margin-bottom: 18px;
     align-items: center;
     flex-wrap: nowrap;
@@ -835,7 +860,7 @@ footer small {
   }
   .module-open {
     min-height: 87px;
-    padding: 16px;
+    padding: var(--workstel-space-4);
     gap: 13px;
   }
   .module-open h2 {
@@ -845,13 +870,13 @@ footer small {
     font-size: var(--workstel-font-sm);
   }
   .favorite-button {
-    margin-top: 12px;
+    margin-top: var(--workstel-space-3);
   }
   .task-panel {
     padding: 17px;
   }
   .task-row {
-    gap: 8px;
+    gap: var(--workstel-space-2);
   }
   .task-row strong {
     font-size: var(--workstel-font-sm);
@@ -861,13 +886,13 @@ footer small {
     flex-shrink: 0;
   }
   .login-header {
-    padding: 0 20px;
+    padding: 0 var(--workstel-space-5);
   }
   .login-panel {
-    padding: 28px 24px;
+    padding: var(--workstel-space-7) var(--workstel-space-6);
   }
   .detail-panel {
-    padding: 28px 23px;
+    padding: var(--workstel-space-7) 23px;
   }
   .login-note {
     align-items: flex-start;
@@ -885,23 +910,23 @@ footer small {
   .favorite-button.v-btn--icon {
     min-width: 44px;
     height: 44px;
-    margin: 8px 4px 0 0;
+    margin: var(--workstel-space-2) var(--workstel-space-1) 0 0;
   }
   .task-row > div {
     min-width: 0;
     overflow-wrap: anywhere;
   }
   .login-main {
-    padding: 28px 18px;
+    padding: var(--workstel-space-7) 18px;
   }
   .empty-state {
-    padding: 32px 16px;
+    padding: var(--workstel-space-8) var(--workstel-space-4);
   }
   .info-panel {
     padding: 22px;
   }
   footer {
-    gap: 12px;
+    gap: var(--workstel-space-3);
     flex-wrap: wrap;
   }
 }
@@ -921,7 +946,7 @@ footer small {
   }
   .header-inner .wordmark > .v-icon {
     font-size: 24px;
-    margin-right: 6px;
+    margin-right: var(--workstel-space-1_5);
   }
 }
 /* Framework text joins the type scale: buttons use the small step, badges the caption step. */

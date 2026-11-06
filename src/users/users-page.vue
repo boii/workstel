@@ -278,8 +278,8 @@ function forgetPassword() {
 .users-toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--workstel-space-3);
+  margin-bottom: var(--workstel-space-3);
 }
 .users-search {
   flex: 1;
@@ -291,7 +291,7 @@ function forgetPassword() {
 .users-count {
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--workstel-space-2);
 }
 .users-list {
   list-style: none;
@@ -299,16 +299,17 @@ function forgetPassword() {
   padding: 0;
   background: rgb(var(--v-theme-surface));
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   overflow: hidden;
 }
 .users-list li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
+  gap: var(--workstel-space-4);
   min-height: 64px;
-  padding: 8px 12px 8px 16px;
+  padding: var(--workstel-space-2) var(--workstel-space-3) var(--workstel-space-2)
+    var(--workstel-space-4);
 }
 .users-list li + li {
   border-top: 1px solid var(--workstel-border);
@@ -316,12 +317,12 @@ function forgetPassword() {
 .users-identity {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   min-width: 0;
 }
 .users-identity strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .users-identity small {
@@ -332,15 +333,15 @@ function forgetPassword() {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 4px;
+  gap: var(--workstel-space-1);
 }
 .users-badge {
-  padding: 1px 8px;
-  border-radius: 4px;
+  padding: 1px var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   line-height: 1.6;
 }
 .users-badge--developer {
@@ -371,8 +372,8 @@ function forgetPassword() {
   }
   .users-list li {
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-    padding: 12px;
+    gap: var(--workstel-space-2);
+    padding: var(--workstel-space-3);
   }
   .users-badges {
     justify-content: flex-start;

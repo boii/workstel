@@ -166,39 +166,39 @@ function changedLabel(state: ModuleState) {
 .switches-heading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .switches-heading h2 {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   line-height: 1.4;
 }
 .switches-badge {
-  padding: 1px 8px;
-  border-radius: 4px;
+  padding: 1px var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   line-height: 1.6;
 }
 .switches-hint {
-  margin-top: 6px;
+  margin-top: var(--workstel-space-1_5);
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
 }
 .switches-list {
   list-style: none;
-  margin: 12px 0 0;
+  margin: var(--workstel-space-3) 0 0;
   padding: 0;
 }
 .switches-list li {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   min-height: 56px;
-  padding: 8px 0;
+  padding: var(--workstel-space-2) 0;
   border-top: 1px solid var(--workstel-border);
 }
 .switches-list li > .v-icon {
@@ -208,13 +208,13 @@ function changedLabel(state: ModuleState) {
 .switches-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   flex: 1;
   min-width: 0;
 }
 .switches-text strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .switches-text small {
   font-size: var(--workstel-font-xs);
@@ -222,12 +222,12 @@ function changedLabel(state: ModuleState) {
   overflow-wrap: anywhere;
 }
 .switches-state {
-  padding: 1px 8px;
-  border-radius: 4px;
+  padding: 1px var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-success-bg);
   color: var(--workstel-success-text);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   line-height: 1.6;
 }
 .switches-state--off {
@@ -242,10 +242,10 @@ function changedLabel(state: ModuleState) {
 }
 .switches-confirm h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
 }
 .switches-confirm p {
-  margin-top: 10px;
+  margin-top: var(--workstel-space-2_5);
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
@@ -254,8 +254,8 @@ function changedLabel(state: ModuleState) {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-5);
 }
 @media (max-width: 680px) {
   .switches-list li {

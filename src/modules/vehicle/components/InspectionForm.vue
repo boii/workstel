@@ -236,7 +236,7 @@ const fieldError = (field: InspectionField) => {
 .inspection-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-  gap: 16px;
+  gap: var(--workstel-space-4);
 }
 .inspection-first-label {
   margin-top: 0;
@@ -248,20 +248,20 @@ const fieldError = (field: InspectionField) => {
 .inspection-fuel .v-btn {
   flex: 1;
   min-width: 0;
-  padding: 0 4px;
+  padding: 0 var(--workstel-space-1);
   font-size: var(--workstel-font-sm);
 }
 .inspection-checklist-heading {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .inspection-checklist-heading .field-label {
   margin-bottom: 0;
 }
 .inspection-hint {
-  margin: 2px 0 12px;
+  margin: var(--workstel-space-0_5) 0 var(--workstel-space-3);
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
@@ -273,15 +273,16 @@ const fieldError = (field: InspectionField) => {
   margin: 0;
   padding: 0;
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
 }
 .inspection-items li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   min-height: 56px;
-  padding: 8px 8px 8px 12px;
+  padding: var(--workstel-space-2) var(--workstel-space-2) var(--workstel-space-2)
+    var(--workstel-space-3);
   font-size: var(--workstel-font-sm);
 }
 .inspection-items li + li {
@@ -295,7 +296,7 @@ const fieldError = (field: InspectionField) => {
 }
 .inspection-items .v-btn {
   font-size: var(--workstel-font-sm);
-  padding: 0 10px;
+  padding: 0 var(--workstel-space-2_5);
 }
 @media (max-width: 680px) {
   .inspection-row {
@@ -304,7 +305,7 @@ const fieldError = (field: InspectionField) => {
   }
   /* Stacked columns need the normal gap above the second label. */
   .inspection-row > div + div .inspection-first-label {
-    margin-top: 20px;
+    margin-top: var(--workstel-space-5);
   }
   .inspection-checklist-heading .v-btn {
     min-height: 44px;

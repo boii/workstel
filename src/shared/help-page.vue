@@ -186,27 +186,27 @@ async function copyVersion() {
 .help-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: var(--workstel-space-4);
   align-items: start;
 }
 .help-column {
   display: grid;
-  gap: 16px;
+  gap: var(--workstel-space-4);
   min-width: 0;
 }
 .help-card {
-  padding: 20px 22px;
+  padding: var(--workstel-space-5) 22px;
   min-width: 0;
 }
 .help-card--flush {
-  padding-bottom: 8px;
+  padding-bottom: var(--workstel-space-2);
 }
 .help-card h2 {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--workstel-space-2);
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   line-height: 1.4;
 }
 .help-card h2 .v-icon {
@@ -216,14 +216,14 @@ async function copyVersion() {
 .help-tips,
 .help-shortcuts {
   list-style: none;
-  margin: 12px 0 0;
+  margin: var(--workstel-space-3) 0 0;
   padding: 0;
 }
 .help-steps li {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 8px 0;
+  gap: var(--workstel-space-3);
+  padding: var(--workstel-space-2) 0;
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
 }
@@ -237,11 +237,11 @@ async function copyVersion() {
   background: var(--workstel-info-bg);
   color: var(--workstel-primary-text);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 .help-tips li {
   position: relative;
-  padding: 6px 0 6px 18px;
+  padding: var(--workstel-space-1_5) 0 var(--workstel-space-1_5) 18px;
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
 }
@@ -258,10 +258,10 @@ async function copyVersion() {
 .help-warning {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-2_5);
+  padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-warning-bg);
   color: var(--workstel-warning-text);
   font-size: var(--workstel-font-sm);
@@ -269,13 +269,13 @@ async function copyVersion() {
 }
 .help-warning .v-icon {
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: var(--workstel-space-0_5);
 }
 .help-action {
-  margin: 8px 0 -6px -12px;
+  margin: var(--workstel-space-2) 0 -6px -12px;
 }
 .help-faq {
-  margin-top: 8px;
+  margin-top: var(--workstel-space-2);
 }
 .help-faq :deep(.v-expansion-panel) {
   background: transparent;
@@ -288,15 +288,15 @@ async function copyVersion() {
 }
 .help-faq :deep(.v-expansion-panel-title) {
   min-height: 48px;
-  padding: 10px 0;
+  padding: var(--workstel-space-2_5) 0;
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .help-faq :deep(.v-expansion-panel-title__overlay) {
   display: none;
 }
 .help-faq :deep(.v-expansion-panel-text__wrapper) {
-  padding: 0 0 12px;
+  padding: 0 0 var(--workstel-space-3);
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
@@ -305,7 +305,7 @@ async function copyVersion() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--workstel-space-4);
   padding: 9px 0;
   border-top: 1px solid var(--workstel-border);
   font-size: var(--workstel-font-sm);
@@ -322,12 +322,12 @@ kbd {
   text-align: center;
   border: 1px solid var(--workstel-border);
   border-bottom-width: 2px;
-  border-radius: 4px;
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-surface-muted);
   color: var(--workstel-text-secondary);
 }
 .help-muted {
-  margin-top: 8px;
+  margin-top: var(--workstel-space-2);
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
@@ -336,10 +336,11 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 8px 4px 8px 12px;
-  border-radius: 6px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-3);
+  padding: var(--workstel-space-2) var(--workstel-space-1) var(--workstel-space-2)
+    var(--workstel-space-3);
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-surface-muted);
 }
 .help-version > span {

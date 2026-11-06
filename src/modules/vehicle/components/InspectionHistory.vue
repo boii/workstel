@@ -138,7 +138,7 @@ const issues = (entry: Inspection) =>
   padding: 0;
 }
 .history-list li {
-  padding: 12px 0;
+  padding: var(--workstel-space-3) 0;
   border-top: 1px solid var(--workstel-border);
 }
 .history-list li:first-child {
@@ -149,17 +149,17 @@ const issues = (entry: Inspection) =>
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .history-heading strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .history-details {
   display: grid;
   grid-template-columns: 120px minmax(0, 1fr);
-  gap: 4px 12px;
-  margin-top: 8px;
+  gap: var(--workstel-space-1) var(--workstel-space-3);
+  margin-top: var(--workstel-space-2);
   font-size: var(--workstel-font-sm);
 }
 .history-details dt {

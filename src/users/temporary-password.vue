@@ -66,11 +66,12 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 12px;
-  padding: 10px 6px 10px 14px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-3);
+  padding: var(--workstel-space-2_5) var(--workstel-space-1_5) var(--workstel-space-2_5)
+    var(--workstel-space-3_5);
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-surface-muted);
 }
 .temp-box code {

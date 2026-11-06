@@ -6,13 +6,13 @@
   background: transparent;
   font-size: var(--workstel-font-sm);
   color: var(--workstel-text-secondary);
-  margin-bottom: 10px;
-  padding: 4px 0;
+  margin-bottom: var(--workstel-space-2_5);
+  padding: var(--workstel-space-1) 0;
 }
 .hk-notice {
   font-size: var(--workstel-font-xs) !important;
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: var(--workstel-space-3);
 }
 .hk-muted {
   color: var(--workstel-text-secondary);
@@ -23,13 +23,13 @@
 .hk-form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 12px;
+  column-gap: var(--workstel-space-3);
 }
 .hk-import textarea {
   font-family: 'Noto Sans', monospace;
 }
 .hk-import-error {
-  margin-top: 8px;
+  margin-top: var(--workstel-space-2);
   color: var(--workstel-danger-text);
 }
 /* The caller's running timer */
@@ -37,11 +37,11 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 14px;
-  padding: 12px 16px;
+  gap: var(--workstel-space-4);
+  margin-bottom: var(--workstel-space-3_5);
+  padding: var(--workstel-space-3) var(--workstel-space-4);
   border: 1px solid rgb(var(--v-theme-primary));
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-info-bg);
 }
 .hk-mine-text {
@@ -55,12 +55,12 @@
 }
 .hk-mine-text strong {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .hk-mine-time {
   font-size: 28px;
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--workstel-primary-text);
 }
@@ -69,13 +69,13 @@
 }
 .hk-mine-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .hk-tabs-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--workstel-space-2);
+  margin-bottom: var(--workstel-space-3);
   border-bottom: 1px solid var(--workstel-border);
 }
 .hk-tabs {
@@ -87,12 +87,12 @@
 }
 /* Room list view */
 .hk-room-list {
-  padding: 4px 16px;
+  padding: var(--workstel-space-1) var(--workstel-space-4);
 }
 .hk-sort {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   padding: 0;
   border: 0;
   background: transparent;
@@ -113,7 +113,7 @@
   border: 0;
   background: transparent;
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   color: var(--workstel-primary-text);
 }
 .hk-list-time {
@@ -124,10 +124,10 @@
 }
 .hk-badge {
   display: inline-block;
-  padding: 1px 8px;
-  border-radius: 4px;
+  padding: 1px var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   line-height: 1.6;
   white-space: nowrap;
 }
@@ -150,7 +150,7 @@
 .hk-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 180px));
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .hk-toolbar:not(:has(> :nth-child(3))):has(> :nth-child(2)) {
   grid-template-columns: minmax(0, 1fr) minmax(0, 180px);
@@ -166,25 +166,25 @@
   margin-top: 18px;
 }
 .hk-floor h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--workstel-space-2);
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   color: var(--workstel-text-secondary);
 }
 .hk-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .hk-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   min-height: 84px;
-  padding: 10px 12px;
+  padding: var(--workstel-space-2_5) var(--workstel-space-3);
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: rgb(var(--v-theme-surface));
   font: inherit;
   color: inherit;
@@ -192,10 +192,7 @@
   cursor: pointer;
 }
 .hk-card:hover {
-  box-shadow:
-    0 3px 10px -2px #55555514,
-    0 2px 20px #5555550f,
-    0 1px 30px #55555508;
+  box-shadow: var(--workstel-shadow-card);
 }
 .hk-card:focus-visible {
   outline: 2px solid var(--workstel-primary-text);
@@ -208,15 +205,15 @@
 }
 .hk-card-number {
   font-size: var(--workstel-font-lg);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .hk-card-time {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--workstel-space-1);
   font-size: var(--workstel-font-md);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   font-variant-numeric: tabular-nums;
   color: var(--workstel-info-text);
 }
@@ -242,20 +239,20 @@
 }
 /* Room timer dialog */
 .hk-section {
-  margin-top: 16px;
-  padding-top: 14px;
+  margin-top: var(--workstel-space-4);
+  padding-top: var(--workstel-space-3_5);
   border-top: 1px solid var(--workstel-border);
 }
 .hk-section-title {
-  margin-bottom: 4px;
+  margin-bottom: var(--workstel-space-1);
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .hk-choices {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 10px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-2_5);
 }
 .hk-choices .v-btn {
   height: 64px !important;
@@ -264,22 +261,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 16px;
+  gap: var(--workstel-space-1);
+  padding: var(--workstel-space-4);
   border: 1px solid rgb(var(--v-theme-primary));
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-info-bg);
   text-align: center;
 }
 .hk-running-type {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 600;
+  gap: var(--workstel-space-1_5);
+  font-weight: var(--workstel-weight-semibold);
 }
 .hk-running-time {
   font-size: 44px;
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
   color: var(--workstel-primary-text);
@@ -291,12 +288,12 @@
 .hk-running-actions {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 8px;
+  gap: var(--workstel-space-2);
   width: 100%;
-  margin-top: 10px;
+  margin-top: var(--workstel-space-2_5);
 }
 .hk-cancel {
-  margin-top: 4px;
+  margin-top: var(--workstel-space-1);
 }
 .hk-recent {
   list-style: none;
@@ -307,8 +304,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto auto;
-  column-gap: 8px;
-  padding: 6px 0;
+  column-gap: var(--workstel-space-2);
+  padding: var(--workstel-space-1_5) 0;
 }
 .hk-recent li + li {
   border-top: 1px dashed var(--workstel-border);
@@ -316,7 +313,7 @@
 .hk-recent li > span {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--workstel-space-1);
 }
 .hk-recent small {
   grid-row: 2;
@@ -333,16 +330,16 @@
 .hk-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--workstel-space-2);
+  margin-bottom: var(--workstel-space-3);
 }
 .hk-stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 12px 14px;
+  gap: var(--workstel-space-0_5);
+  padding: var(--workstel-space-3) var(--workstel-space-3_5);
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: rgb(var(--v-theme-surface));
 }
 .hk-stat span,
@@ -352,20 +349,20 @@
 }
 .hk-stat strong {
   font-size: var(--workstel-font-lg);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   font-variant-numeric: tabular-nums;
 }
 .hk-panel {
-  margin-bottom: 12px;
-  padding: 14px 16px;
+  margin-bottom: var(--workstel-space-3);
+  padding: var(--workstel-space-3_5) var(--workstel-space-4);
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: rgb(var(--v-theme-surface));
 }
 .hk-panel h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--workstel-space-2);
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .hk-table {
   width: 100%;
@@ -373,14 +370,14 @@
   font-size: var(--workstel-font-sm);
 }
 .hk-table th {
-  padding: 4px 6px;
+  padding: var(--workstel-space-1) var(--workstel-space-1_5);
   font-size: var(--workstel-font-xs);
-  font-weight: 400;
+  font-weight: var(--workstel-weight-regular);
   text-align: left;
   color: var(--workstel-text-secondary);
 }
 .hk-table td {
-  padding: 6px;
+  padding: var(--workstel-space-1_5);
   border-top: 1px solid var(--workstel-border);
   overflow-wrap: anywhere;
 }
@@ -394,22 +391,22 @@
   margin: 0;
   padding: 0;
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   background: rgb(var(--v-theme-surface));
 }
 .hk-history li {
   display: grid;
   grid-template-columns: 56px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: var(--workstel-space-3);
+  padding: var(--workstel-space-2_5) var(--workstel-space-3_5);
 }
 .hk-history li + li {
   border-top: 1px solid var(--workstel-border);
 }
 .hk-history-room {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .hk-history li > div {
   display: flex;
@@ -419,7 +416,7 @@
 .hk-history li > div > span {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--workstel-space-1);
 }
 .hk-history small {
   font-size: var(--workstel-font-xs);
@@ -427,13 +424,13 @@
 }
 .hk-history-time {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .hk-history--cancelled .hk-history-time {
   font-size: var(--workstel-font-sm);
-  font-weight: 400;
+  font-weight: var(--workstel-weight-regular);
   color: var(--workstel-text-secondary);
 }
 @media (max-width: 680px) {
@@ -471,8 +468,8 @@
   }
   .hk-history li {
     grid-template-columns: 44px minmax(0, 1fr) auto;
-    gap: 8px;
-    padding: 10px 12px;
+    gap: var(--workstel-space-2);
+    padding: var(--workstel-space-2_5) var(--workstel-space-3);
   }
 }
 /* On narrow screens the room list keeps two lines per room instead of the stacked card:
@@ -481,8 +478,8 @@
   .hk-room-list.stack-table-container .stack-table tr {
     grid-template-columns: auto auto minmax(0, 1fr);
     align-items: center;
-    gap: 2px 10px;
-    padding: 8px 2px;
+    gap: var(--workstel-space-0_5) var(--workstel-space-2_5);
+    padding: var(--workstel-space-2) var(--workstel-space-0_5);
   }
   .hk-room-list.stack-table-container .stack-table td::before {
     display: none;

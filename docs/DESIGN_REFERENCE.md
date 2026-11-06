@@ -100,3 +100,16 @@ Approved by the user as a correction pass within the baseline. Colours, Quicksan
 - Paired fields: short pairs stay side by side on phones and stack only below 360px. The pairs are Sales stage and segment, value and room nights, arrival and departure; Bin Card code and unit, minimum and department; and Document category and department. The vehicle inspection odometer and fuel level still stack, because the fuel buttons need the full width.
 - Optional fields: `src/shared/optional-fields.vue` folds optional fields behind one "Add …" link (deal, account and document notes; inspection notes; stock reference and notes). The fields open by themselves when they already have a value, when a server error points at them, or for inspection notes once an item is marked as an issue. They fold again when the form is reopened, and expanding them focuses the first field. The Bin Card stock movement sheet on a phone went from 594px to 473px.
 - Footers: every module form already keeps Cancel and Save in the `ModuleDialog` footer, outside the scrolling body, so no change was needed.
+
+## Centralized style tokens — 6 November 2026
+
+Approved by the user as a consistency pass. The visual baseline does not change: every token holds the value that was already written in that place.
+
+All tokens live in `:root` in `src/styles.css`, alongside the colour and type tokens above.
+
+- Font weights: `--workstel-weight-regular|medium|semibold|bold` = 400 / 500 / 600 / 700. All 88 literal weights now use them.
+- Spacing: `--workstel-space-<n>` = n × 4px, with half steps written as `_5` (`0_5` = 2px, `1_5` = 6px, … `8` = 32px). It is used in `gap`, `padding` and `margin` (567 values). Values off this scale stay literal so the layout stays the same: 1, 3, 5, 7, 9, 11, 15, 17, 18, 22 and 23px, plus a few one-off offsets. Bring these onto the scale only after a visual review.
+- Radius: `--workstel-radius-sm|md|lg|pill` = 4 / 6 / 12 / 999px. Pill replaces 28px on the 40px search field and 26px on the 52px floating action; both were already fully rounded. Circles (`50%`) and resets (`0`) stay literal.
+- Shadows: `--workstel-shadow-card` and `--workstel-shadow-header` hold the measured values. Hex alpha approximations (`#55555514`) now use the exact measured rgba values. The skip link gains the card shadow's missing third layer (3% alpha, visible only on focus).
+- Primary: styles use `rgb(var(--v-theme-primary))` instead of repeating `#0096c7`, so the Vuetify theme in `src/main.ts` is the single source.
+- Breakpoints cannot use custom properties in media queries, so they stay literal. The standard set is 360, 560 (container), 680, 720 (container), 760, 900 and 1050px. Prefer 680px for phone layouts. The 359/360 and 400px outliers remain until a visual review.

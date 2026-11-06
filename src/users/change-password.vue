@@ -114,9 +114,9 @@ async function submit() {
 .password-required {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  gap: var(--workstel-space-2);
+  padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-warning-bg);
   color: var(--workstel-warning-text);
   font-size: var(--workstel-font-sm);
@@ -130,8 +130,8 @@ async function submit() {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-5);
 }
 @media (max-width: 680px) {
   .password-actions .v-btn {

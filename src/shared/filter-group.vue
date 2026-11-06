@@ -88,25 +88,25 @@ const label = computed(() =>
 .filter-group-panel {
   width: 320px;
   max-width: 100%;
-  padding: 14px 16px 16px;
+  padding: var(--workstel-space-3_5) var(--workstel-space-4) var(--workstel-space-4);
 }
 .filter-group-panel header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   min-height: 44px;
-  margin-bottom: 6px;
+  margin-bottom: var(--workstel-space-1_5);
 }
 .filter-group-panel h2 {
   font-size: var(--workstel-font-md);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
 }
 .filter-group-fields {
   display: grid;
-  gap: 4px;
+  gap: var(--workstel-space-1);
 }
 .filter-group-done {
-  margin-top: 6px;
+  margin-top: var(--workstel-space-1_5);
 }
 </style>

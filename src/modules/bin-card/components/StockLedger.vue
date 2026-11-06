@@ -149,7 +149,7 @@ watch(open, (value) => {
 .ledger-scroll {
   overflow-x: auto;
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
 }
 .ledger-table {
   width: 100%;
@@ -160,21 +160,21 @@ watch(open, (value) => {
     sans-serif;
 }
 .ledger-table th {
-  padding: 8px 12px;
+  padding: var(--workstel-space-2) var(--workstel-space-3);
   text-align: left;
   font-size: var(--workstel-font-xs);
-  font-weight: 400;
+  font-weight: var(--workstel-weight-regular);
   color: var(--workstel-text-secondary);
   background: var(--workstel-surface-muted);
 }
 .ledger-table td {
-  padding: 8px 12px;
+  padding: var(--workstel-space-2) var(--workstel-space-3);
   border-top: 1px solid var(--workstel-border);
   vertical-align: top;
 }
 .ledger-table td small {
   display: block;
-  margin-top: 2px;
+  margin-top: var(--workstel-space-0_5);
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
   overflow-wrap: anywhere;

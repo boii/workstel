@@ -148,7 +148,7 @@ async function submit() {
 .profile-form-pair {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 0 12px;
+  gap: 0 var(--workstel-space-3);
 }
 /* Paired fields stay side by side on phones and stack only on the narrowest screens. */
 @media (max-width: 359px) {

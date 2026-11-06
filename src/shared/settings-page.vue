@@ -239,10 +239,10 @@ function granted(assignment: StaffAssignment) {
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: var(--workstel-space-4);
 }
 .settings-card {
-  padding: 20px 22px;
+  padding: var(--workstel-space-5) 22px;
   min-width: 0;
 }
 .settings-card--wide {
@@ -250,7 +250,7 @@ function granted(assignment: StaffAssignment) {
 }
 .settings-card h2 {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   line-height: 1.4;
 }
 .settings-card-heading {
@@ -258,7 +258,7 @@ function granted(assignment: StaffAssignment) {
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 4px 16px;
+  gap: var(--workstel-space-1) var(--workstel-space-4);
 }
 .settings-profile-edit {
   margin: -6px -8px -6px 0;
@@ -272,24 +272,24 @@ function granted(assignment: StaffAssignment) {
 .settings-profile {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 12px;
+  gap: var(--workstel-space-3_5);
+  margin-top: var(--workstel-space-3);
   min-width: 0;
 }
 .settings-initials {
   font-size: var(--workstel-font-md);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   color: #526774;
 }
 .settings-profile-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   min-width: 0;
 }
 .settings-profile-text strong {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .settings-profile-text span {
@@ -301,13 +301,13 @@ function granted(assignment: StaffAssignment) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   min-height: 52px;
-  padding: 8px 0;
+  padding: var(--workstel-space-2) 0;
   border-top: 1px solid var(--workstel-border);
 }
 .settings-card h2 + .settings-row {
-  margin-top: 8px;
+  margin-top: var(--workstel-space-2);
   border-top: 0;
 }
 .settings-row--first {
@@ -318,31 +318,31 @@ function granted(assignment: StaffAssignment) {
 }
 .settings-language .v-btn {
   font-size: var(--workstel-font-sm);
-  padding: 0 12px;
+  padding: 0 var(--workstel-space-3);
 }
 .settings-access {
   list-style: none;
-  margin: 12px 0 0;
+  margin: var(--workstel-space-3) 0 0;
   padding: 0;
 }
 .settings-access li {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px 16px;
+  gap: var(--workstel-space-2) var(--workstel-space-4);
   min-height: 48px;
-  padding: 8px 0;
+  padding: var(--workstel-space-2) 0;
   border-top: 1px solid var(--workstel-border);
 }
 .settings-access-name {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
   min-width: 0;
 }
 .settings-access-name strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .settings-access-name span {
@@ -353,19 +353,19 @@ function granted(assignment: StaffAssignment) {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 4px;
+  gap: var(--workstel-space-1);
 }
 .settings-permissions span {
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: var(--workstel-space-0_5) var(--workstel-space-2);
+  border-radius: var(--workstel-radius-sm);
   background: var(--workstel-surface-subtle);
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-xs);
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
   line-height: 1.6;
 }
 .settings-card > .settings-muted {
-  margin-top: 12px;
+  margin-top: var(--workstel-space-3);
 }
 @media (max-width: 680px) {
   .settings-grid {

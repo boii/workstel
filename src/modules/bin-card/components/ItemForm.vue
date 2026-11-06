@@ -207,13 +207,13 @@ const fieldError = (field: ItemField) =>
 .bin-form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--workstel-space-3);
 }
 .bin-first-label {
   margin-top: 0;
 }
 .bin-form-hint {
-  margin-top: 12px;
+  margin-top: var(--workstel-space-3);
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
@@ -225,7 +225,7 @@ const fieldError = (field: ItemField) =>
   }
   /* Stacked columns need the normal gap above the second label. */
   .bin-form-grid > div + div .bin-first-label {
-    margin-top: 20px;
+    margin-top: var(--workstel-space-5);
   }
 }
 </style>

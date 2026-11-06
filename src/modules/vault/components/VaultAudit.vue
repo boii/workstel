@@ -228,13 +228,13 @@ onUnmounted(() => {
 .vault-audit-hint {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
-  margin: 0 0 12px;
+  margin: 0 0 var(--workstel-space-3);
   line-height: 1.5;
 }
 .vault-audit-controls {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr) 40px;
-  gap: 8px;
+  gap: var(--workstel-space-2);
   align-items: center;
 }
 .vault-audit-controls > * {
@@ -258,10 +258,10 @@ onUnmounted(() => {
   line-height: 1.5;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) 150px minmax(60px, 0.5fr) 95px 80px 18px;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   align-items: center;
   min-height: 48px;
-  padding: 8px 20px;
+  padding: var(--workstel-space-2) var(--workstel-space-5);
   cursor: pointer;
   list-style: none;
 }
@@ -277,7 +277,7 @@ onUnmounted(() => {
 }
 .vault-audit-action {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: anywhere;
 }
 .vault-audit-time,
@@ -321,8 +321,8 @@ onUnmounted(() => {
 .vault-audit-details {
   display: grid;
   grid-template-columns: 155px minmax(0, 1fr);
-  gap: 7px 12px;
-  padding: 12px 20px 16px;
+  gap: 7px var(--workstel-space-3);
+  padding: var(--workstel-space-3) var(--workstel-space-5) var(--workstel-space-4);
   background: rgba(var(--v-theme-primary), 0.025);
   border-top: 1px solid var(--workstel-border);
   font-size: var(--workstel-font-xs);
@@ -336,13 +336,13 @@ onUnmounted(() => {
   overflow-wrap: anywhere;
 }
 .vault-audit-empty {
-  padding: 30px 20px;
+  padding: 30px var(--workstel-space-5);
   text-align: center;
   color: var(--workstel-text-secondary);
   font-size: var(--workstel-font-sm);
 }
 .vault-audit-empty p {
-  margin: 8px 0;
+  margin: var(--workstel-space-2) 0;
 }
 @media (max-width: 680px) {
   .vault-audit-controls {
@@ -356,8 +356,8 @@ onUnmounted(() => {
   }
   .vault-audit-event summary {
     grid-template-columns: minmax(0, 1fr) auto 18px;
-    gap: 4px 10px;
-    padding: 10px 16px;
+    gap: var(--workstel-space-1) var(--workstel-space-2_5);
+    padding: var(--workstel-space-2_5) var(--workstel-space-4);
     min-height: 64px;
   }
   .vault-audit-action {
@@ -386,8 +386,8 @@ onUnmounted(() => {
   }
   .vault-audit-details {
     grid-template-columns: 115px minmax(0, 1fr);
-    padding: 12px 16px;
-    gap: 8px;
+    padding: var(--workstel-space-3) var(--workstel-space-4);
+    gap: var(--workstel-space-2);
   }
 }
 </style>

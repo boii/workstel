@@ -45,7 +45,7 @@ async function expand() {
 </template>
 <style scoped>
 .optional-fields-toggle {
-  margin-top: 10px;
-  padding-inline: 4px !important;
+  margin-top: var(--workstel-space-2_5);
+  padding-inline: var(--workstel-space-1) !important;
 }
 </style>

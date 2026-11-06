@@ -199,7 +199,7 @@ const fieldError = (field: DocumentField) =>
 .document-form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--workstel-space-3);
 }
 /* Category and department stay side by side on phones; only very narrow screens stack them. */
 @media (max-width: 359px) {

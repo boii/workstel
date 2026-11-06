@@ -49,8 +49,8 @@
   }
   .module-page :is(.vehicle-row, .bin-row, .documents-row, .sales-row) {
     grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
-    padding: 14px;
+    gap: var(--workstel-space-2_5);
+    padding: var(--workstel-space-3_5);
   }
   .module-page :is(.vehicle-actions, .bin-actions, .documents-actions, .sales-actions) {
     justify-content: flex-start;
@@ -99,13 +99,13 @@
     flex-basis: auto;
   }
   .module-page .module-page-actions {
-    gap: 8px;
+    gap: var(--workstel-space-2);
   }
   .module-page-actions > .v-btn:not(.v-btn--icon) {
     flex: 1 1 auto;
   }
   .v-dialog:not(.v-dialog--fullscreen) > .v-overlay__content {
-    margin: 12px;
+    margin: var(--workstel-space-3);
   }
 }
 /* Phones: search and the Filters button share one row (see shared/filter-group.vue). */
@@ -167,13 +167,10 @@
     z-index: 5;
     flex: 0 0 auto;
     height: 52px !important;
-    padding-inline: 20px;
-    border-radius: 26px;
+    padding-inline: var(--workstel-space-5);
+    border-radius: var(--workstel-radius-pill);
     /* Measured header shadow token (DESIGN_REFERENCE.md). */
-    box-shadow:
-      0 2px 30px -1px rgba(85, 85, 85, 0.08),
-      0 4px 30px rgba(85, 85, 85, 0.06),
-      0 1px 30px rgba(85, 85, 85, 0.03);
+    box-shadow: var(--workstel-shadow-header);
   }
   .module-page:has(.module-primary-action) {
     padding-bottom: 76px;
@@ -189,8 +186,9 @@
   .module-page :is(.vehicle-row, .bin-row) {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 6px 10px;
-    padding: 12px 8px 10px 14px;
+    gap: var(--workstel-space-1_5) var(--workstel-space-2_5);
+    padding: var(--workstel-space-3) var(--workstel-space-2) var(--workstel-space-2_5)
+      var(--workstel-space-3_5);
   }
   .module-page :is(.vehicle-identity, .bin-identity) {
     grid-column: 1 / -1;
@@ -198,7 +196,7 @@
   .module-page :is(.vehicle-actions, .bin-actions) {
     flex-wrap: nowrap;
     justify-content: flex-end;
-    gap: 2px;
+    gap: var(--workstel-space-0_5);
   }
   .module-page :is(.vehicle-actions, .bin-actions) .v-btn--icon {
     margin-left: 0;

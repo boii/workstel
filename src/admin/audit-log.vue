@@ -234,13 +234,13 @@ function date(value: string) {
 .admin-audit-notice {
   font-size: var(--workstel-font-xs) !important;
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: var(--workstel-space-3);
 }
 .admin-audit-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 180px) 40px;
   align-items: center;
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .admin-audit-toolbar > * {
   min-width: 0;
@@ -251,7 +251,7 @@ function date(value: string) {
   padding: 0;
   background: rgb(var(--v-theme-surface));
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
   overflow: hidden;
 }
 .admin-audit-list li + li {
@@ -260,10 +260,10 @@ function date(value: string) {
 .admin-audit-event summary {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) 150px minmax(60px, 0.5fr) 95px 80px 18px;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   align-items: center;
   min-height: 48px;
-  padding: 8px 16px;
+  padding: var(--workstel-space-2) var(--workstel-space-4);
   line-height: 1.5;
   cursor: pointer;
   list-style: none;
@@ -280,7 +280,7 @@ function date(value: string) {
 }
 .admin-audit-action {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
   overflow-wrap: break-word;
 }
 .admin-audit-time,
@@ -323,9 +323,9 @@ function date(value: string) {
 .admin-audit-details {
   display: grid;
   grid-template-columns: 155px minmax(0, 1fr);
-  gap: 7px 12px;
+  gap: 7px var(--workstel-space-3);
   margin: 0;
-  padding: 12px 16px 16px;
+  padding: var(--workstel-space-3) var(--workstel-space-4) var(--workstel-space-4);
   background: var(--workstel-surface-subtle);
   border-top: 1px solid var(--workstel-border);
   font-size: var(--workstel-font-xs);
@@ -349,8 +349,8 @@ function date(value: string) {
   }
   .admin-audit-event summary {
     grid-template-columns: minmax(0, 1fr) auto 18px;
-    gap: 4px 10px;
-    padding: 10px 12px;
+    gap: var(--workstel-space-1) var(--workstel-space-2_5);
+    padding: var(--workstel-space-2_5) var(--workstel-space-3);
     min-height: 64px;
   }
   .admin-audit-action {
@@ -379,8 +379,8 @@ function date(value: string) {
   }
   .admin-audit-details {
     grid-template-columns: 115px minmax(0, 1fr);
-    gap: 8px;
-    padding: 12px;
+    gap: var(--workstel-space-2);
+    padding: var(--workstel-space-3);
   }
 }
 </style>

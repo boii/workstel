@@ -340,28 +340,28 @@ onUnmounted(() => {
 </template>
 <style scoped>
 .vault-share-section {
-  margin-top: 16px;
-  padding-top: 14px;
+  margin-top: var(--workstel-space-4);
+  padding-top: var(--workstel-space-3_5);
   border-top: 1px solid var(--workstel-border);
 }
 .vault-share-section h3 {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .vault-share-warning {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
+  gap: var(--workstel-space-1_5);
   color: var(--workstel-warning-text) !important;
 }
 .vault-share-warning .v-icon {
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: var(--workstel-space-0_5);
 }
 .vault-share-departments {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 12px;
+  gap: 0 var(--workstel-space-3);
 }
 .vault-share-departments :deep(.v-label),
 .vault-transfer-actions :deep(.v-label) {
@@ -372,18 +372,18 @@ onUnmounted(() => {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-2);
 }
 .vault-transfer-confirm {
   padding: 22px;
 }
 .vault-transfer-confirm h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
 }
 .vault-transfer-confirm p {
-  margin-top: 10px;
+  margin-top: var(--workstel-space-2_5);
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
@@ -393,8 +393,8 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-5);
 }
 @media (max-width: 680px) {
   .vault-transfer-actions .v-btn,

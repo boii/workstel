@@ -65,8 +65,8 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 14px 20px;
+  gap: var(--workstel-space-3);
+  padding: var(--workstel-space-3_5) var(--workstel-space-5);
   border-bottom: 1px solid var(--workstel-border);
   flex-shrink: 0;
 }
@@ -75,7 +75,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
 }
 .module-dialog-title h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -86,7 +86,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   overflow-wrap: anywhere;
 }
 .module-dialog-body {
-  padding: 16px 20px !important;
+  padding: var(--workstel-space-4) var(--workstel-space-5) !important;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -98,21 +98,21 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: var(--workstel-space-2);
+  padding: var(--workstel-space-3) var(--workstel-space-5);
   border-top: 1px solid var(--workstel-border);
   flex-shrink: 0;
 }
 @media (max-width: 680px) {
   .module-dialog-sheet .module-dialog {
-    border-radius: 12px 12px 0 0 !important;
+    border-radius: var(--workstel-radius-lg) var(--workstel-radius-lg) 0 0 !important;
     padding-bottom: env(safe-area-inset-bottom);
   }
   .module-dialog-sheet .module-dialog-actions :deep(.v-btn:last-child) {
     flex: 1 1 auto;
   }
   .module-dialog-heading {
-    padding: 12px 16px;
+    padding: var(--workstel-space-3) var(--workstel-space-4);
   }
   /* Vuetify sets the button height inline from the global VBtn default. */
   .module-dialog-heading > .v-btn {
@@ -120,10 +120,10 @@ const bottomSheet = computed(() => phone.value && props.sheet);
     height: 44px !important;
   }
   .module-dialog-body {
-    padding: 14px 16px !important;
+    padding: var(--workstel-space-3_5) var(--workstel-space-4) !important;
   }
   .module-dialog-actions {
-    padding: 10px 16px;
+    padding: var(--workstel-space-2_5) var(--workstel-space-4);
   }
   /* Slot buttons carry the parent's scope, so they are reached with :deep(). */
   .module-dialog-actions :deep(.v-btn) {

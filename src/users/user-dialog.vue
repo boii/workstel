@@ -431,29 +431,29 @@ async function confirmAction() {
 </template>
 <style scoped>
 .user-section + .user-section {
-  margin-top: 20px;
-  padding-top: 16px;
+  margin-top: var(--workstel-space-5);
+  padding-top: var(--workstel-space-4);
   border-top: 1px solid var(--workstel-border);
 }
 .user-section h3 {
   font-size: var(--workstel-font-md);
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-weight: var(--workstel-weight-semibold);
+  margin-bottom: var(--workstel-space-2);
 }
 .user-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--workstel-space-3);
 }
 .user-row-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
 }
 .user-row-text strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .user-row-text small,
 .user-note {
@@ -463,21 +463,21 @@ async function confirmAction() {
 .user-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-3);
 }
 .user-note {
-  margin-top: 8px;
+  margin-top: var(--workstel-space-2);
 }
 .user-departments {
   list-style: none;
   margin: 0;
   padding: 0;
   border: 1px solid var(--workstel-border);
-  border-radius: 6px;
+  border-radius: var(--workstel-radius-md);
 }
 .user-departments li {
-  padding: 10px 12px;
+  padding: var(--workstel-space-2_5) var(--workstel-space-3);
 }
 .user-departments li + li {
   border-top: 1px solid var(--workstel-border);
@@ -489,17 +489,17 @@ async function confirmAction() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--workstel-space-3);
   min-height: 40px;
 }
 .user-department-head strong {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
+  font-weight: var(--workstel-weight-semibold);
 }
 .user-department-head small {
   display: block;
   font-size: var(--workstel-font-xs);
-  font-weight: 400;
+  font-weight: var(--workstel-weight-regular);
   color: var(--workstel-text-secondary);
 }
 .user-department-head .v-switch {
@@ -507,24 +507,24 @@ async function confirmAction() {
 }
 .user-department-body {
   display: grid;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-2);
 }
 .user-vault {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0 12px;
+  gap: 0 var(--workstel-space-3);
 }
 .user-label {
   font-size: var(--workstel-font-sm);
-  font-weight: 600;
-  margin-right: 4px;
+  font-weight: var(--workstel-weight-semibold);
+  margin-right: var(--workstel-space-1);
 }
 .user-modules {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 8px;
+  gap: var(--workstel-space-2);
 }
 .user-departments :deep(.v-label) {
   font-size: var(--workstel-font-sm);
@@ -535,7 +535,7 @@ async function confirmAction() {
 .user-vault-list,
 .user-vault-result ul {
   list-style: none;
-  margin: 6px 0 8px;
+  margin: var(--workstel-space-1_5) 0 var(--workstel-space-2);
   padding: 0;
   font-size: var(--workstel-font-sm);
 }
@@ -547,13 +547,13 @@ async function confirmAction() {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-2);
 }
 .user-vault-result {
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 6px;
+  margin-top: var(--workstel-space-2_5);
+  padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-surface-muted);
   font-size: var(--workstel-font-sm);
 }
@@ -565,10 +565,10 @@ async function confirmAction() {
 }
 .user-confirm h2 {
   font-size: var(--workstel-font-lg);
-  font-weight: 500;
+  font-weight: var(--workstel-weight-medium);
 }
 .user-confirm p {
-  margin-top: 10px;
+  margin-top: var(--workstel-space-2_5);
   font-size: var(--workstel-font-sm);
   line-height: 1.6;
   color: var(--workstel-text-secondary);
@@ -578,8 +578,8 @@ async function confirmAction() {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
+  gap: var(--workstel-space-2);
+  margin-top: var(--workstel-space-5);
 }
 @media (max-width: 680px) {
   .user-actions .v-btn,

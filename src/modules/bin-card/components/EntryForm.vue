@@ -202,15 +202,15 @@ const unit = computed(() => props.item?.unit ?? '');
 .entry-balances {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 14px;
-  border-radius: 6px;
+  gap: var(--workstel-space-4);
+  padding: var(--workstel-space-3) var(--workstel-space-3_5);
+  border-radius: var(--workstel-radius-md);
   background: var(--workstel-surface-muted);
 }
 .entry-balances > div {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--workstel-space-0_5);
 }
 .entry-balances small {
   font-size: var(--workstel-font-xs);

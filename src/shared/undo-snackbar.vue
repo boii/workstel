@@ -26,6 +26,6 @@ const emit = defineEmits<{ close: [] }>();
 <style scoped>
 .undo-snackbar-action {
   min-height: 44px;
-  font-weight: 700;
+  font-weight: var(--workstel-weight-bold);
 }
 </style>
