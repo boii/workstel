@@ -7,7 +7,7 @@ export default {
   roomOne: 'kamar',
   tabRooms: 'Kamar',
   tabHistory: 'Riwayat',
-  manageRooms: 'Daftar kamar',
+  manageRooms: 'Kelola kamar',
   addRoom: 'Tambah kamar',
   editRoom: 'Ubah kamar',
   saveRoom: 'Simpan kamar',

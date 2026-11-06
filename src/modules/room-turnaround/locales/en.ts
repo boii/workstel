@@ -6,7 +6,7 @@ export default {
   roomOne: 'room',
   tabRooms: 'Rooms',
   tabHistory: 'History',
-  manageRooms: 'Room list',
+  manageRooms: 'Manage rooms',
   addRoom: 'Add room',
   editRoom: 'Edit room',
   saveRoom: 'Save room',

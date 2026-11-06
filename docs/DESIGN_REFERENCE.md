@@ -140,7 +140,7 @@ Approved by the user. It completes the first pass and covers every group that wa
 
 Approved by the user after a signed-in production review of all six modules at desktop and 390px. The page frame was already consistent: back link, title, count, toolbar order and row actions. These placement rules now apply to every module:
 
-- **Heading actions:** one filled primary action, placed last. On phones it becomes the floating action (`.module-primary-action`). Secondary heading actions (Sales Add account, Room Turnaround Room list) use the text variant. On phones they keep their natural width and label instead of stretching across the screen or collapsing to an icon. Vault now follows this rule: its add button floats on phones, and the Vault-only heading overrides (row layout, icon-only buttons, smaller title) are gone.
+- **Heading actions:** one filled primary action, placed last. On phones it becomes the floating action (`.module-primary-action`). Secondary heading actions (Sales Add account, Room Turnaround Manage rooms) use the text variant. On phones they keep their natural width and label instead of stretching across the screen or collapsing to an icon. Vault now follows this rule: its add button floats on phones, and the Vault-only heading overrides (row layout, icon-only buttons, smaller title) are gone.
 - **Row status:** status sits in the row's status column between the identity and the actions, with its supporting date or value. Sales CRM moved the deal stage from the start of the row into that column, above the follow-up date, as Bin Card and Vehicle Checklist already did. In lists narrower than 720px, the identity takes the first line, and status and actions share the second. Tabular modules (Vault, Room Turnaround) keep status in a table column.
 - **Filters:** every secondary filter belongs to the module's `FilterGroup`, so it folds into the Filters button on phones and counts in its badge. Bin Card's "Low stock only" checkbox is now a Stock select ("All stock levels" / "Low stock only"; Indonesian "Stok", "Semua tingkat stok", "Hanya stok menipis"). Reset filters clears it. The Bin Card toolbar uses the same 180px filter columns as Documents and Sales CRM.
 
@@ -257,3 +257,10 @@ Every icon-only button uses one style: `v-btn` with `icon` and `variant="text"`.
 - Icon buttons are square, so the overlay is a true circle: 40×40px by default and 36×36px for `size="small"`/`"x-small"` in-row icons (copy, reveal, row ⋮) on desktop, and at least 44×44px on phones. The global rule in `src/styles.css` overrides the 36px VBtn default height, which had made desktop icons 40×36 or 30×36 ovals.
 - Labelled header buttons that hide their label (Search below 1050px, Switch module on phones) become the same round 40px (44px on phones) icon button, in the header icon colour, instead of keeping 6px corners and the grey search colour.
 - Room Turnaround's grid/list view is two of these icon buttons with `aria-pressed`; the chosen view is the primary-coloured icon. The outlined `choice-group` toggle remains for labelled choices only.
+
+## Room Turnaround relayout — 7 November 2026
+
+- **One controls row:** the Rooms/History tabs, the tab's own toolbar (search and `FilterGroup` on Rooms, the day on History) and the grid/list icons share one row, so the room grid starts one row higher. In pages or split views narrower than 720px the tabs take their own line, with a bottom border, and search, Filters and the view icons share the next line.
+- **History day:** the date sits beside the tabs instead of on its own row.
+- **No page shortcuts:** Room Turnaround no longer registers `/` and `?` or opens its own shortcut list, like Vault.
+- **Heading menu label:** the room management menu (Add room, Import rooms, Show/Hide archived) is labelled "Manage rooms" ("Kelola kamar") instead of "Room list", which read like a view.

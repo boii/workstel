@@ -3,16 +3,11 @@ import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
-import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useUndoNotice } from '../../../core/use-optimistic-archive';
 import { runtime } from '../../../config/runtime';
-import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
-import { useShortcuts } from '../../../core/use-shortcuts';
-import { focusFieldInput } from '../../../core/focus-field';
 import { usePersistedRef } from '../../../core/use-persisted-ref';
-import type { FocusableField } from '../../../core/focus-field';
 import ImportRooms from '../components/ImportRooms.vue';
 import RoomForm from '../components/RoomForm.vue';
 import RoomTimer from '../components/RoomTimer.vue';
@@ -346,17 +341,6 @@ const typeTiles = computed(() =>
     .filter((row) => row.totals?.done),
 );
 
-const searchField = ref<FocusableField | null>(null);
-const shortcutsOpen = ref(false);
-useShortcuts(() => [
-  { key: '/', run: () => focusFieldInput(searchField.value) },
-  { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
-]);
-const shortcutRows = computed(() => [
-  { keys: '/', label: messages.value.search },
-  { keys: '?', label: t('shortcutList') },
-  { keys: 'Esc', label: t('shortcutClose') },
-]);
 const floorItems = computed(() => [
   { value: null, title: messages.value.allFloors },
   ...floors.value.map((value) => ({ value, title: value || messages.value.noFloor })),
@@ -468,7 +452,9 @@ const departmentItems = computed(() => [
             >
           </div>
         </div>
-        <div class="hk-tabs-row">
+        <!-- One row: tabs, then the tab's own search/filters or day, then the room view.
+             Narrow pages put the tabs on their own line above the rest. -->
+        <div class="hk-controls">
           <v-tabs
             v-model="tab"
             color="primary"
@@ -486,6 +472,50 @@ const departmentItems = computed(() => [
               >{{ messages.tabHistory }}</v-tab
             >
           </v-tabs>
+          <div
+            v-if="tab === 'rooms'"
+            class="hk-toolbar"
+          >
+            <v-text-field
+              v-model="search"
+              class="hk-search"
+              :placeholder="messages.search"
+              :aria-label="messages.search"
+              prepend-inner-icon="mdi-magnify"
+              single-line
+              clearable
+              maxlength="10"
+            />
+            <FilterGroup
+              :count="filterCount"
+              @reset="resetFilterGroup"
+            >
+              <v-select
+                v-if="floors.length > 1"
+                v-model="floor"
+                :items="floorItems"
+                :label="messages.floor"
+              />
+              <v-select
+                v-if="hotelScope.length > 1"
+                v-model="departmentId"
+                :items="departmentItems"
+                :label="messages.department"
+              />
+            </FilterGroup>
+          </div>
+          <div
+            v-else
+            class="hk-toolbar hk-toolbar--day"
+          >
+            <v-text-field
+              v-model="day"
+              type="date"
+              :label="messages.day"
+              :max="hotelToday()"
+              min="2000-01-01"
+            />
+          </div>
           <!-- Plain icon buttons: the chosen view is the primary-coloured icon, with no fill or frame. -->
           <div
             v-if="tab === 'rooms'"
@@ -508,51 +538,6 @@ const departmentItems = computed(() => [
               @click="view = option.value"
             />
           </div>
-        </div>
-        <div
-          v-if="tab === 'rooms'"
-          class="hk-toolbar"
-        >
-          <v-text-field
-            ref="searchField"
-            v-model="search"
-            class="hk-search"
-            :placeholder="messages.search"
-            :aria-label="messages.search"
-            prepend-inner-icon="mdi-magnify"
-            single-line
-            clearable
-            maxlength="10"
-          />
-          <FilterGroup
-            :count="filterCount"
-            @reset="resetFilterGroup"
-          >
-            <v-select
-              v-if="floors.length > 1"
-              v-model="floor"
-              :items="floorItems"
-              :label="messages.floor"
-            />
-            <v-select
-              v-if="hotelScope.length > 1"
-              v-model="departmentId"
-              :items="departmentItems"
-              :label="messages.department"
-            />
-          </FilterGroup>
-        </div>
-        <div
-          v-else
-          class="hk-toolbar"
-        >
-          <v-text-field
-            v-model="day"
-            type="date"
-            :label="messages.day"
-            :max="hotelToday()"
-            min="2000-01-01"
-          />
         </div>
       </template>
       <template #empty-action>
@@ -972,10 +957,6 @@ const departmentItems = computed(() => [
       v-model="importOpen"
       :save="importRows"
       @done="imported"
-    />
-    <KeyboardShortcuts
-      v-model="shortcutsOpen"
-      :rows="shortcutRows"
     />
     <UndoSnackbar
       :message="notice"

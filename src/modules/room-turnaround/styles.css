@@ -71,16 +71,29 @@
   display: flex;
   gap: var(--workstel-space-2);
 }
-.hk-tabs-row {
+/* Tabs, the tab's toolbar and the room view share one row. */
+.hk-controls {
   display: flex;
   align-items: center;
-  gap: var(--workstel-space-2);
-  margin-bottom: var(--workstel-space-3);
-  border-bottom: 1px solid var(--workstel-border);
+  gap: var(--workstel-space-3);
 }
 .hk-tabs {
-  flex: 1 1 auto;
+  flex: none;
+}
+.hk-controls > .hk-toolbar {
+  flex: 1;
   min-width: 0;
+}
+/* Narrow pages: tabs on their own line, then search, Filters and view (or the day). */
+@container (max-width: 720px) {
+  .hk-controls {
+    flex-wrap: wrap;
+    row-gap: var(--workstel-space-2);
+  }
+  .hk-tabs {
+    flex-basis: 100%;
+    border-bottom: 1px solid var(--workstel-border);
+  }
 }
 .hk-view {
   flex: none;
