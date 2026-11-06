@@ -155,10 +155,19 @@ p {
   text-transform: none;
   border-radius: var(--workstel-radius-md);
 }
+/* One icon button shape: square boxes, so the hover and focus overlay is a circle.
+   The VBtn default height (36px, main.ts) is inline and Vuetify's density rules load
+   later, hence !important. Phones raise
+   both sides to the touch target through min-width/min-height (responsive.css). */
 .v-btn--icon {
   border-radius: 50%;
-  width: var(--workstel-control-md);
-  height: var(--workstel-control-md);
+  width: var(--workstel-control-md) !important;
+  height: var(--workstel-control-md) !important;
+}
+/* Small in-row icons (copy, reveal, row menu) stay compact but square. */
+.v-btn--icon:is(.v-btn--size-small, .v-btn--size-x-small) {
+  width: var(--workstel-control-sm) !important;
+  height: var(--workstel-control-sm) !important;
 }
 .v-field__input {
   font-size: var(--workstel-font-md);
@@ -296,10 +305,14 @@ p {
   background: white;
 }
 @media (max-width: 1050px) {
+  /* Label hidden: the button becomes a round icon button like its neighbours. */
   .palette-button {
     width: var(--workstel-control-md);
     min-width: var(--workstel-control-md) !important;
-    padding: 0 var(--workstel-space-2) !important;
+    height: var(--workstel-control-md) !important;
+    padding: 0 !important;
+    border-radius: 50% !important; /* beats the VBtn rounded-sm default */
+    color: inherit !important; /* same icon colour as the other header icons */
   }
   .palette-button .v-btn__content {
     display: none;
@@ -673,10 +686,13 @@ footer small {
   .help-button {
     display: none;
   }
+  /* Label hidden: the button becomes a round icon button like its neighbours. */
   .switch-button {
     width: var(--workstel-control-md);
     min-width: var(--workstel-control-md) !important;
-    padding: 0 var(--workstel-space-2) !important;
+    height: var(--workstel-control-md) !important;
+    padding: 0 !important;
+    border-radius: 50% !important; /* beats the VBtn rounded-sm default */
   }
   .switch-button .v-btn__content,
   .switch-button .v-btn__append {

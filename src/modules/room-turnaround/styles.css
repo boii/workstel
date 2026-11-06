@@ -84,6 +84,9 @@
 }
 .hk-view {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--workstel-space-1);
 }
 /* Room list view */
 .hk-room-list {

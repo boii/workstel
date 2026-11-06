@@ -486,26 +486,28 @@ const departmentItems = computed(() => [
               >{{ messages.tabHistory }}</v-tab
             >
           </v-tabs>
-          <v-btn-toggle
+          <!-- Plain icon buttons: the chosen view is the primary-coloured icon, with no fill or frame. -->
+          <div
             v-if="tab === 'rooms'"
-            v-model="view"
-            mandatory
-            variant="outlined"
-            color="primary"
-            density="compact"
-            class="choice-group hk-view"
+            class="hk-view"
             role="group"
             :aria-label="messages.view"
-            ><v-btn
-              value="grid"
-              icon="mdi-view-grid-outline"
-              :aria-label="messages.viewGrid"
-              :title="messages.viewGrid" /><v-btn
-              value="list"
-              icon="mdi-format-list-bulleted"
-              :aria-label="messages.viewList"
-              :title="messages.viewList"
-          /></v-btn-toggle>
+          >
+            <v-btn
+              v-for="option in [
+                { value: 'grid', icon: 'mdi-view-grid-outline', label: messages.viewGrid },
+                { value: 'list', icon: 'mdi-format-list-bulleted', label: messages.viewList },
+              ] as const"
+              :key="option.value"
+              :icon="option.icon"
+              variant="text"
+              :color="view === option.value ? 'primary' : undefined"
+              :aria-label="option.label"
+              :aria-pressed="view === option.value"
+              :title="option.label"
+              @click="view = option.value"
+            />
+          </div>
         </div>
         <div
           v-if="tab === 'rooms'"

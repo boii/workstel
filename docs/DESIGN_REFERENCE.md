@@ -254,4 +254,6 @@ Every icon-only button uses one style: `v-btn` with `icon` and `variant="text"`.
 
 - The Filters button of `FilterGroup` (every module on phones) and the dashboard category filter on phones changed from tonal with a 6px square background to this style, so they match the header, row ⋮, copy/reveal, dialog close and Vault Audit log buttons.
 - Labelled buttons are not affected: row primary actions stay tonal (`.row-primary-action`) and the heading primary action stays filled.
-- Segmented toggles such as the Room Turnaround grid/list view keep the outlined `v-btn-toggle` look; they are a choice, not a standalone icon button.
+- Icon buttons are square, so the overlay is a true circle: 40×40px by default and 36×36px for `size="small"`/`"x-small"` in-row icons (copy, reveal, row ⋮) on desktop, and at least 44×44px on phones. The global rule in `src/styles.css` overrides the 36px VBtn default height, which had made desktop icons 40×36 or 30×36 ovals.
+- Labelled header buttons that hide their label (Search below 1050px, Switch module on phones) become the same round 40px (44px on phones) icon button, in the header icon colour, instead of keeping 6px corners and the grey search colour.
+- Room Turnaround's grid/list view is two of these icon buttons with `aria-pressed`; the chosen view is the primary-coloured icon. The outlined `choice-group` toggle remains for labelled choices only.
