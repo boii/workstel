@@ -378,3 +378,15 @@ Commit 30fbb68 (frontend only) replaces literal font weights, spacing, radii, sh
 ## Centralized style tokens, second pass — 6 November 2026
 
 Commit 7883155 (frontend only) moves the remaining colours, line heights, letter spacing, heights, icon sizes, stacking and dialog widths onto shared tokens (see DESIGN_REFERENCE.md). The user approved small colour and letter-spacing changes. It was fast-forwarded onto `main` and pushed. It was published through Wrangler Direct Upload to https://c456d05a.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed. The production entry stylesheet matched the local build and contains the new tokens. Demo mode was checked at desktop width and 390px before release. The signed-in production session was not checked.
+
+## Module layout consistency release — 6 November 2026
+
+Commit 159bbe3 (frontend only) applies one placement rule across modules (see DESIGN_REFERENCE.md):
+
+- Secondary heading actions use the text variant and the primary action floats on phones, including in Vault.
+- Sales CRM shows the deal stage in a status column.
+- Bin Card's Low stock filter is a Stock select inside the filter group.
+
+It was fast-forwarded onto `main` and pushed. It was published through Wrangler Direct Upload to https://d57a0395.workstel.pages.dev/ (production https://workstel.pages.dev/), because GitHub Actions is still blocked by billing. `npm run check`, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset matched the local build.
+
+In the signed-in production session at desktop width, every module's heading actions aligned at the same height, and Vault, Sales CRM and Room Turnaround secondary actions used the text variant. The Sales CRM stage rendered in the status column, and the Bin Card toolbar showed three 180px filters. At 390px, Vault and Sales CRM showed the floating add action, secondary actions kept their natural width, the Vault title used the shared 23px size, and nothing overflowed. Nothing was saved in production.
