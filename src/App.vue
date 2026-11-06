@@ -748,7 +748,7 @@ function logout() {
                     v-bind="menuProps"
                     class="mobile-category-filter"
                     icon="mdi-filter-variant"
-                    variant="tonal"
+                    variant="text"
                     :color="category !== 'All modules' ? 'primary' : undefined"
                     :aria-label="t('filterModules')"
                     :aria-pressed="category !== 'All modules'"

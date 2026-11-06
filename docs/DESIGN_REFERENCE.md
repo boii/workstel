@@ -247,3 +247,11 @@ Approved by the user after weighing "every dialog full height" against short dia
 - **Why not full height for everything:** confirmations ("Discard changes?", module switch-off, block/reset/transfer, Vault transfer) would be mostly empty space; a confirmation over a full-height form would cover it entirely; and frequent short dialogs such as the Room Turnaround timer would cover the whole screen each time.
 - **Footer:** on phones the footer's main action still spans the remaining width, in every dialog.
 - This replaces the bottom sheets described in "Mobile bottom sheets" and "Two phone dialog layouts" above.
+
+## One icon button style — 7 November 2026
+
+Every icon-only button uses one style: `v-btn` with `icon` and `variant="text"`. It has no background at rest, and the hover, focus and press overlay is the round Vuetify icon shape. Phones keep the 44px touch target. An active state (Filters with filters set, the dashboard category filter, a favourite) is shown by `color="primary"` on the icon, plus the count badge on Filters, never by a fill.
+
+- The Filters button of `FilterGroup` (every module on phones) and the dashboard category filter on phones changed from tonal with a 6px square background to this style, so they match the header, row ⋮, copy/reveal, dialog close and Vault Audit log buttons.
+- Labelled buttons are not affected: row primary actions stay tonal (`.row-primary-action`) and the heading primary action stays filled.
+- Segmented toggles such as the Room Turnaround grid/list view keep the outlined `v-btn-toggle` look; they are a choice, not a standalone icon button.

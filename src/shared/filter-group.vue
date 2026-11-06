@@ -41,7 +41,8 @@ const label = computed(() =>
       <v-btn
         v-bind="menu"
         class="filter-group-button"
-        variant="tonal"
+        icon
+        variant="text"
         :color="count ? 'primary' : undefined"
         :aria-label="label"
         :title="label"
