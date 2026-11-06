@@ -135,11 +135,11 @@ const groups = computed(() => {
 });
 const visibleCount = computed(() => groups.value.reduce((sum, [, list]) => sum + list.length, 0));
 
-// Grid or list of rooms; the choice is remembered in this browser.
+// List or grid of rooms; list by default, and a viewer's own choice is remembered in this browser.
 type RoomView = 'grid' | 'list';
 const view = usePersistedRef<RoomView>(
   'workstel.room-turnaround.view',
-  'grid',
+  'list',
   (value): value is RoomView => value === 'grid' || value === 'list',
 );
 // Running, paused, finished today (hotel day) or not yet today.
