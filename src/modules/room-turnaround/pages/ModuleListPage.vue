@@ -8,6 +8,7 @@ import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
 import { useShortcuts } from '../../../core/use-shortcuts';
 import { focusFieldInput } from '../../../core/focus-field';
+import { usePersistedRef } from '../../../core/use-persisted-ref';
 import type { FocusableField } from '../../../core/focus-field';
 import ImportRooms from '../components/ImportRooms.vue';
 import RoomForm from '../components/RoomForm.vue';
@@ -133,6 +134,64 @@ const groups = computed(() => {
   return [...map.entries()].sort((a, b) => byFloor(a[0], b[0]));
 });
 const visibleCount = computed(() => groups.value.reduce((sum, [, list]) => sum + list.length, 0));
+
+// Grid or list of rooms; the choice is remembered in this browser.
+type RoomView = 'grid' | 'list';
+const view = usePersistedRef<RoomView>(
+  'workstel.room-turnaround.view',
+  'grid',
+  (value): value is RoomView => value === 'grid' || value === 'list',
+);
+// Running, paused, finished today (hotel day) or not yet today.
+type RoomStatus = 'active' | 'paused' | 'done' | 'todo';
+const statusRank: Record<RoomStatus, number> = { active: 0, paused: 1, todo: 2, done: 3 };
+const today = computed(() => hotelToday(new Date(now.value)));
+function roomStatus(room: Room): RoomStatus {
+  if (room.openTask) return room.openTask.status === 'paused' ? 'paused' : 'active';
+  return room.lastDone && hotelToday(new Date(room.lastDone.finishedAt)) === today.value
+    ? 'done'
+    : 'todo';
+}
+const statusLabel = (value: RoomStatus) =>
+  value === 'active'
+    ? messages.value.inProgress
+    : value === 'paused'
+      ? messages.value.paused
+      : value === 'done'
+        ? messages.value.statusDone
+        : messages.value.statusTodo;
+const roomSeconds = (room: Room) =>
+  room.openTask
+    ? elapsedSeconds(room.openTask, now.value)
+    : (room.lastDone?.durationSeconds ?? null);
+// Default order puts running rooms first, longest timer on top, then paused, waiting, done.
+type SortKey = 'room' | 'status' | 'time';
+const sortKey = ref<SortKey>('status');
+const sortDesc = ref(false);
+const byNumber = (a: Room, b: Room) =>
+  a.number.localeCompare(b.number, undefined, { numeric: true });
+const listRooms = computed(() => {
+  const compare =
+    sortKey.value === 'room'
+      ? byNumber
+      : sortKey.value === 'status'
+        ? (a: Room, b: Room) =>
+            statusRank[roomStatus(a)] - statusRank[roomStatus(b)] ||
+            (roomSeconds(b) ?? 0) - (roomSeconds(a) ?? 0) ||
+            byNumber(a, b)
+        : (a: Room, b: Room) => (roomSeconds(a) ?? -1) - (roomSeconds(b) ?? -1) || byNumber(a, b);
+  const sorted = groups.value.flatMap(([, list]) => list).sort(compare);
+  return sortDesc.value ? sorted.reverse() : sorted;
+});
+function sortBy(key: SortKey) {
+  if (sortKey.value === key) sortDesc.value = !sortDesc.value;
+  else {
+    sortKey.value = key;
+    sortDesc.value = key === 'time';
+  }
+}
+const ariaSort = (key: SortKey) =>
+  sortKey.value === key ? (sortDesc.value ? 'descending' : 'ascending') : 'none';
 const myRoom = computed(() => rooms.value.find((r) => r.openTask?.mine) ?? null);
 const hasFilters = computed(() => !!search.value || floor.value !== null || !!departmentId.value);
 // Filters other than search; on phones they share one Filters button.
@@ -393,23 +452,45 @@ const departmentItems = computed(() => [
             >
           </div>
         </div>
-        <v-tabs
-          v-model="tab"
-          color="primary"
-          density="compact"
-          class="hk-tabs"
-        >
-          <v-tab
-            value="rooms"
-            prepend-icon="mdi-door"
-            >{{ messages.tabRooms }}</v-tab
+        <div class="hk-tabs-row">
+          <v-tabs
+            v-model="tab"
+            color="primary"
+            density="compact"
+            class="hk-tabs"
           >
-          <v-tab
-            value="history"
-            prepend-icon="mdi-history"
-            >{{ messages.tabHistory }}</v-tab
-          >
-        </v-tabs>
+            <v-tab
+              value="rooms"
+              prepend-icon="mdi-door"
+              >{{ messages.tabRooms }}</v-tab
+            >
+            <v-tab
+              value="history"
+              prepend-icon="mdi-history"
+              >{{ messages.tabHistory }}</v-tab
+            >
+          </v-tabs>
+          <v-btn-toggle
+            v-if="tab === 'rooms'"
+            v-model="view"
+            mandatory
+            variant="outlined"
+            color="primary"
+            density="compact"
+            class="choice-group hk-view"
+            role="group"
+            :aria-label="messages.view"
+            ><v-btn
+              value="grid"
+              icon="mdi-view-grid-outline"
+              :aria-label="messages.viewGrid"
+              :title="messages.viewGrid" /><v-btn
+              value="list"
+              icon="mdi-format-list-bulleted"
+              :aria-label="messages.viewList"
+              :title="messages.viewList"
+          /></v-btn-toggle>
+        </div>
         <div
           v-if="tab === 'rooms'"
           class="hk-toolbar"
@@ -473,7 +554,171 @@ const departmentItems = computed(() => [
         >
       </template>
 
-      <div v-if="tab === 'rooms'">
+      <section
+        v-if="tab === 'rooms' && view === 'list'"
+        class="hk-panel hk-room-list stack-table-container"
+      >
+        <table
+          class="hk-table stack-table"
+          style="--stack-columns: 2"
+        >
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                :aria-sort="ariaSort('room')"
+              >
+                <button
+                  type="button"
+                  class="hk-sort"
+                  @click="sortBy('room')"
+                >
+                  {{ messages.room
+                  }}<v-icon
+                    v-if="sortKey === 'room'"
+                    :icon="sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up'"
+                    size="14"
+                  />
+                </button>
+              </th>
+              <th
+                v-if="floors.length > 1"
+                scope="col"
+              >
+                {{ messages.floor }}
+              </th>
+              <th
+                scope="col"
+                :aria-sort="ariaSort('status')"
+              >
+                <button
+                  type="button"
+                  class="hk-sort"
+                  @click="sortBy('status')"
+                >
+                  {{ messages.status
+                  }}<v-icon
+                    v-if="sortKey === 'status'"
+                    :icon="sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up'"
+                    size="14"
+                  />
+                </button>
+              </th>
+              <th scope="col">{{ messages.kind }}</th>
+              <th scope="col">{{ messages.attendant }}</th>
+              <th
+                scope="col"
+                class="hk-number"
+                :aria-sort="ariaSort('time')"
+              >
+                <button
+                  type="button"
+                  class="hk-sort"
+                  @click="sortBy('time')"
+                >
+                  {{ messages.time
+                  }}<v-icon
+                    v-if="sortKey === 'time'"
+                    :icon="sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up'"
+                    size="14"
+                  />
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="room in listRooms"
+              :key="room.id"
+              class="hk-room-row"
+              :class="{ 'hk-card--archived': room.archived }"
+              @click="openRoom(room)"
+            >
+              <td class="stack-table-primary">
+                <button
+                  type="button"
+                  class="hk-room-link"
+                  :aria-label="messages.room + ' ' + room.number"
+                  @click.stop="openRoom(room)"
+                >
+                  {{ room.number }}
+                </button>
+              </td>
+              <td
+                v-if="floors.length > 1"
+                class="hk-col-floor"
+                :data-label="messages.floor"
+              >
+                {{ room.floor || messages.noFloor }}
+              </td>
+              <td
+                class="hk-col-status"
+                :data-label="messages.status"
+              >
+                <span
+                  class="hk-badge"
+                  :class="'hk-badge--' + roomStatus(room)"
+                  >{{ statusLabel(roomStatus(room)) }}</span
+                >
+              </td>
+              <td
+                class="hk-col-kind"
+                :data-label="messages.kind"
+              >
+                <template v-if="room.openTask ?? room.lastDone">
+                  <v-icon
+                    :icon="taskIcons[(room.openTask ?? room.lastDone)!.type]"
+                    size="15"
+                  />
+                  {{ messages[taskKeys[(room.openTask ?? room.lastDone)!.type]] }}
+                </template>
+                <span
+                  v-else
+                  class="hk-muted"
+                  >—</span
+                >
+              </td>
+              <td
+                class="hk-col-attendant"
+                :data-label="messages.attendant"
+                :title="room.openTask?.attendantEmail"
+              >
+                <template v-if="room.openTask">{{
+                  shortName(room.openTask.attendantEmail)
+                }}</template>
+                <span
+                  v-else
+                  class="hk-muted"
+                  >—</span
+                >
+              </td>
+              <td
+                class="hk-number hk-col-time"
+                :data-label="messages.time"
+              >
+                <strong
+                  v-if="room.openTask"
+                  class="hk-list-time"
+                  :class="{ 'hk-list-time--paused': room.openTask.status === 'paused' }"
+                  >{{ formatDuration(elapsedSeconds(room.openTask, now)) }}</strong
+                >
+                <template v-else-if="room.lastDone"
+                  >{{ formatDuration(room.lastDone.durationSeconds) }}
+                  <small class="hk-muted"
+                    >· {{ formatTime(room.lastDone.finishedAt) }}</small
+                  ></template
+                >
+                <span
+                  v-else
+                  class="hk-muted"
+                  >—</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <div v-else-if="tab === 'rooms'">
         <section
           v-for="[floorName, list] in groups"
           :key="floorName"
