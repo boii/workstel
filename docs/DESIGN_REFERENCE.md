@@ -235,3 +235,13 @@ Approved by the user: full-screen dialogs on phones should read as a popup in th
 - **Opening:** inset popups use the default dialog transition, like desktop dialogs. Bottom sheets still slide up from the bottom.
 - **Footer:** the footer's main action still spans the remaining width on phones, in sheets and inset popups.
 - This replaces the full-screen layout, safe-area padding and opening transition described in "Full-screen dialogs on phones" and "Two phone dialog layouts" above.
+
+## One phone dialog layout — 6 November 2026
+
+Approved by the user after weighing "every dialog full height" against short dialogs: every dialog on a phone is now a centred popup with a gap on every side. Bottom sheets are removed.
+
+- **Layout:** on phones (≤ 680px) every `ModuleDialog` is a centred popup (`dialog-popup` in `src/shared/dialog-phone.css`, renamed from `dialog-sheet.css`) with a 12px gap (`--workstel-space-3`) on every side; top and bottom grow to the safe-area insets where those are larger. Cards keep their normal rounded corners and open with the default dialog transition.
+- **Height:** short dialogs take their content height, up to the screen height minus the gaps. `fullscreen` dialogs (long forms and views that grow with records) also take `dialog-inset` and fill the height, as described in "Inset full-screen dialogs on phones". The command palette uses the full-height popup.
+- **Why not full height for everything:** confirmations ("Discard changes?", module switch-off, block/reset/transfer, Vault transfer) would be mostly empty space; a confirmation over a full-height form would cover it entirely; and frequent short dialogs such as the Room Turnaround timer would cover the whole screen each time.
+- **Footer:** on phones the footer's main action still spans the remaining width, in every dialog.
+- This replaces the bottom sheets described in "Mobile bottom sheets" and "Two phone dialog layouts" above.

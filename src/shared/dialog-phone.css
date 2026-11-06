@@ -1,0 +1,26 @@
+/* Phone layout for ModuleDialog and the command palette. Every dialog on a phone is a centred
+   popup with a gap on every side (`dialog-popup`): short dialogs take their content height,
+   while long forms, history lists and audit views (`fullscreen`) also take `dialog-inset` and
+   fill the height. The overlay content is teleported to the body, so these rules are global. */
+@media (max-width: 680px) {
+  /* The gap matches desktop popups on small screens; top and bottom also clear the notch and
+     the iPhone home indicator. */
+  .v-dialog.dialog-popup {
+    --dialog-popup-gap: var(--workstel-space-3);
+    --dialog-popup-top: max(var(--dialog-popup-gap), env(safe-area-inset-top));
+    --dialog-popup-bottom: max(var(--dialog-popup-gap), env(safe-area-inset-bottom));
+  }
+  .v-dialog.dialog-popup > .v-overlay__content {
+    width: calc(100% - 2 * var(--dialog-popup-gap)) !important;
+    max-width: calc(100% - 2 * var(--dialog-popup-gap)) !important;
+    max-height: calc(100dvh - var(--dialog-popup-top) - var(--dialog-popup-bottom)) !important;
+    margin: var(--dialog-popup-top) var(--dialog-popup-gap) var(--dialog-popup-bottom) !important;
+  }
+  .v-dialog.dialog-popup.dialog-inset > .v-overlay__content {
+    height: calc(100dvh - var(--dialog-popup-top) - var(--dialog-popup-bottom)) !important;
+  }
+  .v-dialog.dialog-popup.dialog-inset > .v-overlay__content > .v-card {
+    height: 100%;
+    max-height: 100%;
+  }
+}

@@ -12,9 +12,9 @@ const props = withDefaults(
     busy?: boolean;
     width?: number;
     /**
-     * On phones a dialog opens as a bottom sheet sized to its content. Long forms and views
-     * whose length grows with records (histories, ledgers, audit logs) open instead as an inset
-     * popup that fills the screen apart from a gap on every side.
+     * On phones every dialog is a centred popup with a gap on every side, sized to its content.
+     * Long forms and views whose length grows with records (histories, ledgers, audit logs)
+     * set this to fill the height as well.
      */
     fullscreen?: boolean;
     /** The form has unsaved input: closing it without saving asks first. */
@@ -46,7 +46,6 @@ const maxWidth = computed(
 );
 const phone = usePhone();
 const insetPhone = computed(() => phone.value && props.fullscreen);
-const bottomSheet = computed(() => phone.value && !props.fullscreen);
 const confirmDiscard = ref(false);
 // Close, Escape, an outside click, phone Back and the form's own Cancel all come here.
 function requestClose() {
@@ -67,8 +66,7 @@ watch(open, (value) => {
     :model-value="open"
     :max-width="maxWidth"
     :persistent="busy"
-    :class="{ 'dialog-sheet': bottomSheet, 'dialog-inset': insetPhone }"
-    :transition="bottomSheet ? 'dialog-bottom-transition' : undefined"
+    :class="{ 'dialog-popup': phone, 'dialog-inset': insetPhone }"
     scrollable
     :aria-label="title"
     @update:model-value="(value: boolean) => (value ? (open = true) : requestClose())"
@@ -199,9 +197,8 @@ watch(open, (value) => {
   flex-shrink: 0;
 }
 @media (max-width: 680px) {
-  /* On phones the footer's main action spans the remaining width, in sheets and inset popups. */
-  .dialog-sheet .module-dialog-actions :deep(.v-btn:last-child:not(.v-btn--variant-text)),
-  .dialog-inset .module-dialog-actions :deep(.v-btn:last-child:not(.v-btn--variant-text)) {
+  /* On phones the footer's main action spans the remaining width. */
+  .dialog-popup .module-dialog-actions :deep(.v-btn:last-child:not(.v-btn--variant-text)) {
     flex: 1 1 auto;
   }
   .module-dialog-heading {

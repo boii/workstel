@@ -144,7 +144,7 @@ function onKeydown(event: KeyboardEvent) {
     v-model="open"
     :max-width="fullscreen ? undefined : 600"
     class="palette-dialog"
-    :class="{ 'dialog-inset': fullscreen }"
+    :class="{ 'dialog-popup dialog-inset': fullscreen }"
     :aria-label="t('paletteTitle')"
     scrollable
   >
