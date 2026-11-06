@@ -488,3 +488,7 @@ Verification ran in a transaction that was rolled back, printing only counts and
 - The summary function returns `name` per attendant.
 
 The signed-in production pages were not opened, so the names were not seen on screen in production.
+
+## Cancel timer confirmation — 7 November 2026
+
+Commit 9efccd1 (frontend only) makes Room Turnaround's Cancel timer ask "Cancel this timer?" ("Batalkan timer ini?") first, naming the room, kind and elapsed time, with a red Cancel timer and Keep timing ("Lanjutkan timer"), because cancelling discards the timed work with no Undo. Start, Pause, Resume and Finish still act at once (see DESIGN_REFERENCE.md, "Room dialog"). It was pushed to GitHub `main`; GitHub Actions remains blocked by the account billing lock, so CI did not run. The bundle was published through Wrangler Direct Upload to https://97e25f52.workstel.pages.dev/ (production https://workstel.pages.dev/). Format, lint, tests, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset (`index-CTIy0ZXV.js`) matched the local build. Keep timing and Cancel timer were exercised in demo mode at desktop width. The confirmation was not checked at 390px or in production; nothing was opened or saved in production.
