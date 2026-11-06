@@ -30,6 +30,31 @@ current session and the cookie is cleared even if upstream revocation fails.
 Local development needs a same-origin HTTPS endpoint with a separately approved
 development origin; production origins must not be loosened for development.
 
+## Google sign-up domain restriction
+
+Migration `202611070002_signup_domains.sql` adds
+`workstel_private.before_user_created`, a Supabase Auth "Before User Created"
+hook. When it is enabled, a new account created through Google (or any provider
+other than email/password) is rejected with HTTP 403 unless its email domain
+exactly matches a row in `workstel_private.signup_domains`. Subdomains must be
+listed separately. With no rows, every external-provider sign-up is rejected.
+Developer-created email/password accounts are unaffected, and an existing staff
+account that signs in with Google under the same verified email is linked rather
+than created, so it is unaffected too. A permitted sign-up still has no hotel,
+department or module access until a developer assigns it.
+
+To activate it after applying the migration:
+
+1. Add the staff domain(s) in the Supabase SQL editor, in lowercase:
+   `insert into workstel_private.signup_domains(domain) values ('hotel.example');`
+2. In Supabase **Authentication → Hooks**, add a **Before User Created** hook of
+   type Postgres function, and select `workstel_private.before_user_created`.
+3. Confirm in a real browser that a staff-domain Google account can sign up and
+   that an outside Google account is refused.
+
+The hook and the Google provider are not enabled by this repository, and the
+steps above have not yet been verified against the production project.
+
 ## Cloudflare runtime configuration
 
 Before deploying, configure these **production Pages secret bindings**, separate
