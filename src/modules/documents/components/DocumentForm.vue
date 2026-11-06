@@ -79,6 +79,7 @@ const fieldError = (field: DocumentField) =>
 <template>
   <ModuleDialog
     v-model="open"
+    sheet
     :title="document ? messages.edit : messages.add"
     :busy="saving"
   >

@@ -76,6 +76,7 @@ const fieldError = (field: ItemField) =>
 <template>
   <ModuleDialog
     v-model="open"
+    sheet
     :title="item ? messages.edit : messages.add"
     :busy="saving"
   >

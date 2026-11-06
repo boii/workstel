@@ -54,6 +54,7 @@ const fieldError = (field: VehicleField) =>
 <template>
   <ModuleDialog
     v-model="open"
+    sheet
     :title="vehicle ? messages.edit : messages.add"
     :busy="saving"
   >

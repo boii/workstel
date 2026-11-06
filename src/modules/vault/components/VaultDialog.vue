@@ -10,11 +10,15 @@ const props = withDefaults(
     busy?: boolean;
     width?: number;
     fullscreenOnMobile?: boolean;
+    /** Short dialogs open on phones as a bottom sheet sized to their content. */
+    sheet?: boolean;
   }>(),
-  { subtitle: '', busy: false, width: 560, fullscreenOnMobile: false },
+  { subtitle: '', busy: false, width: 560, fullscreenOnMobile: false, sheet: false },
 );
 const { width: viewport } = useDisplay();
-const fullscreen = computed(() => viewport.value <= 680 && props.fullscreenOnMobile);
+const phone = computed(() => viewport.value <= 680);
+const fullscreen = computed(() => phone.value && props.fullscreenOnMobile && !props.sheet);
+const bottomSheet = computed(() => phone.value && props.sheet);
 const messages = useVaultMessages();
 </script>
 <template>
@@ -23,6 +27,8 @@ const messages = useVaultMessages();
     :max-width="width"
     :persistent="busy"
     :fullscreen="fullscreen"
+    :class="{ 'dialog-sheet': bottomSheet }"
+    :transition="bottomSheet ? 'dialog-bottom-transition' : undefined"
     scrollable
     :aria-label="title"
   >

@@ -31,6 +31,7 @@ function close() {
 <template>
   <ModuleDialog
     v-model="open"
+    sheet
     :title="t('tempPasswordTitle')"
     :subtitle="t('tempPasswordFor') + ' ' + email"
     :width="dialogWidth.md"

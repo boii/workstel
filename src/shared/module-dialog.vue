@@ -27,7 +27,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
     :max-width="props.width"
     :persistent="busy"
     :fullscreen="fullscreen"
-    :class="{ 'module-dialog-sheet': bottomSheet }"
+    :class="{ 'dialog-sheet': bottomSheet }"
     :transition="bottomSheet ? 'dialog-bottom-transition' : undefined"
     scrollable
     :aria-label="title"
@@ -105,11 +105,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   flex-shrink: 0;
 }
 @media (max-width: 680px) {
-  .module-dialog-sheet .module-dialog {
-    border-radius: var(--workstel-radius-lg) var(--workstel-radius-lg) 0 0 !important;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .module-dialog-sheet .module-dialog-actions :deep(.v-btn:last-child) {
+  .dialog-sheet .module-dialog-actions :deep(.v-btn:last-child) {
     flex: 1 1 auto;
   }
   .module-dialog-heading {
@@ -129,20 +125,6 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   /* Slot buttons carry the parent's scope, so they are reached with :deep(). */
   .module-dialog-actions :deep(.v-btn) {
     min-height: var(--workstel-touch-target);
-  }
-}
-</style>
-<style>
-/* The overlay content is teleported outside this component, so the sheet layout is global. */
-@media (max-width: 680px) {
-  .v-dialog.module-dialog-sheet {
-    align-items: flex-end;
-  }
-  .v-dialog.module-dialog-sheet > .v-overlay__content {
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: 92dvh !important;
-    margin: 0 !important;
   }
 }
 </style>

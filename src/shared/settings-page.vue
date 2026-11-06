@@ -213,6 +213,7 @@ function granted(assignment: StaffAssignment) {
     </v-card>
     <ModuleDialog
       v-model="passwordOpen"
+      sheet
       :title="t('changePasswordTitle')"
       :width="dialogWidth.md"
     >

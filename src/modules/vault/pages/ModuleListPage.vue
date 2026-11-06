@@ -204,7 +204,7 @@ function resetFilters() {
       v-model="detailOpen"
       :title="detail?.name ?? messages.details"
       :subtitle="messages.details"
-      fullscreen-on-mobile
+      sheet
     >
       <template v-if="detail">
         <p class="vault-detail-subtitle">

@@ -167,3 +167,13 @@ Still open from the review: Vehicle Checklist's 200px filter columns, and Vault'
 - **Accessible names:** Record and Inspect now carry an `aria-label` with the record name ("Record — <item>", "Inspect — <vehicle>"), like the other row actions.
 - **Negotiation chip:** the Sales CRM Negotiation stage no longer has its 1px info outline. It was added when negotiation moved from warning to info, to tell it apart from Proposal. It was the only outlined status chip in the app, and the chip's label already names the stage. Every status chip is now a tint with matching text and no border.
 - **Vault account details:** Account details now open as a centered popup, like Edit account and the detail dialogs in other modules (Sales account detail, Bin Card ledger, Vehicle history), instead of a right-hand drawer. The popup uses the standard 560px Vault width and fills the screen at 680px and below, as the drawer did. Its content, Reveal button, ⋮ menu and URL (`/vault/accounts/:accountId`) are unchanged. `VaultDialog` no longer has a `drawer` option, and the drawer CSS is gone.
+
+## Mobile bottom sheets — 6 November 2026
+
+On phones (680px and below), short dialogs now open as bottom sheets sized to their content, instead of filling the screen. Long forms and long lists stay full screen.
+
+- **Shared rule:** the sheet layout moved from `module-dialog.vue` to `src/shared/dialog-sheet.css` (class `dialog-sheet`): bottom-aligned, full width, at most 92dvh, rounded top corners and the safe-area inset. `ModuleDialog` and `VaultDialog` both have a `sheet` option that applies it.
+- **Now bottom sheets:** Vault account details; Bin Card add/edit item; Documents add/edit document; Vehicle Checklist add/edit vehicle; Room Turnaround import rooms; Sales CRM archive account confirmation; Settings change password; Users add user and the temporary password.
+- **Already bottom sheets:** stock movement, Log activity, add/edit room, the room timer and Profile.
+- **Still full screen, by design:** Sales CRM deal form (12 fields) and account form (8 fields), the Vehicle inspection form (checklist), the user access dialog, and the views whose length grows with records: Sales account detail, Bin Card ledger, Vehicle history and Vault Audit log.
+- Vault's other dialogs (edit account, password, sharing, confirmations) were content-sized centered popups on phones and are unchanged.

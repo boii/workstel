@@ -1,0 +1,18 @@
+/* Bottom sheets for short dialogs on phones (ModuleDialog `sheet`, VaultDialog `sheet`).
+   The overlay content is teleported to the body, so these rules are global. Long forms,
+   history lists and audit views stay full screen instead. */
+@media (max-width: 680px) {
+  .v-dialog.dialog-sheet {
+    align-items: flex-end;
+  }
+  .v-dialog.dialog-sheet > .v-overlay__content {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    margin: 0 !important;
+  }
+  .v-dialog.dialog-sheet > .v-overlay__content > .v-card {
+    border-radius: var(--workstel-radius-lg) var(--workstel-radius-lg) 0 0 !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
