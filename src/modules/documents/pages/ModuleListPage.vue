@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
@@ -319,31 +320,25 @@ const departmentItems = computed(() => [
               rel="noopener noreferrer"
               :aria-label="messages.open + ' — ' + document.title + ' (' + messages.openHint + ')'"
               >{{ messages.open }}</v-btn
-            ><v-menu
+            ><ActionMenu
               v-if="
                 can(document.departmentId, 'canWrite') || can(document.departmentId, 'canManage')
               "
-              ><template #activator="{ props: menu }"
-                ><v-btn
-                  v-bind="menu"
-                  icon="mdi-dots-vertical"
-                  variant="text"
-                  :aria-label="messages.moreActions + ' — ' + document.title" /></template
-              ><v-list density="compact"
-                ><v-list-item
-                  v-if="can(document.departmentId, 'canWrite')"
-                  prepend-icon="mdi-pencil-outline"
-                  :title="messages.edit"
-                  @click="openForm(document)" /><v-list-item
-                  v-if="can(document.departmentId, 'canManage')"
-                  :prepend-icon="
-                    document.status === 'active'
-                      ? 'mdi-archive-outline'
-                      : 'mdi-archive-arrow-up-outline'
-                  "
-                  :title="document.status === 'active' ? messages.archive : messages.restore"
-                  @click="toggleArchive(document)" /></v-list
-            ></v-menu>
+              :label="messages.moreActions + ' — ' + document.title"
+              ><v-list-item
+                v-if="can(document.departmentId, 'canWrite')"
+                prepend-icon="mdi-pencil-outline"
+                :title="messages.edit"
+                @click="openForm(document)" /><v-list-item
+                v-if="can(document.departmentId, 'canManage')"
+                :prepend-icon="
+                  document.status === 'active'
+                    ? 'mdi-archive-outline'
+                    : 'mdi-archive-arrow-up-outline'
+                "
+                :title="document.status === 'active' ? messages.archive : messages.restore"
+                @click="toggleArchive(document)"
+            /></ActionMenu>
           </template>
         </ListRow>
       </ul>

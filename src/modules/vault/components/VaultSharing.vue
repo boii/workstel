@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { dialogWidth } from '../../../shared/dialog-widths';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { vaultRpc } from '../live-api';
@@ -303,24 +302,14 @@ onUnmounted(() => {
       v-model="confirmTransfer"
       class="vault-dialog"
       :title="messages.transferConfirm"
-      :width="dialogWidth.md"
+      :confirm-label="messages.transfer"
+      :cancel-label="messages.cancel"
+      @confirm="transfer"
     >
       <p>
         <strong>{{ entry.name }}</strong> → <strong>{{ newOwner.trim() }}</strong>
       </p>
       <p class="vault-transfer-confirm-body">{{ messages.transferConfirmBody }}</p>
-      <template #actions>
-        <v-btn
-          variant="text"
-          @click="confirmTransfer = false"
-          >{{ messages.cancel }}</v-btn
-        ><v-btn
-          color="primary"
-          variant="flat"
-          @click="transfer"
-          >{{ messages.transfer }}</v-btn
-        >
-      </template>
     </ModuleDialog>
     <template #actions>
       <v-btn

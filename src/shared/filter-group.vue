@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Comment, computed, ref, useSlots } from 'vue';
 import type { VNode } from 'vue';
-import { useDisplay } from 'vuetify';
+import { usePhone } from './breakpoints';
 import { t } from '../i18n';
 
 /**
@@ -11,8 +11,7 @@ import { t } from '../i18n';
  */
 const props = defineProps<{ count: number }>();
 const emit = defineEmits<{ reset: [] }>();
-const { width } = useDisplay();
-const compact = computed(() => width.value <= 680);
+const compact = usePhone();
 const open = ref(false);
 const slots = useSlots();
 // Filters rendered with v-if (one floor, one department) leave only comment nodes;

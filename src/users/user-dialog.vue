@@ -383,8 +383,18 @@ async function confirmAction() {
               : 'userConfirmResetTitle',
         )
       "
-      :width="dialogWidth.md"
+      :confirm-label="
+        t(
+          confirm === 'block'
+            ? 'userBlock'
+            : confirm === 'vault'
+              ? 'userVaultTransfer'
+              : 'userResetPassword',
+        )
+      "
+      :destructive="confirm === 'block'"
       @update:model-value="confirm = null"
+      @confirm="confirmAction"
     >
       <p>
         <strong>{{ user?.email }}</strong> —
@@ -404,26 +414,6 @@ async function confirmAction() {
       >
         {{ t('userVaultBlockWarning') }} <strong>{{ owned.length }}</strong>
       </p>
-      <template #actions>
-        <v-btn
-          variant="text"
-          @click="confirm = null"
-          >{{ t('cancelAction') }}</v-btn
-        ><v-btn
-          :color="confirm === 'block' ? 'error' : 'primary'"
-          variant="flat"
-          @click="confirmAction"
-          >{{
-            t(
-              confirm === 'block'
-                ? 'userBlock'
-                : confirm === 'vault'
-                  ? 'userVaultTransfer'
-                  : 'userResetPassword',
-            )
-          }}</v-btn
-        >
-      </template>
     </ModuleDialog>
   </ModuleDialog>
 </template>

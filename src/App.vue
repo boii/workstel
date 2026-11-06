@@ -2,9 +2,10 @@
 import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
-import { useDisplay, useLocale } from 'vuetify';
-const { width } = useDisplay();
-const headerHeight = computed(() => (width.value <= 680 ? 112 : 64));
+import { useLocale } from 'vuetify';
+import { usePhone } from './shared/breakpoints';
+const phone = usePhone();
+const headerHeight = computed(() => (phone.value ? 112 : 64));
 const { current: materialLocale } = useLocale();
 watch(
   locale,
@@ -39,6 +40,7 @@ import { useShortcuts } from './core/use-shortcuts';
 import { focusFieldInput } from './core/focus-field';
 import type { FocusableField } from './core/focus-field';
 import KeyboardShortcuts from './shared/keyboard-shortcuts.vue';
+import ActionMenu from './shared/action-menu.vue';
 import ModuleDialog from './shared/module-dialog.vue';
 import { dialogWidth } from './shared/dialog-widths';
 import CommandPalette from './shared/command-palette.vue';
@@ -211,7 +213,7 @@ function onScroll() {
   scrollFrame = window.requestAnimationFrame(() => {
     scrollFrame = 0;
     const y = window.scrollY;
-    if (width.value > 680 || y < 112) headerCollapsed.value = false;
+    if (!phone.value || y < 112) headerCollapsed.value = false;
     else if (y > lastScrollY + 8) headerCollapsed.value = true;
     else if (y < lastScrollY - 8) headerCollapsed.value = false;
     if (Math.abs(y - lastScrollY) > 8 || y < 112) lastScrollY = y;
@@ -406,24 +408,21 @@ function logout() {
           <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span>
         </span>
         <div class="login-language">
-          <v-menu
+          <ActionMenu :min-width="180"
             ><template #activator="{ props }"
               ><v-btn
                 v-bind="props"
                 icon="mdi-translate"
                 variant="text"
                 :aria-label="t('language')" /></template
-            ><v-list
-              density="compact"
-              min-width="180"
-              ><v-list-item
-                title="English"
-                :active="locale === 'en'"
-                @click="locale = 'en'" /><v-list-item
-                title="Bahasa Indonesia"
-                :active="locale === 'id'"
-                @click="locale = 'id'" /></v-list
-          ></v-menu>
+            ><v-list-item
+              title="English"
+              :active="locale === 'en'"
+              @click="locale = 'en'" /><v-list-item
+              title="Bahasa Indonesia"
+              :active="locale === 'id'"
+              @click="locale = 'id'"
+          /></ActionMenu>
         </div>
       </header>
       <main class="login-main">
@@ -560,24 +559,21 @@ function logout() {
               @click="paletteOpen = true"
               ><span class="palette-button-label">{{ t('paletteButton') }}</span
               ><kbd class="palette-button-kbd">{{ paletteKeys }}</kbd></v-btn
-            ><v-menu
+            ><ActionMenu :min-width="180"
               ><template #activator="{ props }"
                 ><v-btn
                   v-bind="props"
                   icon="mdi-translate"
                   variant="text"
                   :aria-label="t('language')" /></template
-              ><v-list
-                density="compact"
-                min-width="180"
-                ><v-list-item
-                  title="English"
-                  :active="locale === 'en'"
-                  @click="locale = 'en'" /><v-list-item
-                  title="Bahasa Indonesia"
-                  :active="locale === 'id'"
-                  @click="locale = 'id'" /></v-list></v-menu
-            ><v-menu
+              ><v-list-item
+                title="English"
+                :active="locale === 'en'"
+                @click="locale = 'en'" /><v-list-item
+                title="Bahasa Indonesia"
+                :active="locale === 'id'"
+                @click="locale = 'id'" /></ActionMenu
+            ><ActionMenu :min-width="240"
               ><template #activator="{ props }"
                 ><v-btn
                   v-bind="props"
@@ -588,18 +584,15 @@ function logout() {
                   append-icon="mdi-chevron-down"
                   >{{ t('switchModule') }}</v-btn
                 ></template
-              ><v-list
-                density="compact"
-                min-width="240"
-                ><v-list-subheader>{{ t('hotelModules') }}</v-list-subheader
-                ><v-list-item
-                  v-for="m in listedModules"
-                  :key="m.id"
-                  :prepend-icon="m.icon || 'mdi-view-module-outline'"
-                  :title="translate(m.title)"
-                  :disabled="!canOpenModule(m)"
-                  :subtitle="!canOpenModule(m) ? t('comingSoon') : undefined"
-                  @click="openModule(m)" /></v-list></v-menu
+              ><v-list-subheader>{{ t('hotelModules') }}</v-list-subheader
+              ><v-list-item
+                v-for="m in listedModules"
+                :key="m.id"
+                :prepend-icon="m.icon || 'mdi-view-module-outline'"
+                :title="translate(m.title)"
+                :disabled="!canOpenModule(m)"
+                :subtitle="!canOpenModule(m) ? t('comingSoon') : undefined"
+                @click="openModule(m)" /></ActionMenu
             ><v-btn
               icon="mdi-help-circle-outline"
               variant="text"
@@ -621,7 +614,7 @@ function logout() {
                 <p>{{ t('noNotifications') }}</p>
                 <small>{{ t('sampleData') }}</small></v-card
               ></v-menu
-            ><v-menu
+            ><ActionMenu :min-width="230"
               ><template #activator="{ props }"
                 ><v-btn
                   v-bind="props"
@@ -634,35 +627,32 @@ function logout() {
                     ><span class="avatar-label">{{ initialsOf(accountName) }}</span></v-avatar
                   ></v-btn
                 ></template
-              ><v-list
-                density="compact"
-                min-width="230"
-                ><v-list-item
-                  :title="accountName"
-                  :subtitle="
-                    runtime.demo ? t('demoRole') : t('authorized')
-                  " /><v-divider /><v-list-item
-                  prepend-icon="mdi-cog-outline"
-                  :title="t('accountSettings')"
-                  @click="nav('Settings')" /><v-list-item
-                  v-if="isDeveloper"
-                  prepend-icon="mdi-account-multiple-outline"
-                  :title="t('usersTitle')"
-                  @click="nav('Users')" /><v-list-item
-                  v-if="isDeveloper"
-                  prepend-icon="mdi-history"
-                  :title="t('auditLogTitle')"
-                  @click="nav('Audit log')" /><v-list-item
-                  prepend-icon="mdi-help-circle-outline"
-                  :title="t('help')"
-                  @click="nav('Help')" /><v-list-item
-                  prepend-icon="mdi-keyboard-outline"
-                  :title="t('shortcuts')"
-                  @click="shortcutsOpen = true" /><v-list-item
-                  prepend-icon="mdi-logout"
-                  :title="t('signOut')"
-                  @click="logout" /></v-list
-            ></v-menu>
+              ><v-list-item
+                :title="accountName"
+                :subtitle="
+                  runtime.demo ? t('demoRole') : t('authorized')
+                " /><v-divider /><v-list-item
+                prepend-icon="mdi-cog-outline"
+                :title="t('accountSettings')"
+                @click="nav('Settings')" /><v-list-item
+                v-if="isDeveloper"
+                prepend-icon="mdi-account-multiple-outline"
+                :title="t('usersTitle')"
+                @click="nav('Users')" /><v-list-item
+                v-if="isDeveloper"
+                prepend-icon="mdi-history"
+                :title="t('auditLogTitle')"
+                @click="nav('Audit log')" /><v-list-item
+                prepend-icon="mdi-help-circle-outline"
+                :title="t('help')"
+                @click="nav('Help')" /><v-list-item
+                prepend-icon="mdi-keyboard-outline"
+                :title="t('shortcuts')"
+                @click="shortcutsOpen = true" /><v-list-item
+                prepend-icon="mdi-logout"
+                :title="t('signOut')"
+                @click="logout"
+            /></ActionMenu>
           </div></div></v-app-bar
       ><v-main :id="session ? 'workspace-main' : undefined"
         ><div class="workspace-content">
@@ -753,7 +743,7 @@ function logout() {
                   :value="c"
                   >{{ translate(c) }}</v-btn
                 ></v-btn-toggle
-              ><v-menu location="bottom end">
+              ><ActionMenu>
                 <template #activator="{ props: menuProps }">
                   <v-btn
                     v-bind="menuProps"
@@ -766,16 +756,15 @@ function logout() {
                     :title="t('filterModules')"
                   />
                 </template>
-                <v-list density="compact">
-                  <v-list-item
-                    v-for="c in ['All modules', 'Operations', 'Commercial', 'Administration']"
-                    :key="c"
-                    :active="category === c"
-                    @click="category = c"
-                    >{{ translate(c) }}</v-list-item
-                  >
-                </v-list>
-              </v-menu>
+
+                <v-list-item
+                  v-for="c in ['All modules', 'Operations', 'Commercial', 'Administration']"
+                  :key="c"
+                  :active="category === c"
+                  @click="category = c"
+                  >{{ translate(c) }}</v-list-item
+                >
+              </ActionMenu>
             </div>
             <div class="module-grid">
               <v-card

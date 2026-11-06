@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { dialogWidth } from './dialog-widths';
 import { onMounted, ref } from 'vue';
 import ModuleDialog from './module-dialog.vue';
 import { locale, t, translate } from '../i18n';
@@ -18,6 +17,13 @@ const loading = ref(true);
 const failure = ref('');
 const busy = ref<string | null>(null);
 const pendingOff = ref<ModuleManifest | null>(null);
+// Redraws the switches when a switch-off is cancelled: the server state did not change, so
+// Vue would otherwise leave the clicked switch showing off.
+const redraw = ref(0);
+function cancelOff() {
+  pendingOff.value = null;
+  redraw.value++;
+}
 const notice = ref('');
 
 async function load() {
@@ -119,6 +125,7 @@ function changedLabel(state: ModuleState) {
           >{{ t(stateOf(module.id)?.enabled ? 'moduleOn' : 'moduleOff') }}</span
         >
         <v-switch
+          :key="module.id + '-' + redraw"
           :model-value="stateOf(module.id)?.enabled ?? false"
           :disabled="!stateOf(module.id) || busy !== null"
           :loading="busy === module.id ? 'primary' : false"
@@ -134,25 +141,15 @@ function changedLabel(state: ModuleState) {
     <ModuleDialog
       :model-value="!!pendingOff"
       :title="t('moduleDisableTitle')"
-      :width="dialogWidth.md"
-      @update:model-value="pendingOff = null"
+      :confirm-label="t('moduleTurnOff')"
+      destructive
+      @update:model-value="cancelOff"
+      @confirm="pendingOff && apply(pendingOff, false)"
     >
       <p>
         <strong>{{ pendingOff ? translate(pendingOff.title) : '' }}</strong> —
         {{ t('moduleDisableBody') }}
       </p>
-      <template #actions>
-        <v-btn
-          variant="text"
-          @click="pendingOff = null"
-          >{{ t('cancelAction') }}</v-btn
-        ><v-btn
-          color="error"
-          variant="flat"
-          @click="pendingOff && apply(pendingOff, false)"
-          >{{ t('moduleTurnOff') }}</v-btn
-        >
-      </template>
     </ModuleDialog>
     <v-snackbar
       :model-value="!!notice"

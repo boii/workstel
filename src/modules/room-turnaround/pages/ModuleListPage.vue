@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
@@ -379,7 +380,7 @@ const departmentItems = computed(() => [
       @retry="load()"
     >
       <template #actions>
-        <v-menu v-if="canManageAny"
+        <ActionMenu v-if="canManageAny"
           ><template #activator="{ props: menu }"
             ><v-btn
               v-bind="menu"
@@ -388,18 +389,17 @@ const departmentItems = computed(() => [
               append-icon="mdi-chevron-down"
               >{{ messages.manageRooms }}</v-btn
             ></template
-          ><v-list density="compact"
-            ><v-list-item
-              prepend-icon="mdi-plus"
-              :title="messages.addRoom"
-              @click="openForm()" /><v-list-item
-              prepend-icon="mdi-table-arrow-down"
-              :title="messages.importRooms"
-              @click="importOpen = true" /><v-list-item
-              :prepend-icon="showArchived ? 'mdi-eye-off-outline' : 'mdi-archive-eye-outline'"
-              :title="showArchived ? messages.hideArchived : messages.showArchived"
-              @click="showArchived = !showArchived" /></v-list
-        ></v-menu>
+          ><v-list-item
+            prepend-icon="mdi-plus"
+            :title="messages.addRoom"
+            @click="openForm()" /><v-list-item
+            prepend-icon="mdi-table-arrow-down"
+            :title="messages.importRooms"
+            @click="importOpen = true" /><v-list-item
+            :prepend-icon="showArchived ? 'mdi-eye-off-outline' : 'mdi-archive-eye-outline'"
+            :title="showArchived ? messages.hideArchived : messages.showArchived"
+            @click="showArchived = !showArchived"
+        /></ActionMenu>
       </template>
       <template #toolbar>
         <v-alert

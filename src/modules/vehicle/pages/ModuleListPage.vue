@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
@@ -336,26 +337,21 @@ const departmentItems = computed(() => [
               :title="messages.history"
               @click="openHistory(vehicle)"
               >{{ messages.history }}</v-btn
-            ><v-menu v-if="can(vehicle.departmentId, 'canManage')"
-              ><template #activator="{ props: menu }"
-                ><v-btn
-                  v-bind="menu"
-                  icon="mdi-dots-vertical"
-                  variant="text"
-                  :aria-label="messages.moreActions + ' — ' + vehicle.name" /></template
-              ><v-list density="compact"
-                ><v-list-item
-                  prepend-icon="mdi-pencil-outline"
-                  :title="messages.edit"
-                  @click="openForm(vehicle)" /><v-list-item
-                  :prepend-icon="
-                    vehicle.status === 'active'
-                      ? 'mdi-archive-outline'
-                      : 'mdi-archive-arrow-up-outline'
-                  "
-                  :title="vehicle.status === 'active' ? messages.archive : messages.restore"
-                  @click="toggleArchive(vehicle)" /></v-list
-            ></v-menu>
+            ><ActionMenu
+              v-if="can(vehicle.departmentId, 'canManage')"
+              :label="messages.moreActions + ' — ' + vehicle.name"
+              ><v-list-item
+                prepend-icon="mdi-pencil-outline"
+                :title="messages.edit"
+                @click="openForm(vehicle)" /><v-list-item
+                :prepend-icon="
+                  vehicle.status === 'active'
+                    ? 'mdi-archive-outline'
+                    : 'mdi-archive-arrow-up-outline'
+                "
+                :title="vehicle.status === 'active' ? messages.archive : messages.restore"
+                @click="toggleArchive(vehicle)"
+            /></ActionMenu>
           </template>
         </ListRow>
       </ul>

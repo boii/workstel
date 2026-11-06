@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
@@ -269,20 +268,11 @@ function resetFilters() {
       v-model="archiveOpen"
       class="vault-dialog"
       :title="messages.archiveTitle"
-      :width="dialogWidth.sm"
+      :confirm-label="messages.archive"
+      :cancel-label="messages.cancel"
+      @confirm="archiveEntry"
     >
       <p class="vault-field-hint vault-panel-intro">{{ messages.archiveHint }}</p>
-      <template #actions
-        ><v-btn
-          variant="text"
-          @click="archiveId = null"
-          >{{ messages.cancel }}</v-btn
-        ><v-btn
-          color="primary"
-          @click="archiveEntry"
-          >{{ messages.archive }}</v-btn
-        ></template
-      >
     </ModuleDialog>
     <v-snackbar
       :model-value="!!feedback"

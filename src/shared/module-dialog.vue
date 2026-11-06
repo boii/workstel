@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useDisplay } from 'vuetify';
+import { usePhone } from './breakpoints';
 import { t } from '../i18n';
 import { dialogWidth } from './dialog-widths';
 
@@ -18,11 +18,32 @@ const props = withDefaults(
     fullscreen?: boolean;
     /** The form has unsaved input: closing it without saving asks first. */
     dirty?: boolean;
+    /**
+     * Makes this a confirmation: the footer gets Cancel and a filled button with this label,
+     * which emits `confirm`. Confirmations default to the `md` width.
+     */
+    confirmLabel?: string;
+    /** The confirmed action removes access or data, so its button is red. */
+    destructive?: boolean;
+    /** Replaces "Cancel" on a confirmation, as in "Keep editing". */
+    cancelLabel?: string;
   }>(),
-  { subtitle: '', busy: false, width: dialogWidth.lg, fullscreen: false, dirty: false },
+  {
+    subtitle: '',
+    busy: false,
+    width: undefined,
+    fullscreen: false,
+    dirty: false,
+    confirmLabel: '',
+    destructive: false,
+    cancelLabel: '',
+  },
 );
-const { width: viewport } = useDisplay();
-const phone = computed(() => viewport.value <= 680);
+const emit = defineEmits<{ confirm: [] }>();
+const maxWidth = computed(
+  () => props.width ?? (props.confirmLabel ? dialogWidth.md : dialogWidth.lg),
+);
+const phone = usePhone();
 const fullPhone = computed(() => phone.value && props.fullscreen);
 const bottomSheet = computed(() => phone.value && !props.fullscreen);
 const confirmDiscard = ref(false);
@@ -43,7 +64,7 @@ watch(open, (value) => {
 <template>
   <v-dialog
     :model-value="open"
-    :max-width="props.width"
+    :max-width="maxWidth"
     :persistent="busy"
     :fullscreen="fullPhone"
     :class="{ 'dialog-sheet': bottomSheet }"
@@ -85,34 +106,38 @@ watch(open, (value) => {
         ><slot
       /></v-card-text>
       <footer
-        v-if="$slots.actions"
+        v-if="$slots.actions || confirmLabel"
         class="module-dialog-actions"
       >
         <slot
           name="actions"
           :close="requestClose"
-        />
+        >
+          <v-btn
+            variant="text"
+            :disabled="busy"
+            @click="requestClose"
+            >{{ cancelLabel || t('cancelAction') }}</v-btn
+          ><v-btn
+            :color="destructive ? 'error' : 'primary'"
+            variant="flat"
+            :loading="busy"
+            @click="emit('confirm')"
+            >{{ confirmLabel }}</v-btn
+          >
+        </slot>
       </footer>
     </v-card>
     <ModuleDialog
       v-if="dirty || confirmDiscard"
       v-model="confirmDiscard"
       :title="t('discardTitle')"
-      :width="dialogWidth.md"
+      :confirm-label="t('discardAction')"
+      :cancel-label="t('keepEditing')"
+      destructive
+      @confirm="discard"
     >
       <p>{{ t('discardBody') }}</p>
-      <template #actions>
-        <v-btn
-          variant="text"
-          @click="confirmDiscard = false"
-          >{{ t('keepEditing') }}</v-btn
-        ><v-btn
-          color="error"
-          variant="flat"
-          @click="discard"
-          >{{ t('discardAction') }}</v-btn
-        >
-      </template>
     </ModuleDialog>
   </v-dialog>
 </template>

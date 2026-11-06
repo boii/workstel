@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { useDisplay } from 'vuetify';
+import { usePhone } from './breakpoints';
 import { t } from '../i18n';
 import { usePersistedRef } from '../core/use-persisted-ref';
 import { focusFieldInput } from '../core/focus-field';
@@ -21,8 +21,7 @@ export interface PaletteItem {
 
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{ items: PaletteItem[] }>();
-const { width } = useDisplay();
-const fullscreen = computed(() => width.value <= 680);
+const fullscreen = usePhone();
 const query = ref('');
 const active = ref(0);
 const listRef = ref<HTMLElement | null>(null);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { dialogWidth } from '../../../shared/dialog-widths';
+import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
@@ -762,23 +762,16 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
                 openActivityForm({ id: deal.accountId, name: deal.accountName }, [deal], deal.id)
               "
               >{{ messages.logActivity }}</v-btn
-            ><v-menu
-              ><template #activator="{ props: menu }"
-                ><v-btn
-                  v-bind="menu"
-                  icon="mdi-dots-vertical"
-                  variant="text"
-                  :aria-label="messages.moreActions + ' — ' + deal.title" /></template
-              ><v-list density="compact"
-                ><v-list-item
-                  v-if="can(deal.departmentId, 'canWrite')"
-                  prepend-icon="mdi-pencil-outline"
-                  :title="messages.editDeal"
-                  @click="openDealForm(deal)" /><v-list-item
-                  prepend-icon="mdi-domain"
-                  :title="messages.viewAccount"
-                  @click="openAccount(deal.accountId)" /></v-list
-            ></v-menu>
+            ><ActionMenu :label="messages.moreActions + ' — ' + deal.title"
+              ><v-list-item
+                v-if="can(deal.departmentId, 'canWrite')"
+                prepend-icon="mdi-pencil-outline"
+                :title="messages.editDeal"
+                @click="openDealForm(deal)" /><v-list-item
+                prepend-icon="mdi-domain"
+                :title="messages.viewAccount"
+                @click="openAccount(deal.accountId)"
+            /></ActionMenu>
           </template>
         </ListRow>
       </ul>
@@ -886,22 +879,11 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       :title="messages.archiveConfirmTitle"
       :subtitle="detailAccount?.name ?? ''"
       :busy="archiving"
-      :width="dialogWidth.md"
+      :confirm-label="messages.archive"
+      :cancel-label="messages.cancel"
+      @confirm="setArchived(true)"
     >
       <p>{{ messages.archiveConfirmText }}</p>
-      <template #actions>
-        <v-btn
-          variant="text"
-          :disabled="archiving"
-          @click="archiveConfirmOpen = false"
-          >{{ messages.cancel }}</v-btn
-        ><v-btn
-          color="primary"
-          :loading="archiving"
-          @click="setArchived(true)"
-          >{{ messages.archive }}</v-btn
-        >
-      </template>
     </ModuleDialog>
     <KeyboardShortcuts
       v-model="shortcutsOpen"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ActionMenu from '../../../shared/action-menu.vue';
 import type { VaultEntry } from '../types';
 import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultPasswordCell from './VaultPasswordCell.vue';
@@ -127,7 +128,7 @@ function website(value: string) {
         class="vault-compact-actions"
         role="cell"
       >
-        <v-menu location="bottom end"
+        <ActionMenu
           ><template #activator="{ props: menu }"
             ><v-btn
               v-bind="menu"
@@ -137,40 +138,38 @@ function website(value: string) {
               :disabled="busy"
               :aria-label="messages.actions + ' — ' + entry.name"
           /></template>
-          <v-list density="compact">
-            <v-list-item
-              prepend-icon="mdi-information-outline"
-              :title="messages.details"
-              @click="$emit('detail', entry)"
-            />
-            <v-list-item
-              v-if="canEdit(entry)"
-              prepend-icon="mdi-pencil-outline"
-              :title="messages.edit"
-              @click="$emit('edit', entry)"
-            />
-            <v-list-item
-              v-if="secretAvailable && entry.status === 'active' && canEdit(entry)"
-              prepend-icon="mdi-key-outline"
-              :title="messages.setPassword"
-              @click="$emit('password', entry)"
-            />
-            <v-list-item
-              v-if="sharingAvailable && entry.isOwner && canEdit(entry)"
-              prepend-icon="mdi-account-multiple-outline"
-              :title="messages.shareTitle"
-              @click="$emit('share', entry)"
-            />
-            <v-list-item
-              v-if="canArchive(entry)"
-              :prepend-icon="
-                entry.status === 'active' ? 'mdi-archive-outline' : 'mdi-archive-arrow-up-outline'
-              "
-              :title="entry.status === 'active' ? messages.archive : messages.restore"
-              @click="entry.status === 'active' ? $emit('archive', entry) : $emit('restore', entry)"
-            />
-          </v-list>
-        </v-menu>
+          <v-list-item
+            prepend-icon="mdi-information-outline"
+            :title="messages.details"
+            @click="$emit('detail', entry)"
+          />
+          <v-list-item
+            v-if="canEdit(entry)"
+            prepend-icon="mdi-pencil-outline"
+            :title="messages.edit"
+            @click="$emit('edit', entry)"
+          />
+          <v-list-item
+            v-if="secretAvailable && entry.status === 'active' && canEdit(entry)"
+            prepend-icon="mdi-key-outline"
+            :title="messages.setPassword"
+            @click="$emit('password', entry)"
+          />
+          <v-list-item
+            v-if="sharingAvailable && entry.isOwner && canEdit(entry)"
+            prepend-icon="mdi-account-multiple-outline"
+            :title="messages.shareTitle"
+            @click="$emit('share', entry)"
+          />
+          <v-list-item
+            v-if="canArchive(entry)"
+            :prepend-icon="
+              entry.status === 'active' ? 'mdi-archive-outline' : 'mdi-archive-arrow-up-outline'
+            "
+            :title="entry.status === 'active' ? messages.archive : messages.restore"
+            @click="entry.status === 'active' ? $emit('archive', entry) : $emit('restore', entry)"
+          />
+        </ActionMenu>
       </div>
     </div>
   </div>
