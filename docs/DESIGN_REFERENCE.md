@@ -91,7 +91,7 @@ Approved by the user as a correction pass within the baseline. Colours, Quicksan
 - Status colours are defined once in `:root` (`--workstel-success|warning|danger|info|neutral-bg/-text`), and modules map their states to them. Done, pass and won use success. Needs attention, low stock, due today and paused use warning. Out of stock, overdue, blocked and errors use danger. In-progress work and proposal or negotiation stages use info. Lead uses neutral. A lost deal now reads as closed (neutral) instead of an error, and negotiation no longer uses the warning colour.
 - Neutrals: `--workstel-surface-muted` and `--workstel-surface-subtle` replace eight near-identical greys. Ten secondary-text greys, several below 4.5:1 contrast, now use `--workstel-text-secondary`. Borders use `--workstel-border`. Category colours (Vault department marks, module icons), the measured search fill and disabled "Coming soon" text stay literal.
 - Type scale: `--workstel-font-xs|sm|md|lg|xl` = 11 / 13 / 15 / 20 / clamp(23–26) px replaces 20 ad-hoc sizes, including 7px and 10px text. Buttons use the small step and page headings use the display step. Exempt: the wordmark, timer figures, icon glyphs, status dots, 16px touch inputs (which prevent iOS zoom) and the temporary-password code.
-- Row actions: per-row primary actions (Record, Inspect, Open, Log activity) use the outlined primary style instead of tonal blocks. A page's filled button is then the only solid call to action. Outlined primary text uses `--workstel-primary-text` for contrast.
+- Row actions: per-row primary actions (Record, Inspect, Open, Log activity, View account) use `variant="tonal"` with the shared `.row-primary-action` class from src/shared/list-row.css: a 12% primary tint behind `--workstel-primary-text`, with no border. A page's filled button is still the only solid call to action. (They were outlined until the tonal row action change; see below.)
 - Money: summaries use compact currency and rows and details use the full amount. A deal value of 0 reads "No value yet" ("Belum ada nilai") instead of "IDR 0".
 - Navigation: production hides My tasks until it has a backend, instead of showing a disabled link. Demo mode still shows it.
 
@@ -160,3 +160,8 @@ Still open from the review: Vehicle Checklist's 200px filter columns, and Vault'
   - In lists narrower than 720px, the identity takes the first line, and status and actions share the second, with actions on the right. This includes Documents, whose Open button was left-aligned on phones.
   - The Sales accounts row action changed from tonal to outlined, like other row actions.
   - Vehicle's columns moved from 1.3fr / 1fr to the shared 1.4fr / 0.8fr. Bin and Vehicle rows gained 2px of vertical padding to match the others.
+
+## Tonal row actions — 6 November 2026
+
+- **Row primary action:** Record (Bin Card), Inspect (Vehicle Checklist), Open (Documents), Log activity and View account (Sales CRM) changed from outlined to tonal, with no border. They share `.row-primary-action` in `src/shared/list-row.css`: a 12% tint of the theme primary (#0096C7) behind `--workstel-primary-text` (#006f8f), about 4.9:1 contrast. Long lists read lighter, and the heading's filled button stays the only solid call to action.
+- **Accessible names:** Record and Inspect now carry an `aria-label` with the record name ("Record — <item>", "Inspect — <vehicle>"), like the other row actions.

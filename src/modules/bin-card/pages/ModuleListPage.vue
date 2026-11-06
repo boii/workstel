@@ -331,9 +331,10 @@ const departmentItems = computed(() => [
           <template #actions>
             <v-btn
               v-if="item.status === 'active' && can(item.departmentId, 'canWrite')"
-              color="primary"
-              variant="outlined"
+              variant="tonal"
+              class="row-primary-action"
               prepend-icon="mdi-swap-vertical"
+              :aria-label="messages.record + ' — ' + item.name"
               @click="openEntry(item)"
               >{{ messages.record }}</v-btn
             ><v-btn

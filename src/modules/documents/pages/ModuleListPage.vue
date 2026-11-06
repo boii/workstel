@@ -311,8 +311,8 @@ const departmentItems = computed(() => [
           <template #actions>
             <v-btn
               v-if="document.status === 'active'"
-              color="primary"
-              variant="outlined"
+              variant="tonal"
+              class="row-primary-action"
               append-icon="mdi-open-in-new"
               :href="document.url"
               target="_blank"

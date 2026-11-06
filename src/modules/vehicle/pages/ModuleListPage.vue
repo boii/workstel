@@ -322,9 +322,10 @@ const departmentItems = computed(() => [
           <template #actions>
             <v-btn
               v-if="vehicle.status === 'active' && can(vehicle.departmentId, 'canWrite')"
-              color="primary"
-              variant="outlined"
+              variant="tonal"
+              class="row-primary-action"
               prepend-icon="mdi-clipboard-check-outline"
+              :aria-label="messages.inspect + ' — ' + vehicle.name"
               @click="openInspection(vehicle)"
               >{{ messages.inspect }}</v-btn
             ><v-btn

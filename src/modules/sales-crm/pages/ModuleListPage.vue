@@ -754,8 +754,8 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           <template #actions>
             <v-btn
               v-if="can(deal.departmentId, 'canWrite')"
-              color="primary"
-              variant="outlined"
+              variant="tonal"
+              class="row-primary-action"
               prepend-icon="mdi-plus"
               :aria-label="messages.logActivity + ' — ' + deal.title"
               @click="
@@ -825,8 +825,8 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           </template>
           <template #actions>
             <v-btn
-              color="primary"
-              variant="outlined"
+              variant="tonal"
+              class="row-primary-action"
               append-icon="mdi-chevron-right"
               :aria-label="messages.viewAccount + ' — ' + account.name"
               @click="openAccount(account.id)"

@@ -73,6 +73,14 @@
   justify-content: flex-end;
   gap: var(--workstel-space-2);
 }
+/* The row's main action: a tonal button with a primary tint and the darker primary text,
+   which keeps the label readable on the tint. Use variant="tonal" without a color. */
+.row-primary-action.v-btn {
+  color: var(--workstel-primary-text);
+}
+.row-primary-action .v-btn__underlay {
+  background: rgb(var(--v-theme-primary));
+}
 /* Narrow lists: identity on the first line; status and actions share the second line, with
    actions on the right. Secondary row actions become 44px icon buttons that keep their
    accessible names and tooltips. */
