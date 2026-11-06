@@ -752,7 +752,7 @@ onMounted(() => {
       :title="detail?.name ?? messages.details"
       :subtitle="messages.details"
       :busy="busy"
-      drawer
+      fullscreen-on-mobile
     >
       <v-skeleton-loader
         v-if="detailLoading"

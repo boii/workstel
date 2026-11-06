@@ -5,8 +5,8 @@ The production implementation uses authenticated Supabase RPCs for account metad
 ## Layout contract
 
 Use `VaultDialog.vue` for Vault overlays. It owns the compact title, close control,
-scrollable body and fixed action footer. Standard forms use 560px maximum width;
-detail drawers and confirmations use 440px, and Audit log uses 960px. Detail and
+scrollable body and fixed action footer. Standard forms and account details use 560px maximum width;
+confirmations use 440px, and Audit log uses 960px. Detail and
 audit views fill the mobile screen. Short forms remain content-sized with a
 scrollable body when space is limited.
 

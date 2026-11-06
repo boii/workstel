@@ -9,24 +9,20 @@ const props = withDefaults(
     subtitle?: string;
     busy?: boolean;
     width?: number;
-    drawer?: boolean;
     fullscreenOnMobile?: boolean;
   }>(),
-  { subtitle: '', busy: false, width: 560, drawer: false, fullscreenOnMobile: false },
+  { subtitle: '', busy: false, width: 560, fullscreenOnMobile: false },
 );
 const { width: viewport } = useDisplay();
-const fullscreen = computed(
-  () => viewport.value <= 680 && (props.drawer || props.fullscreenOnMobile),
-);
+const fullscreen = computed(() => viewport.value <= 680 && props.fullscreenOnMobile);
 const messages = useVaultMessages();
 </script>
 <template>
   <v-dialog
     v-model="open"
-    :max-width="drawer ? 440 : width"
+    :max-width="width"
     :persistent="busy"
     :fullscreen="fullscreen"
-    :class="{ 'vault-panel-drawer': drawer }"
     scrollable
     :aria-label="title"
   >

@@ -3,21 +3,21 @@
 Implemented 2 November 2026 with Vue Router 4 and HTML5 history. The URL is the
 source of truth for navigation; no browser storage or global state store is used.
 
-| Page                 | URL                                         |
-| -------------------- | ------------------------------------------- |
-| Dashboard            | `/`                                         |
-| Favorites            | `/favorites`                                |
-| Settings             | `/settings`                                 |
-| Help                 | `/help`                                     |
-| Users (developers)   | `/admin/users`                              |
-| Demo tasks           | `/tasks`                                    |
-| Vault list           | `/vault`                                    |
-| Vault account drawer | `/vault/accounts/:accountId?hotel=:hotelId` |
-| Vehicle Checklist    | `/vehicle`                                  |
-| Bin Card             | `/bin-card`                                 |
-| Documents & SOPs     | `/documents`                                |
-| Sales CRM            | `/sales-crm`                                |
-| Room Turnaround      | `/room-turnaround`                          |
+| Page                  | URL                                         |
+| --------------------- | ------------------------------------------- |
+| Dashboard             | `/`                                         |
+| Favorites             | `/favorites`                                |
+| Settings              | `/settings`                                 |
+| Help                  | `/help`                                     |
+| Users (developers)    | `/admin/users`                              |
+| Demo tasks            | `/tasks`                                    |
+| Vault list            | `/vault`                                    |
+| Vault account details | `/vault/accounts/:accountId?hotel=:hotelId` |
+| Vehicle Checklist     | `/vehicle`                                  |
+| Bin Card              | `/bin-card`                                 |
+| Documents & SOPs      | `/documents`                                |
+| Sales CRM             | `/sales-crm`                                |
+| Room Turnaround       | `/room-turnaround`                          |
 
 `src/router.ts` installs browser history. `src/routes.ts` combines shell routes
 with module-owned routes. Shell content remains in App.vue to preserve the
@@ -49,8 +49,8 @@ The demo requires entering preview again after refresh and then restores its URL
 
 Live Vault keeps hotel, submitted search, status, department and access filters in
 query parameters. Invalid filter values fall back to allowed defaults. Filter
-updates replace history; opening an account pushes history. Back closes a drawer;
-Forward reopens it. Closing a drawer explicitly replaces its URL with the list.
+updates replace history; opening an account pushes history. Back closes the account
+details dialog; Forward reopens it. Closing it explicitly replaces its URL with the list.
 Load-more progress resets on refresh; it is not yet URL state. Other shell and
 demo filters remain local.
 
