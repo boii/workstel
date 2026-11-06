@@ -31,10 +31,13 @@ const messages = useRoomTurnaroundMessages();
 const busy = ref(false);
 const failure = ref('');
 const recent = ref<CleaningTask[]>([]);
+/** Cancel throws the timed work away and has no Undo, so it asks first. */
+const confirmCancel = ref(false);
 let controller: AbortController | null = null;
 
 watch(open, (value) => {
   if (!value) {
+    confirmCancel.value = false;
     controller?.abort();
     return;
   }
@@ -71,6 +74,11 @@ async function act(run: () => Promise<void>, close: boolean) {
 const begin = (type: TaskType) => act(() => props.start(props.room!, type), true);
 const control = (action: TaskAction) =>
   act(() => props.update(task.value!, action), action === 'finish' || action === 'cancel');
+function cancelConfirmed() {
+  confirmCancel.value = false;
+  // The timer may have been finished elsewhere while the question was open.
+  if (task.value) void control('cancel');
+}
 </script>
 <template>
   <ModuleDialog
@@ -150,7 +158,7 @@ const control = (action: TaskAction) =>
           class="hk-cancel"
           :disabled="busy"
           :title="messages.cancelHint"
-          @click="control('cancel')"
+          @click="confirmCancel = true"
           >{{ messages.cancelTask }}</v-btn
         >
       </section>
@@ -231,5 +239,22 @@ const control = (action: TaskAction) =>
         />
       </ActionMenu>
     </template>
+    <ModuleDialog
+      v-model="confirmCancel"
+      :title="messages.cancelConfirm"
+      :confirm-label="messages.cancelTask"
+      :cancel-label="messages.keepTiming"
+      destructive
+      :busy="busy"
+      @confirm="cancelConfirmed"
+    >
+      <p v-if="room && task">
+        <strong
+          >{{ messages.room }} {{ room.number }} · {{ messages[taskKeys[task.type]] }} ·
+          {{ formatDuration(elapsedSeconds(task, now)) }}</strong
+        >
+      </p>
+      <p class="hk-muted">{{ messages.cancelHint }}</p>
+    </ModuleDialog>
   </ModuleDialog>
 </template>

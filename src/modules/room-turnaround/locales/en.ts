@@ -46,6 +46,8 @@ export default {
   finish: 'Finish',
   cancelTask: 'Cancel timer',
   cancelHint: 'Use cancel for a timer started by mistake. It is not counted.',
+  cancelConfirm: 'Cancel this timer?',
+  keepTiming: 'Keep timing',
   last: 'Last',
   notCleaned: 'Not timed yet',
   roomHistory: 'Recent cleanings',

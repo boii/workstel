@@ -47,6 +47,8 @@ export default {
   finish: 'Selesai',
   cancelTask: 'Batalkan timer',
   cancelHint: 'Batalkan jika timer salah dimulai. Tidak ikut dihitung.',
+  cancelConfirm: 'Batalkan timer ini?',
+  keepTiming: 'Lanjutkan timer',
   last: 'Terakhir',
   notCleaned: 'Belum ada catatan',
   roomHistory: 'Pembersihan terakhir',
