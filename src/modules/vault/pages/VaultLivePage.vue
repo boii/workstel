@@ -551,6 +551,7 @@ onMounted(() => {
         <v-btn
           :disabled="!canWrite || busy"
           color="primary"
+          class="module-primary-action"
           prepend-icon="mdi-plus"
           :aria-label="messages.add"
           :title="messages.add"

@@ -16,6 +16,8 @@ export default {
   active: 'Active',
   archived: 'Archived',
   all: 'All items',
+  stockFilter: 'Stock',
+  allStock: 'All stock levels',
   lowOnly: 'Low stock only',
   code: 'Item code',
   codePlaceholder: 'Example: LIN-01',

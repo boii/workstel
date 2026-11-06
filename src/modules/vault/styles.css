@@ -14,21 +14,6 @@
 .vault-compact-page .module-page-toolbar {
   margin: var(--workstel-space-3_5) 0;
 }
-.vault-compact-page .module-page-title > p {
-  margin-top: var(--workstel-space-0_5);
-  font-size: var(--workstel-font-xs);
-}
-.vault-module.vault-compact-page .module-page-heading {
-  flex-direction: row;
-  align-items: center;
-}
-.vault-module.vault-compact-page .module-page-actions {
-  width: auto;
-  flex-shrink: 0;
-}
-.vault-compact-page .module-page-actions > .v-btn:first-child {
-  min-width: 0;
-}
 .vault-compact-page .vault-breadcrumb {
   margin-bottom: var(--workstel-space-2_5);
 }
@@ -293,31 +278,6 @@
   .vault-compact-filters > * {
     flex-basis: 140px;
     max-width: none;
-  }
-  .vault-compact-page .module-page-actions > .v-btn:first-child .v-btn__content {
-    font-size: 0;
-  }
-  .vault-compact-page .module-page-actions > .v-btn:last-child .v-btn__content {
-    font-size: 0;
-  }
-  .vault-compact-page .module-page-actions > .v-btn:last-child .v-btn__prepend {
-    margin-inline: 0;
-  }
-  .vault-compact-page .module-page-actions > .v-btn:last-child {
-    padding-inline: var(--workstel-space-3);
-    min-width: var(--workstel-touch-target);
-  }
-  .vault-compact-page .module-page-actions > .v-btn:first-child .v-btn__prepend {
-    margin-inline: 0;
-  }
-  .vault-compact-page .module-page-actions > .v-btn:first-child {
-    padding-inline: var(--workstel-space-3);
-  }
-  .vault-compact-page .module-page h1 {
-    font-size: var(--workstel-font-lg);
-  }
-  .vault-compact-page .module-page-actions {
-    gap: var(--workstel-space-1);
   }
 }
 .vault-notice {

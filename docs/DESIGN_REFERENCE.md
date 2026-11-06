@@ -135,3 +135,13 @@ Approved by the user. It completes the first pass and covers every group that wa
 - **Icons:** `--workstel-icon-xs|sm|md|lg|xl|2xl` = 14 / 16 / 18 / 22 / 28 / 32px, passed as `v-icon size="var(--workstel-icon-sm)"`. Sizes 11, 15, 20, 30 and 36px (one to four uses each) and avatar sizes stay literal.
 - **Dialog widths:** `dialogWidth` in `src/shared/dialog-widths.ts` holds every width (420–960px) at its current value. That includes the Vuetify default and the ModuleDialog default. Reducing the number of steps is a separate visual decision.
 - **Stacking:** `--workstel-z-floating` = 5 and `--workstel-z-skip-link` = 3000.
+
+## Module layout consistency — 6 November 2026
+
+Approved by the user after a signed-in production review of all six modules at desktop and 390px. The page frame was already consistent: back link, title, count, toolbar order and row actions. These placement rules now apply to every module:
+
+- **Heading actions:** one filled primary action, placed last. On phones it becomes the floating action (`.module-primary-action`). Secondary heading actions (Vault Audit log, Sales Add account, Room Turnaround Room list) use the text variant. On phones they keep their natural width and label instead of stretching across the screen or collapsing to an icon. Vault now follows this rule: its add button floats on phones, and the Vault-only heading overrides (row layout, icon-only buttons, smaller title) are gone.
+- **Row status:** status sits in the row's status column between the identity and the actions, with its supporting date or value. Sales CRM moved the deal stage from the start of the row into that column, above the follow-up date, as Bin Card and Vehicle Checklist already did. In lists narrower than 720px, the identity takes the first line, and status and actions share the second. Tabular modules (Vault, Room Turnaround) keep status in a table column.
+- **Filters:** every secondary filter belongs to the module's `FilterGroup`, so it folds into the Filters button on phones and counts in its badge. Bin Card's "Low stock only" checkbox is now a Stock select ("All stock levels" / "Low stock only"; Indonesian "Stok", "Semua tingkat stok", "Hanya stok menipis"). Reset filters clears it. The Bin Card toolbar uses the same 180px filter columns as Documents and Sales CRM.
+
+Still open from the review: three row padding variants, Documents' left-aligned Open button on phones, leading row icons in only some modules, Vehicle Checklist's 200px filter columns, and Vault's count wording. Vault also keeps its own toolbar (Access, Filters toggle, refresh, shortcuts).

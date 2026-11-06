@@ -537,8 +537,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       <template #actions>
         <template v-if="canWriteAny">
           <v-btn
-            variant="tonal"
-            color="primary"
+            variant="text"
             prepend-icon="mdi-domain-plus"
             @click="openAccountForm()"
             >{{ messages.addAccount }}</v-btn
@@ -702,11 +701,6 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           class="sales-row"
         >
           <div class="sales-identity">
-            <span
-              class="sales-stage"
-              :class="'sales-stage--' + deal.stage"
-              >{{ messages[stageKeys[deal.stage]] }}</span
-            >
             <div>
               <strong>{{ deal.title }}</strong>
               <button
@@ -735,8 +729,13 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
               >
             </div>
           </div>
-          <div class="sales-actions">
+          <!-- Status column, as in Bin Card and Vehicle Checklist: stage, then the follow-up. -->
+          <div class="sales-state">
             <span
+              class="sales-stage"
+              :class="'sales-stage--' + deal.stage"
+              >{{ messages[stageKeys[deal.stage]] }}</span
+            ><span
               v-if="isOpenStage(deal) && deal.nextFollowUp"
               class="sales-follow-up"
               :class="'sales-follow-up--' + followUpState(deal.nextFollowUp, today)"
@@ -753,7 +752,10 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
               v-else-if="deal.closedAt"
               class="sales-follow-up"
               >{{ messages.closedOn }} {{ formatDay(hotelToday(new Date(deal.closedAt))) }}</span
-            ><v-btn
+            >
+          </div>
+          <div class="sales-actions">
+            <v-btn
               v-if="can(deal.departmentId, 'canWrite')"
               color="primary"
               variant="outlined"

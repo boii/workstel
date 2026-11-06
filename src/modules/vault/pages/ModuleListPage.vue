@@ -131,6 +131,7 @@ function resetFilters() {
       <template #actions
         ><v-btn
           color="primary"
+          class="module-primary-action"
           prepend-icon="mdi-plus"
           :aria-label="messages.add"
           :title="messages.add"

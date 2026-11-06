@@ -113,11 +113,13 @@ const hasFilters = computed(
 );
 // Filters other than search; on phones they share one Filters button.
 const filterCount = computed(
-  () => (departmentId.value ? 1 : 0) + (status.value !== 'active' ? 1 : 0),
+  () =>
+    (departmentId.value ? 1 : 0) + (status.value !== 'active' ? 1 : 0) + (lowOnly.value ? 1 : 0),
 );
 function resetFilterGroup() {
   departmentId.value = null;
   status.value = 'active';
+  lowOnly.value = false;
 }
 function resetFilters() {
   search.value = '';
@@ -188,6 +190,10 @@ const shortcutRows = computed(() => [
   ...(manageableDepartments.value.length ? [{ keys: 'N', label: messages.value.add }] : []),
   { keys: '?', label: t('shortcutList') },
   { keys: 'Esc', label: t('shortcutClose') },
+]);
+const stockItems = computed(() => [
+  { value: false, title: messages.value.allStock },
+  { value: true, title: messages.value.lowOnly },
 ]);
 const statusItems = computed(() => [
   { value: 'active', title: messages.value.active },
@@ -276,16 +282,13 @@ const departmentItems = computed(() => [
               :items="statusItems"
               :label="messages.status"
             />
+            <v-select
+              v-model="lowOnly"
+              :items="stockItems"
+              :label="messages.stockFilter"
+            />
           </FilterGroup>
         </div>
-        <v-checkbox
-          v-model="lowOnly"
-          :label="messages.lowOnly"
-          density="compact"
-          color="primary"
-          hide-details
-          class="bin-low-filter"
-        />
       </template>
       <template #empty-action>
         <v-btn

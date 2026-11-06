@@ -16,20 +16,14 @@
 }
 .bin-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 200px));
+  grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 180px));
   gap: var(--workstel-space-2);
 }
 .bin-toolbar > * {
   min-width: 0;
 }
-.bin-toolbar:not(:has(> :nth-child(3))) {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 200px);
-}
-.bin-low-filter {
-  margin-top: var(--workstel-space-1);
-}
-.bin-low-filter .v-label {
-  font-size: var(--workstel-font-sm);
+.bin-toolbar:not(:has(> :nth-child(4))) {
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 180px));
 }
 .bin-list {
   list-style: none;
@@ -112,7 +106,7 @@
 }
 @media (max-width: 760px) {
   .bin-toolbar,
-  .bin-toolbar:not(:has(> :nth-child(3))) {
+  .bin-toolbar:not(:has(> :nth-child(4))) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .bin-search {
@@ -139,8 +133,5 @@
   .bin-actions .v-btn--icon {
     width: var(--workstel-touch-target);
     margin-left: auto;
-  }
-  .bin-low-filter .v-selection-control {
-    min-height: var(--workstel-touch-target);
   }
 }

@@ -17,6 +17,8 @@ export default {
   active: 'Aktif',
   archived: 'Diarsipkan',
   all: 'Semua barang',
+  stockFilter: 'Stok',
+  allStock: 'Semua tingkat stok',
   lowOnly: 'Hanya stok menipis',
   code: 'Kode barang',
   codePlaceholder: 'Contoh: LIN-01',

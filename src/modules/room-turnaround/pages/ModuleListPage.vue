@@ -383,8 +383,7 @@ const departmentItems = computed(() => [
           ><template #activator="{ props: menu }"
             ><v-btn
               v-bind="menu"
-              variant="tonal"
-              color="primary"
+              variant="text"
               prepend-icon="mdi-door"
               append-icon="mdi-chevron-down"
               >{{ messages.manageRooms }}</v-btn
