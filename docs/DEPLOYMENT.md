@@ -471,3 +471,20 @@ Commit 7a087e1 (frontend only) puts the Room Turnaround tabs, the tab's toolbar 
 ## Room dialog release — 7 November 2026
 
 Commit e55fe24 (frontend only) simplifies the Room Turnaround room dialog (see DESIGN_REFERENCE.md, "Room dialog"): the three task choices share one tonal style, the "Start the timer" heading is removed, the running timer line reads "Started 00:22 · siti", Recent cleanings appears only when the room has a finished cleaning, and Edit/Archive room move to a "Room actions" menu beside Close through a new `ModuleDialog` `#header-actions` slot, so the dialog has no footer. It was pushed to GitHub `main`; GitHub Actions remains blocked by the account billing lock, so CI did not run. The bundle was published through Wrangler Direct Upload to https://fbf3c5cf.workstel.pages.dev/ (production https://workstel.pages.dev/). Format, lint, tests, `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset (`index-Ec3Y7B8n.js`) matched the local build. A new room, a room with history and a running timer were checked in demo mode at 1280px and 390px. A paused timer, the dialog without manage rights and other `ModuleDialog` dialogs were not opened; nothing was opened or saved in production.
+
+## Room Turnaround attendant names — 7 November 2026
+
+Commit 844c9a7 shows Room Turnaround attendants by their profile display name, under the contract approved by the user and recorded in MODULE_STANDARD.md (Module isolation). Migration `202611070001_room_turnaround_attendant_names.sql` adds the server-only `workstel_private.staff_display_name(user)`, `attendant_name` in task rows and `name` in the daily per-attendant totals, which now group by person. Only the display name leaves the profile; without one, the part of the email before @ is used. The frontend falls back to the email name on servers without the migration, and the Settings → Profile hint says the name is shown to colleagues in Room Turnaround.
+
+The frontend was published through Wrangler Direct Upload to https://9ad989b3.workstel.pages.dev/ (production https://workstel.pages.dev/); GitHub Actions remains blocked by the account billing lock, so CI did not run. Format, lint, tests (including the new server and parser tests), `npm run build:production` and `scripts/verify-pages-deployment.mjs` passed, and the production entry asset (`index-BwisSNqx.js`) matched the local build.
+
+The migration was applied on 192.168.2.12 (container `workstel-db`) over SSH as root, after the restricted local backup `/opt/workstel/backups/pre-attendant-names-20261106T180926Z.dump` (mode 0600, 1,028 archive entries) was created and its archive listing checked. This is not an off-server backup or a restore drill. Before it, the server had every migration through `202611050002` and two profile rows. The migration ran in one transaction, recorded its version and reloaded the PostgREST schema.
+
+Verification ran in a transaction that was rolled back, printing only counts and flags:
+
+- Version `202611070001` is recorded. Neither `anon` nor `authenticated` can execute `staff_display_name`; `authenticated` can still execute `room_turnaround_summary` and `anon` cannot.
+- All 24 existing tasks carry a non-empty `attendant_name`; all 24 attendants have a profile display name.
+- No job title appears in a task row. One 3-digit extension matched only as a substring of a `finished_at` timestamp, not as a field.
+- The summary function returns `name` per attendant.
+
+The signed-in production pages were not opened, so the names were not seen on screen in production.
