@@ -28,7 +28,7 @@ const messages = useVaultMessages();
     :persistent="busy"
     :fullscreen="fullscreen"
     :class="{ 'dialog-sheet': bottomSheet }"
-    :transition="bottomSheet ? 'dialog-bottom-transition' : undefined"
+    :transition="bottomSheet || fullscreen ? 'dialog-bottom-transition' : undefined"
     scrollable
     :aria-label="title"
   >

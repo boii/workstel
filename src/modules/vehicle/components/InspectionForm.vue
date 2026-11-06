@@ -25,6 +25,10 @@ const odometer = ref('');
 const fuelLevel = ref<FuelLevel>('full');
 const items = ref<Partial<Record<ChecklistItem, ItemState>>>({});
 const notes = ref('');
+// What the form held when it opened, so closing with unsaved input asks first.
+const snapshot = () => JSON.stringify([odometer.value, fuelLevel.value, items.value, notes.value]);
+const opened = ref('');
+const dirty = computed(() => snapshot() !== opened.value);
 const errors = ref<Partial<Record<InspectionField, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
@@ -39,6 +43,7 @@ watch(open, (value) => {
   errors.value = {};
   failure.value = '';
   idempotencyKey = crypto.randomUUID();
+  opened.value = snapshot();
 });
 const issueMarked = computed(() => hasIssue(items.value));
 function markAllOk() {
@@ -89,6 +94,7 @@ const fieldError = (field: InspectionField) => {
     :title="messages.inspectionTitle"
     :subtitle="vehicle ? vehicle.name + ' · ' + vehicle.plateNumber : ''"
     :busy="saving"
+    :dirty="dirty"
     :width="dialogWidth.xl"
   >
     <v-form
@@ -216,11 +222,11 @@ const fieldError = (field: InspectionField) => {
         />
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

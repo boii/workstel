@@ -633,6 +633,10 @@
   .vault-panel-actions > .v-btn--icon {
     min-width: var(--workstel-touch-target);
   }
+  /* Full-screen footers give the main action the remaining width, like ModuleDialog. */
+  .v-dialog--fullscreen .vault-panel-actions > .v-btn:last-child:not(.v-btn--variant-text) {
+    flex: 1 1 auto;
+  }
   .vault-panel .v-field__input {
     min-height: var(--workstel-touch-target);
   }

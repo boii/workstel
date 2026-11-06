@@ -26,6 +26,9 @@ const blank = (): AccountInput => ({
   departmentId: props.departments[0]?.id ?? '',
 });
 const draft = ref<AccountInput>(blank());
+// What the form held when it opened, so closing with unsaved input asks first.
+const opened = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== opened.value);
 const errors = ref<Partial<Record<keyof AccountInput, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
@@ -43,6 +46,7 @@ watch(open, (value) => {
         departmentId: account.departmentId,
       }
     : blank();
+  opened.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -76,6 +80,7 @@ const fieldError = (field: keyof AccountInput) =>
     v-model="open"
     :title="account ? messages.editAccount : messages.addAccount"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="sales-account-form"
@@ -201,11 +206,11 @@ const fieldError = (field: keyof AccountInput) =>
         />
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { t } from '../i18n';
 import { dialogWidth } from './dialog-widths';
@@ -13,24 +13,41 @@ const props = withDefaults(
     width?: number;
     /** Short forms open on phones as a bottom sheet sized to their content. */
     sheet?: boolean;
+    /** The form has unsaved input: closing it without saving asks first. */
+    dirty?: boolean;
   }>(),
-  { subtitle: '', busy: false, width: dialogWidth.lg, sheet: false },
+  { subtitle: '', busy: false, width: dialogWidth.lg, sheet: false, dirty: false },
 );
 const { width: viewport } = useDisplay();
 const phone = computed(() => viewport.value <= 680);
 const fullscreen = computed(() => phone.value && !props.sheet);
 const bottomSheet = computed(() => phone.value && props.sheet);
+const confirmDiscard = ref(false);
+// Close, Escape, an outside click, phone Back and the form's own Cancel all come here.
+function requestClose() {
+  if (props.busy) return;
+  if (props.dirty) confirmDiscard.value = true;
+  else open.value = false;
+}
+function discard() {
+  confirmDiscard.value = false;
+  open.value = false;
+}
+watch(open, (value) => {
+  if (!value) confirmDiscard.value = false;
+});
 </script>
 <template>
   <v-dialog
-    v-model="open"
+    :model-value="open"
     :max-width="props.width"
     :persistent="busy"
     :fullscreen="fullscreen"
     :class="{ 'dialog-sheet': bottomSheet }"
-    :transition="bottomSheet ? 'dialog-bottom-transition' : undefined"
+    :transition="phone ? 'dialog-bottom-transition' : undefined"
     scrollable
     :aria-label="title"
+    @update:model-value="(value: boolean) => (value ? (open = true) : requestClose())"
   >
     <v-card class="module-dialog">
       <header class="module-dialog-heading">
@@ -43,7 +60,7 @@ const bottomSheet = computed(() => phone.value && props.sheet);
           variant="text"
           :aria-label="t('close')"
           :disabled="busy"
-          @click="open = false"
+          @click="requestClose"
         />
       </header>
       <v-card-text class="module-dialog-body"><slot /></v-card-text>
@@ -51,9 +68,33 @@ const bottomSheet = computed(() => phone.value && props.sheet);
         v-if="$slots.actions"
         class="module-dialog-actions"
       >
-        <slot name="actions" />
+        <slot
+          name="actions"
+          :close="requestClose"
+        />
       </footer>
     </v-card>
+    <ModuleDialog
+      v-if="dirty || confirmDiscard"
+      v-model="confirmDiscard"
+      sheet
+      :title="t('discardTitle')"
+      :width="dialogWidth.md"
+    >
+      <p>{{ t('discardBody') }}</p>
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="confirmDiscard = false"
+          >{{ t('keepEditing') }}</v-btn
+        ><v-btn
+          color="error"
+          variant="flat"
+          @click="discard"
+          >{{ t('discardAction') }}</v-btn
+        >
+      </template>
+    </ModuleDialog>
   </v-dialog>
 </template>
 <style scoped>
@@ -105,7 +146,9 @@ const bottomSheet = computed(() => phone.value && props.sheet);
   flex-shrink: 0;
 }
 @media (max-width: 680px) {
-  .dialog-sheet .module-dialog-actions :deep(.v-btn:last-child) {
+  /* On phones the footer's main action spans the remaining width, in sheets and full screen. */
+  .dialog-sheet .module-dialog-actions :deep(.v-btn:last-child:not(.v-btn--variant-text)),
+  .v-dialog--fullscreen .module-dialog-actions :deep(.v-btn:last-child:not(.v-btn--variant-text)) {
     flex: 1 1 auto;
   }
   .module-dialog-heading {

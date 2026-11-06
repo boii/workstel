@@ -1,6 +1,6 @@
-/* Bottom sheets for short dialogs on phones (ModuleDialog `sheet`, VaultDialog `sheet`).
-   The overlay content is teleported to the body, so these rules are global. Long forms,
-   history lists and audit views stay full screen instead. */
+/* Phone layouts for ModuleDialog and VaultDialog. Short dialogs (`sheet`) open as bottom
+   sheets; long forms, history lists and audit views fill the screen. The overlay content is
+   teleported to the body, so these rules are global. */
 @media (max-width: 680px) {
   .v-dialog.dialog-sheet {
     align-items: flex-end;
@@ -13,6 +13,11 @@
   }
   .v-dialog.dialog-sheet > .v-overlay__content > .v-card {
     border-radius: var(--workstel-radius-lg) var(--workstel-radius-lg) 0 0 !important;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* Keep full-screen footers clear of the iPhone home indicator, as sheets do. */
+  .v-dialog--fullscreen > .v-overlay__content > .v-card.module-dialog,
+  .v-dialog--fullscreen > .v-overlay__content > .v-card.vault-panel {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }

@@ -57,6 +57,9 @@ function empty(): Draft {
     notes: '',
   };
 }
+// What the form held when it opened, so closing with unsaved input asks first.
+const opened = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== opened.value);
 const errors = ref<Partial<Record<keyof DealInput, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
@@ -78,6 +81,7 @@ watch(open, (value) => {
         notes: deal.notes,
       }
     : empty();
+  opened.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -145,6 +149,7 @@ const fieldError = (field: keyof DealInput) =>
     :title="deal ? messages.editDeal : messages.addDeal"
     :subtitle="deal ? deal.accountName : ''"
     :busy="saving"
+    :dirty="dirty"
     :width="dialogWidth.xl"
   >
     <v-form
@@ -330,11 +335,11 @@ const fieldError = (field: keyof DealInput) =>
         />
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

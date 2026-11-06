@@ -186,3 +186,12 @@ Approved by the user. Every dialog except the command palette now uses `ModuleDi
 - **Keyboard shortcuts:** uses `ModuleDialog` with `sheet` at the `xs` width instead of its own header.
 - **New task (demo My tasks):** uses `ModuleDialog` with `sheet` at the `md` width. The hint is the subtitle, and Add task moved to the footer with Cancel. The global `.detail-panel`, `.close-button` and `.submit-button` styles were used only here and are gone.
 - **Still custom:** the command palette keeps its search-first layout.
+
+## Full-screen dialogs on phones — 6 November 2026
+
+Approved by the user after a 390px review of the Sales CRM deal form.
+
+- **Unsaved input:** `ModuleDialog` has a `dirty` prop. While it is true, closing without saving asks "Discard changes?" ("Buang perubahan?") in a bottom sheet, with Keep editing and a red Discard. That covers the close button, Escape, an outside click, phone Back and the form's own Cancel, which uses the `close` function passed to the `#actions` slot. Saving closes without asking. The Sales CRM deal and account forms and the Vehicle inspection form set `dirty` by comparing their input with what they held when opened, so opening a record and closing it unchanged does not ask. Other forms can opt in the same way.
+- **Footer:** on phones, the footer's last non-text button takes the remaining width in full-screen dialogs as well as in sheets (Save deal went from 94px to 276px at 390px). `VaultDialog` does the same in full screen (Audit log).
+- **Safe area:** full-screen `ModuleDialog` and `VaultDialog` cards pad their bottom by `env(safe-area-inset-bottom)`, as sheets already did, so footers stay clear of the iPhone home indicator. The rule lives in `src/shared/dialog-sheet.css`.
+- **Opening:** on phones, full-screen dialogs slide up from the bottom (`dialog-bottom-transition`) like sheets. Desktop dialogs and Vault's centred phone popups keep the default transition.
