@@ -38,6 +38,7 @@ export function createDemoRoomTurnaroundApi(): RoomTurnaroundApi {
       type,
       status: done === null ? 'active' : 'done',
       attendantEmail: email,
+      attendantName: email.split('@')[0],
       mine: email === me,
       startedAt: minutesAgo(minutes),
       pausedAt: null,
@@ -141,6 +142,7 @@ export function createDemoRoomTurnaroundApi(): RoomTurnaroundApi {
         type,
         status: 'active',
         attendantEmail: me,
+        attendantName: me.split('@')[0],
         mine: true,
         startedAt: now(),
         pausedAt: null,
@@ -222,6 +224,7 @@ export function createDemoRoomTurnaroundApi(): RoomTurnaroundApi {
         attendants: [...people.entries()]
           .map(([email, values]) => ({
             email,
+            name: email.split('@')[0],
             done: values.length,
             avgSeconds: avg(values),
             totalSeconds: values.reduce((a, b) => a + b, 0),

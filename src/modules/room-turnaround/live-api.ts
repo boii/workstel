@@ -13,6 +13,10 @@ const isCount = (value: unknown): value is number =>
   typeof value === 'number' && Number.isInteger(value) && value >= 0;
 const optionalTime = (value: unknown) => value === null || isTime(value);
 
+/** Servers before 202611070001 send no attendant name; fall back to the email's local part. */
+function attendantName(name: unknown, email: string) {
+  return (isText(name) && name.trim()) || email.split('@')[0] || email;
+}
 export function parseTask(raw: Raw, roomNumber = ''): CleaningTask {
   if (
     !raw ||
@@ -22,6 +26,7 @@ export function parseTask(raw: Raw, roomNumber = ''): CleaningTask {
     !taskTypes.includes(raw.task_type as never) ||
     !taskStatuses.includes(raw.status as never) ||
     !isText(raw.attendant_email) ||
+    (raw.attendant_name !== undefined && !isText(raw.attendant_name)) ||
     typeof raw.mine !== 'boolean' ||
     !isTime(raw.started_at) ||
     !optionalTime(raw.paused_at) ||
@@ -38,6 +43,7 @@ export function parseTask(raw: Raw, roomNumber = ''): CleaningTask {
     type: raw.task_type as TaskType,
     status: raw.status as CleaningTask['status'],
     attendantEmail: raw.attendant_email,
+    attendantName: attendantName(raw.attendant_name, raw.attendant_email),
     mine: raw.mine,
     startedAt: raw.started_at,
     pausedAt: (raw.paused_at as string | null) ?? null,
@@ -125,6 +131,7 @@ export function parseSummary(data: unknown, meta: Raw | undefined): TurnaroundSu
     !raw.attendants.every(
       (row: Raw) =>
         isText(row?.email) &&
+        (row.name === undefined || isText(row.name)) &&
         isCount(row.done) &&
         isCount(row.avg_seconds) &&
         isCount(row.total_seconds),
@@ -150,6 +157,7 @@ export function parseSummary(data: unknown, meta: Raw | undefined): TurnaroundSu
     ),
     attendants: (raw.attendants as Raw[]).map((row) => ({
       email: String(row.email),
+      name: attendantName(row.name, String(row.email)),
       done: Number(row.done),
       avgSeconds: Number(row.avg_seconds),
       totalSeconds: Number(row.total_seconds),

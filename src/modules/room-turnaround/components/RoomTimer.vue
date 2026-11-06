@@ -7,7 +7,6 @@ import {
   errorMessage,
   formatDateTime,
   formatTime,
-  shortName,
   taskIcons,
   taskKeys,
   taskStatusKeys,
@@ -111,7 +110,7 @@ const control = (action: TaskAction) =>
         <span class="hk-running-time">{{ formatDuration(elapsedSeconds(task, now)) }}</span>
         <small
           >{{ messages.startedAt }} {{ formatTime(task.startedAt) }} ·
-          {{ shortName(task.attendantEmail) }}</small
+          {{ task.attendantName }}</small
         >
         <div
           v-if="canControl"
@@ -204,9 +203,7 @@ const control = (action: TaskAction) =>
                 size="15"
               />{{ messages[taskKeys[entry.type]] }}</span
             >
-            <small
-              >{{ formatDateTime(entry.startedAt) }} · {{ shortName(entry.attendantEmail) }}</small
-            >
+            <small>{{ formatDateTime(entry.startedAt) }} · {{ entry.attendantName }}</small>
             <strong>{{ formatDuration(entry.durationSeconds ?? 0) }}</strong>
           </li>
         </ol>

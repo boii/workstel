@@ -66,6 +66,12 @@ test('Room Turnaround times each room cleaning per module grants', async (t) => 
     await grant(outsider, frontOffice, true, true);
     // Grants made under the old module ID move with the 0013 rename.
     await db.exec(await readFile('supabase/migrations/202611040013_room_turnaround.sql', 'utf8'));
+    // Profiles, then the attendant display names that read them.
+    for (const migration of [
+      '202611050002_user_profiles',
+      '202611070001_room_turnaround_attendant_names',
+    ])
+      await db.exec(await readFile('supabase/migrations/' + migration + '.sql', 'utf8'));
     async function as(user: string) {
       await db.exec('reset role');
       await db.query("select set_config('request.jwt.claim.sub',$1,false)", [user]);
@@ -242,8 +248,23 @@ test('Room Turnaround times each room cleaning per module grants', async (t) => 
         "with shift as (select ($1::date+time '12:00') at time zone 'Asia/Jakarta'-min(started_at) as by from public.room_turnaround_tasks where hotel_id=$2) update public.room_turnaround_tasks set started_at=started_at+shift.by,paused_at=paused_at+shift.by,finished_at=finished_at+shift.by from shift where hotel_id=$2",
         [today, hotel],
       );
+      // The attendant sets a display name; the second attendant has no profile.
+      await as(attendant);
+      assert.ok(
+        (
+          await rpc('workstel_profile_save', [
+            { displayName: 'Siti Rahma', jobTitle: 'Room attendant', extension: '+62 777' },
+          ])
+        ).data,
+      );
       await as(reader);
       const history = await rpc('room_turnaround_tasks_list', [hotel, null, today]);
+      const names = new Map(history.data!.map((row) => [row.attendant_email, row.attendant_name]));
+      assert.equal(names.get('user1@example.com'), 'Siti Rahma');
+      assert.equal(names.get('user2@example.com'), 'user2');
+      // Only the display name leaves the profile.
+      const shown = JSON.stringify(history);
+      assert.ok(!shown.includes('Room attendant') && !shown.includes('+62 777'));
       assert.equal(history.data!.length, 3);
       assert.ok(history.data!.every((row) => typeof row.room_number === 'string'));
       const page = await rpc('room_turnaround_tasks_list', [hotel, null, today, null, null, 2]);
@@ -281,6 +302,15 @@ test('Room Turnaround times each room cleaning per module grants', async (t) => 
       assert.deepEqual(
         people.map((p) => p.email),
         ['user1@example.com', 'user2@example.com'],
+      );
+      assert.deepEqual(
+        people.map((p) => p.name),
+        ['Siti Rahma', 'user2'],
+      );
+      // The helper stays private to the server.
+      await assert.rejects(
+        db.query('select workstel_private.staff_display_name($1)', [attendant]),
+        /permission denied/,
       );
     });
 

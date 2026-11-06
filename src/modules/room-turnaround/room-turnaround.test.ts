@@ -50,6 +50,11 @@ test('room rules and pasted room lists match the server', () => {
 
 test('timers exclude pauses and format as minutes and seconds', () => {
   const task = parseTask(taskRow);
+  // Older servers send no name: the email's local part stands in for the display name.
+  assert.equal(task.attendantName, 'siti');
+  assert.equal(parseTask({ ...taskRow, attendant_name: 'Siti Rahma' }).attendantName, 'Siti Rahma');
+  assert.equal(parseTask({ ...taskRow, attendant_name: '  ' }).attendantName, 'siti');
+  assert.throws(() => parseTask({ ...taskRow, attendant_name: 42 }));
   const start = Date.parse(task.startedAt);
   assert.equal(elapsedSeconds(task, start + 125000), 125);
   const paused: CleaningTask = {

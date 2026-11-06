@@ -14,7 +14,6 @@ import RoomTimer from '../components/RoomTimer.vue';
 import {
   errorMessage,
   formatTime,
-  shortName,
   taskIcons,
   taskKeys,
   taskStatusKeys,
@@ -686,9 +685,7 @@ const departmentItems = computed(() => [
                 :data-label="messages.attendant"
                 :title="room.openTask?.attendantEmail"
               >
-                <template v-if="room.openTask">{{
-                  shortName(room.openTask.attendantEmail)
-                }}</template>
+                <template v-if="room.openTask">{{ room.openTask.attendantName }}</template>
                 <span
                   v-else
                   class="hk-muted"
@@ -766,7 +763,7 @@ const departmentItems = computed(() => [
                     size="var(--workstel-icon-xs)"
                   />{{ formatDuration(elapsedSeconds(room.openTask, now)) }}</span
                 >
-                <small>{{ shortName(room.openTask.attendantEmail) }}</small>
+                <small>{{ room.openTask.attendantName }}</small>
               </template>
               <template v-else-if="room.lastDone">
                 <span class="hk-card-last"
@@ -861,7 +858,7 @@ const departmentItems = computed(() => [
                     class="stack-table-primary"
                     :title="person.email"
                   >
-                    {{ shortName(person.email) }}
+                    {{ person.name }}
                   </td>
                   <td
                     class="hk-number"
@@ -913,7 +910,7 @@ const departmentItems = computed(() => [
                   }}<template v-if="entry.finishedAt">
                     – {{ formatTime(entry.finishedAt) }}</template
                   >
-                  · {{ shortName(entry.attendantEmail) }}</small
+                  · {{ entry.attendantName }}</small
                 >
               </div>
               <span class="hk-history-time">{{

@@ -59,8 +59,6 @@ export function formatDateTime(value: string) {
     timeZone: 'Asia/Jakarta',
   }).format(new Date(value));
 }
-/** Shows an attendant by the part of the email before @, which is how staff know each other. */
-export const shortName = (email: string) => email.split('@')[0] || email;
 
 /** A clock that ticks every second while mounted, corrected by the server time offset. */
 export function useServerClock(offsetMs: () => number) {

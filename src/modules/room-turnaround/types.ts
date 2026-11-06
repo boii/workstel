@@ -12,6 +12,8 @@ export interface CleaningTask {
   type: TaskType;
   status: TaskStatus;
   attendantEmail: string;
+  /** Profile display name, or the part of the email before @ when there is none. */
+  attendantName: string;
   mine: boolean;
   startedAt: string;
   pausedAt: string | null;
@@ -53,6 +55,7 @@ export interface TypeTotals {
 }
 export interface AttendantTotals {
   email: string;
+  name: string;
   done: number;
   avgSeconds: number;
   totalSeconds: number;

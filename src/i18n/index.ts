@@ -132,7 +132,8 @@ export const english = {
   profile: 'Profile',
   editProfile: 'Edit profile',
   displayName: 'Display name',
-  displayNameHint: 'Shown in the account menu instead of your email.',
+  displayNameHint:
+    'Shown in the account menu, and to colleagues in Room Turnaround, instead of your email.',
   addProfileDetails: 'Add job title and extension',
   jobTitle: 'Job title',
   extensionLabel: 'Extension',
@@ -418,7 +419,8 @@ const indonesian: Record<MessageKey, string> = {
   profile: 'Profil',
   editProfile: 'Ubah profil',
   displayName: 'Nama tampilan',
-  displayNameHint: 'Ditampilkan di menu akun sebagai pengganti email.',
+  displayNameHint:
+    'Ditampilkan di menu akun, dan kepada rekan kerja di Room Turnaround, sebagai pengganti email.',
   addProfileDetails: 'Tambah jabatan dan ekstensi',
   jobTitle: 'Jabatan',
   extensionLabel: 'Ekstensi',
