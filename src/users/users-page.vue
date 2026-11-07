@@ -5,6 +5,7 @@ import ModulePage from '../shared/ModulePage.vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import FilterGroup from '../shared/filter-group.vue';
 import ListRow from '../shared/list-row.vue';
+import OptionalFields from '../shared/optional-fields.vue';
 import UndoSnackbar from '../shared/undo-snackbar.vue';
 import { locale, t } from '../i18n';
 import type { MessageKey } from '../i18n';
@@ -103,8 +104,15 @@ function resetFilters() {
   search.value = '';
   resetFilterGroup();
 }
-const departmentCount = (id: string) =>
-  directory.value.users.find((u) => u.id === id)?.memberships.filter((m) => m.enabled).length ?? 0;
+// The first two department names, then how many more, in the directory's order.
+function departmentSummary(user: UserRecord) {
+  const names = directory.value.departments
+    .filter((d) => user.memberships.some((m) => m.enabled && m.departmentId === d.id))
+    .map((d) => d.name);
+  if (!names.length) return t('userNoDepartments');
+  const shown = names.slice(0, 2).join(', ');
+  return names.length > 2 ? shown + ' +' + (names.length - 2) : shown;
+}
 const formatTime = (value: string) =>
   new Intl.DateTimeFormat(locale.value === 'id' ? 'id-ID' : 'en-GB', {
     dateStyle: 'medium',
@@ -135,11 +143,42 @@ const email = ref('');
 const emailError = ref('');
 const creating = ref(false);
 const createFailure = ref('');
+const copyFrom = ref<string | null>(null);
+const copyPartial = ref(false);
+// Only accounts with at least one department have access worth copying.
+const copySources = computed(() =>
+  directory.value.users
+    .filter((u) => u.memberships.some((m) => m.enabled))
+    .map((u) => ({ value: u.id, title: u.email })),
+);
 function openCreate() {
   email.value = '';
   emailError.value = '';
   createFailure.value = '';
+  copyFrom.value = null;
   createOpen.value = true;
+}
+// Copies department membership, Vault permissions and module levels — never the developer
+// role or a block. One call per change, so a failure can leave the copy partial; returns
+// whether every call succeeded.
+async function copyAccess(source: UserRecord, userId: string) {
+  try {
+    for (const membership of source.memberships.filter((m) => m.enabled)) {
+      const { departmentId, enabled, canRead, canWrite, canArchive, canAudit } = membership;
+      await api.setMembership(userId, departmentId, {
+        enabled,
+        canRead,
+        canWrite,
+        canArchive,
+        canAudit,
+      });
+      for (const grant of source.moduleGrants.filter((g) => g.departmentId === departmentId))
+        await api.setModuleLevel(userId, departmentId, grant.moduleId, grant.level);
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 async function create() {
   if (creating.value) return;
@@ -152,8 +191,15 @@ async function create() {
   createFailure.value = '';
   try {
     const created = await api.create(value);
+    // Copy from the source's current access, not from when the page last loaded.
+    if (copyFrom.value) await load();
+    const source = directory.value.users.find((u) => u.id === copyFrom.value);
+    const copied = source ? await copyAccess(source, created.userId) : true;
     createOpen.value = false;
     await load();
+    // The account exists either way; a partial copy is reported, then checked in Manage.
+    // Shown once the password is closed and Manage opens, where the access is checked.
+    copyPartial.value = !copied;
     showPassword(created.email, created.temporaryPassword);
     // Open the new account so access can be assigned right away.
     selectedId.value = created.userId;
@@ -176,6 +222,8 @@ function showPassword(target: string, value: string) {
 function forgetPassword() {
   passwordValue.value = '';
   if (selectedId.value && !accessOpen.value) accessOpen.value = true;
+  if (copyPartial.value) notice.value = t('userCopyPartial');
+  copyPartial.value = false;
 }
 </script>
 <template>
@@ -264,7 +312,7 @@ function forgetPassword() {
               ? t('userLastSignIn') + ' ' + formatTime(user.lastSignInAt)
               : t('userNeverSignedIn')
           }}
-          · {{ t('userDepartments') }}: {{ departmentCount(user.id) }}
+          · {{ departmentSummary(user) }}
         </small>
         <template #status>
           <div class="users-badges">
@@ -344,6 +392,26 @@ function forgetPassword() {
         :error-messages="emailError"
         @update:model-value="emailError = ''"
       />
+      <OptionalFields
+        v-if="copySources.length"
+        :label="t('userCopyAccessAdd')"
+        :filled="!!copyFrom"
+        :reset-key="createOpen"
+      >
+        <label
+          for="user-create-copy"
+          class="field-label"
+          >{{ t('userCopyAccess') }}</label
+        ><v-select
+          id="user-create-copy"
+          v-model="copyFrom"
+          :items="copySources"
+          :disabled="creating"
+          clearable
+          :hint="t('userCopyAccessHint')"
+          persistent-hint
+        />
+      </OptionalFields>
     </v-form>
     <template #actions>
       <v-btn
