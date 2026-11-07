@@ -56,7 +56,8 @@ To enable it on the hotel server:
 
 1. Confirm that the pinned Auth release supports the Before User Created hook.
    If it does not, stop: keep sign-up disabled.
-2. Apply migration `202611070003_google_signup.sql`.
+2. Install the hook with `bash infra/apply-signup-migration.sh` from the release
+   checkout. It backs up the database first and changes no Auth setting.
 3. In Google Cloud, configure the OAuth consent screen as External and publish it
    to production (in Testing only listed test users can sign in). Request only the
    default `openid`, `email` and `profile` scopes. Create a web client with the
@@ -75,12 +76,53 @@ To enable it on the hotel server:
 7. The sign-in page shows the Google button once Auth reports Google as enabled.
    No frontend deployment is needed.
 
+### Server commands
+
+Run these on the hotel server from the release checkout, after it holds this
+change. Edit `.env` with an editor; never put the client secret in a command.
+
+```bash
+# Compose files, project folder and Auth image of the running auth service.
+dir=$(docker inspect workstel-auth --format '{{index .Config.Labels "com.docker.compose.project.working_dir"}}')
+files=$(docker inspect workstel-auth --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}')
+docker inspect workstel-auth --format '{{.Config.Image}}'
+echo "$dir"; echo "$files"
+# The overlay among them must be this release's version.
+grep -l SIGNUP_HOOK_ENABLED ${files//,/ }
+compose() { (cd "$dir" && docker compose $(printf -- '-f %s ' ${files//,/ }) "$@"); }
+```
+
+Stage 1, Google sign-in for existing accounts only. Add the client ID and secret
+to `$dir/.env` with `GOOGLE_ENABLED=true`, leaving sign-up disabled, then:
+
+```bash
+compose up -d --no-deps --force-recreate auth
+bash infra/check-auth-config.sh
+```
+
+Stage 2, open sign-up for Google. Run `bash infra/apply-signup-migration.sh`,
+set `SIGNUP_HOOK_ENABLED=true` and `DISABLE_SIGNUP=false` in `$dir/.env`, recreate
+auth as above, then probe email/password sign-up. It must print `403`:
+
+```bash
+anon=$(grep '^ANON_KEY=' "$dir/.env" | cut -d= -f2-)
+curl -s -o /dev/null -w '%{http_code}\n' -X POST https://workstel.gabot.my.id/auth/v1/signup \
+  -H "apikey: $anon" -H 'content-type: application/json' \
+  -d "{\"email\":\"signup-probe@example.com\",\"password\":\"Probe-$(openssl rand -hex 12)\"}"
+```
+
+Any other result means the hook is not active: set `DISABLE_SIGNUP=true`,
+recreate auth, and delete `signup-probe@example.com` if it was created.
+
 Anyone can create accounts, so the Users list fills with strangers over time; it
 shows the first 500 accounts by email. Leaving the hotel still requires blocking
 the Workstel account, because Google cannot be disabled centrally here.
 
-The hook and the Google provider are not enabled by this repository, and the
-steps above have not yet been verified against the production server.
+Both stages were applied to the hotel server on 7 November 2026 (see
+DEPLOYMENT.md). On the pinned Auth release (`supabase/gotrue:v2.197.0`) the hook
+does not run for accounts created through the admin API, so developer-created
+accounts work with or without the `workstel_admin_created` flag; the flag stays
+so the rule holds if a later release starts running it there.
 
 ## Cloudflare runtime configuration
 

@@ -24,4 +24,5 @@ begin
   grant execute on function workstel_private.before_user_created(jsonb) to supabase_auth_admin;
  end if;
 end$$;
+insert into workstel_private.schema_migrations(version) values ('202611070003') on conflict do nothing;
 commit;

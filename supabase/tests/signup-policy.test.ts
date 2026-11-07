@@ -16,6 +16,7 @@ test('only Google and developer-created accounts may be created', async () => {
     );
     for (const migration of [
       '202611010001_vault_metadata',
+      '202611010002_audit_visibility',
       '202611070002_signup_domains',
       '202611070003_google_signup',
     ])
