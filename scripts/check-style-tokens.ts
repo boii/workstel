@@ -21,7 +21,8 @@ for (const path of (await files('src')).sort()) {
 }
 if (total) {
   console.error(
-    `\n${total} style literal(s) should use shared tokens (docs/DESIGN_REFERENCE.md).` +
+    `\n${total} style value(s) or component(s) should use the shared tokens and primitives` +
+      ' (docs/MODULE_STANDARD.md, docs/DESIGN_REFERENCE.md).' +
       '\nFor a documented exception add a comment: token-exempt: <reason>.',
   );
   process.exit(1);

@@ -13,6 +13,16 @@ const SPACE_SCALE = new Set([2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32]);
 const ICON_SCALE = new Set([14, 16, 18, 22, 28, 32]);
 const LEADING = new Set(['1.4', '1.5', '1.6', '1.7']);
 const EXEMPT = /token-exempt:\s*\S/;
+/** Feature code (modules and app pages) must use the shared primitives in src/shared. */
+const FEATURE = /(?:^|\/)src\/(?:modules|users|admin|profile)\//;
+/** Approved breakpoints: phone layout (shared/breakpoints.ts), narrow list rows, smallest phones. */
+const BREAKPOINTS = new Set([359, 680, 760]);
+const RAW_COMPONENTS: [RegExp, string][] = [
+  [/<v-dialog\b/g, 'raw dialog: use ModuleDialog from shared/module-dialog'],
+  [/<v-menu\b/g, 'raw menu: use ActionMenu or FilterGroup from shared'],
+  [/<v-snackbar\b/g, 'raw snackbar: use UndoSnackbar from shared/undo-snackbar'],
+  [/<v-list\b(?!-)/g, 'raw record list: use <ul class="list-rows"> with ListRow'],
+];
 
 function declarationRule(property: string, value: string): string | null {
   if (property.startsWith('--')) return null;
@@ -78,20 +88,54 @@ export function checkTemplate(template: string, lines: string[], offset = 1): St
   return found;
 }
 
+/** Feature code: breakpoints outside the approved set. */
+function checkBreakpoints(css: string, lines: string[], offset = 1): StyleViolation[] {
+  const found: StyleViolation[] = [];
+  for (const match of css.matchAll(/@media[^{]*?\((?:max|min)-width:\s*(\d+)px\)/g)) {
+    if (BREAKPOINTS.has(Number(match[1]))) continue;
+    const line = offset - 1 + lineOf(css, match.index ?? 0);
+    if (!exempt(lines, line))
+      found.push({
+        line,
+        rule: 'breakpoint: use 680px (phone), 760px (list rows) or 359px (smallest phones)',
+        text: lines[line - 1].trim(),
+      });
+  }
+  return found;
+}
+
+/** Feature templates: Vuetify primitives that have a shared wrapper. */
+function checkComponents(template: string, lines: string[], offset = 1): StyleViolation[] {
+  const found: StyleViolation[] = [];
+  for (const [pattern, rule] of RAW_COMPONENTS)
+    for (const match of template.matchAll(pattern)) {
+      const line = offset - 1 + lineOf(template, match.index ?? 0);
+      if (!exempt(lines, line)) found.push({ line, rule, text: lines[line - 1].trim() });
+    }
+  return found;
+}
+
 /** Checks one stylesheet or single-file component. */
 export function checkStyleFile(path: string, text: string): StyleViolation[] {
   const lines = text.split('\n');
+  const feature = FEATURE.test(path);
   if (path.endsWith('.css')) {
     // src/styles.css opens with the :root block that defines every token.
     const start = path.endsWith('src/styles.css') ? text.indexOf('\n}\n') + 3 : 0;
-    return checkCss(text.slice(start), lines, lineOf(text, start));
+    const found = checkCss(text.slice(start), lines, lineOf(text, start));
+    if (feature) found.push(...checkBreakpoints(text, lines));
+    return found;
   }
   const found: StyleViolation[] = [];
   for (const block of text.matchAll(/(<style[^>]*>)([\s\S]*?)<\/style>/g)) {
     const start = (block.index ?? 0) + block[1].length;
     found.push(...checkCss(block[2], lines, lineOf(text, start)));
+    if (feature) found.push(...checkBreakpoints(block[2], lines, lineOf(text, start)));
   }
   const template = /<template>[\s\S]*<\/template>/.exec(text);
-  if (template) found.push(...checkTemplate(template[0], lines, lineOf(text, template.index)));
+  if (template) {
+    found.push(...checkTemplate(template[0], lines, lineOf(text, template.index)));
+    if (feature) found.push(...checkComponents(template[0], lines, lineOf(text, template.index)));
+  }
   return found;
 }

@@ -214,6 +214,7 @@ onUnmounted(() => {
       >
         {{ messages.privateOnly }}
       </p>
+      <!-- token-exempt: compact share list inside the sharing panel, not a record list -->
       <v-list
         v-else
         class="vault-panel-share-list"

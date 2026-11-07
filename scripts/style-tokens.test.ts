@@ -78,3 +78,45 @@ test('checks Vue style blocks and templates with file line numbers', () => {
     [9, 4, 2, 5],
   );
 });
+
+test('flags raw Vuetify primitives in feature code only', () => {
+  const vue = [
+    '<template>',
+    '  <v-dialog />',
+    '  <v-menu />',
+    '  <v-snackbar />',
+    '  <v-list>',
+    '    <v-list-item />',
+    '  </v-list>',
+    '  <!-- token-exempt: compact sub-list -->',
+    '  <v-list />',
+    '</template>',
+  ].join('\n');
+  assert.deepEqual(
+    checkStyleFile('src/modules/x/pages/A.vue', vue).map((v) => v.line),
+    [2, 3, 4, 5],
+  );
+  assert.deepEqual(rules('src/users/a.vue', '<template><v-snackbar /></template>').length, 1);
+  assert.deepEqual(rules('src/shared/module-dialog.vue', vue), []);
+});
+
+test('flags unapproved breakpoints in feature code only', () => {
+  const css = [
+    '@media (max-width: 680px) {}',
+    '@media (max-width: 760px) {}',
+    '@media (max-width: 359px) {}',
+    '@media (max-width: 900px) {}',
+    '/* token-exempt: summary tiles */',
+    '@media (max-width: 1050px) {}',
+  ].join('\n');
+  assert.deepEqual(
+    checkStyleFile('src/modules/x/styles.css', css).map((v) => v.line),
+    [4],
+  );
+  const vue = '<template><div /></template>\n<style>\n@media (min-width: 600px) {}\n</style>';
+  assert.deepEqual(
+    checkStyleFile('src/profile/a.vue', vue).map((v) => v.line),
+    [3],
+  );
+  assert.deepEqual(rules('src/styles.css', ':root {\n}\n' + css), []);
+});

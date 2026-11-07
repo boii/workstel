@@ -2,6 +2,7 @@
 import { dialogWidth } from '../shared/dialog-widths';
 import { computed, onMounted, ref } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
+import UndoSnackbar from '../shared/undo-snackbar.vue';
 import { locale, t } from '../i18n';
 import type { MessageKey } from '../i18n';
 import { createDemoUsersApi, demoSelfId } from './demo-users-api';
@@ -267,12 +268,11 @@ function forgetPassword() {
       :password="passwordValue"
       @closed="forgetPassword"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="null"
+      @close="notice = ''"
+    />
   </div>
 </template>
 <style scoped>

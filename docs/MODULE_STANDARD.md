@@ -85,6 +85,8 @@ Desktop uses the shared thin header. Mobile uses one-column cards, full-width se
 Pages include a title, one primary action, search/filter where needed, content and pagination.
 Open every dialog with `ModuleDialog` from src/shared/module-dialog.vue. On phones it is a centred popup with a 12px gap on every side, sized to its content; add `fullscreen` only for long forms and views whose length grows with records, which then fill the height. Pass `dirty` from forms with several fields, and close Cancel through the `close` function of the `#actions` slot. For a confirmation, pass `confirm-label` (plus `destructive` when it removes access or data) and handle `@confirm` instead of writing the footer.
 Put a record's further actions, and other small action menus, in `ActionMenu` from src/shared/action-menu.vue rather than `v-menu`. For phone-only behaviour in script, use `usePhone()` from src/shared/breakpoints.ts instead of comparing widths.
+Show notices with `UndoSnackbar` from src/shared/undo-snackbar.vue (pass `:undo="null"` when there is nothing to undo).
+In src/modules, src/users, src/admin and src/profile, `npm run styles:check` rejects raw `<v-dialog>`, `<v-menu>`, `<v-snackbar>` and `<v-list>` (list items inside `ActionMenu` are fine), and media queries other than 680px (phone layout), 760px (narrow list rows) and 359px (smallest phones). A deliberate exception uses the same `token-exempt: <reason>` comment.
 Loading uses skeletons; errors have safe messages and retry; distinguish empty data from no search results.
 Forms have visible labels, inline validation, saving state, submit protection, success feedback and cancellation.
 Verify denied access, expired sessions, offline/network failures and conflicting edits when backend exists.

@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
+import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useUndoNotice } from '../../../core/use-optimistic-archive';
 import { locale } from '../../../i18n';
@@ -86,13 +87,17 @@ function save() {
         >{{ messages.create }}</v-btn
       ></template
     >
-    <v-card
-      ><v-list :aria-label="messages.records"
-        ><v-list-item
-          v-for="record in filtered"
-          :key="record.id"
-          :title="record.name" /></v-list
-    ></v-card>
+    <ul
+      class="list-rows"
+      :aria-label="messages.records"
+    >
+      <ListRow
+        v-for="record in filtered"
+        :key="record.id"
+        :icon="manifest.icon"
+        ><strong>{{ record.name }}</strong></ListRow
+      >
+    </ul>
   </ModulePage>
   <ModuleDialog
     v-model="dialog"
@@ -113,10 +118,10 @@ function save() {
         :error-messages="error"
         @update:model-value="error = ''"
     /></v-form>
-    <template #actions
+    <template #actions="{ close }"
       ><v-btn
         variant="text"
-        @click="dialog = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

@@ -312,6 +312,7 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
+/* token-exempt: four summary tiles fold to two columns before the list breakpoint */
 @media (max-width: 900px) {
   .sales-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
