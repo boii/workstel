@@ -32,66 +32,52 @@ development origin; production origins must not be loosened for development.
 
 ## Google sign-in policy
 
-Decision, 7 November 2026: public sign-up stays disabled
-(`GOTRUE_DISABLE_SIGNUP: 'true'`). Google is a sign-in method for existing staff
-accounts only. A developer creates each account through the admin API with the
-staff member's Google email address and assigns access as usual. That staff
-member then uses "Continue with Google", and Auth is expected to link the Google
-identity to the existing account by its verified email. A Google account with no
-matching Workstel account is refused because sign-up is disabled.
+Decision, 7 November 2026 (revised the same day): anyone with a Google account
+may create a Workstel account with "Continue with Google". The hotel has no
+Google Workspace admin access, so the OAuth client is External and accounts are
+not limited to a domain. A new account has no hotel, department or module access
+and sees "No workspace access yet. Contact your administrator." until a developer
+opens Users, checks who it is and grants access. Grants are the activation step;
+there is no separate approval state. Block accounts that should not be there.
 
-Linking while sign-up is disabled has not yet been verified on the pinned Auth
-release. Verify it before telling staff to use Google.
+Every other self-service sign-up stays refused. Migration
+`202611070003_google_signup.sql` replaces `workstel_private.before_user_created`,
+a Supabase Auth "Before User Created" hook. It admits a new user only when the
+provider is `google` or when `app_metadata.workstel_admin_created` is `true`. Only
+the service role can set that flag, and the Users backend sets it when a developer
+creates an account. Email/password, magic link, phone, anonymous and any other
+provider sign-ups are rejected with HTTP 403. The staff-domain list from
+`202611070002_signup_domains.sql` is dropped.
 
-To enable Google on the hotel server:
+Sign-up must only be opened together with the hook. Without it, turning
+`GOTRUE_DISABLE_SIGNUP` off also opens public email/password registration.
 
-1. Create a Google OAuth web client with the redirect URI
-   `https://workstel.gabot.my.id/auth/v1/callback`.
-2. Put the client ID and secret in the server `.env` only. Never put them in this
-   repository, frontend variables or chat.
-3. Reference them from the auth service environment in the Compose overlay:
-   `GOTRUE_EXTERNAL_GOOGLE_ENABLED`, `GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID`,
-   `GOTRUE_EXTERNAL_GOOGLE_SECRET` and
-   `GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI`. Keep `GOTRUE_DISABLE_SIGNUP: 'true'`.
-   Recreate only the auth service.
-4. The sign-in page shows the Google button automatically once Auth reports
-   Google as enabled. No frontend deployment is needed.
-5. In a real browser, confirm that a pre-created staff account signs in with
-   Google and keeps its access, and that an unknown Google account is refused.
+To enable it on the hotel server:
 
-## Google sign-up domain restriction
+1. Confirm that the pinned Auth release supports the Before User Created hook.
+   If it does not, stop: keep sign-up disabled.
+2. Apply migration `202611070003_google_signup.sql`.
+3. In Google Cloud, configure the OAuth consent screen as External and publish it
+   to production (in Testing only listed test users can sign in). Request only the
+   default `openid`, `email` and `profile` scopes. Create a web client with the
+   redirect URI `https://workstel.gabot.my.id/auth/v1/callback`.
+4. In the server `.env` only (never in this repository, frontend variables or
+   chat), set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_ENABLED=true`,
+   `SIGNUP_HOOK_ENABLED=true` and `DISABLE_SIGNUP=false`. The Compose overlay
+   (`infra/docker-compose.workstel-auth.yml`) maps them to the Auth settings.
+5. Recreate only the auth service and run `infra/check-auth-config.sh`.
+6. Verify straight away, and set `DISABLE_SIGNUP=true` again if any check fails:
+   - `POST /auth/v1/signup` with an email and password returns 403.
+   - A new Google account can sign in, appears in Users and has no access.
+   - A developer can still create an account from Users.
+   - An existing staff account that signs in with Google under the same email
+     keeps its access.
+7. The sign-in page shows the Google button once Auth reports Google as enabled.
+   No frontend deployment is needed.
 
-This hook is optional defence in depth and is not required by the policy above.
-
-Migration `202611070002_signup_domains.sql` adds
-`workstel_private.before_user_created`, a Supabase Auth "Before User Created"
-hook. When it is enabled, a new account created through Google (or any provider
-other than email/password) is rejected with HTTP 403 unless its email domain
-exactly matches a row in `workstel_private.signup_domains`. Subdomains must be
-listed separately. With no rows, every external-provider sign-up is rejected.
-Developer-created email/password accounts are unaffected, and an existing staff
-account that signs in with Google under the same verified email is linked rather
-than created, so it is unaffected too. A permitted sign-up still has no hotel,
-department or module access until a developer assigns it.
-
-To activate it after applying the migration:
-
-1. Add the staff domain(s) in the Supabase SQL editor, in lowercase:
-   `insert into workstel_private.signup_domains(domain) values ('hotel.example');`
-2. The hotel stack is self-hosted, so there is no dashboard hook page. Add the
-   hook to the auth service environment in the Compose overlay
-   (`infra/docker-compose.workstel-auth.yml`) and recreate only the auth service:
-   `GOTRUE_HOOK_BEFORE_USER_CREATED_ENABLED: 'true'` and
-   `GOTRUE_HOOK_BEFORE_USER_CREATED_URI: pg-functions://postgres/workstel_private/before_user_created`.
-   First confirm that the pinned Auth release supports this hook.
-3. Confirm in a real browser that a staff-domain Google account can sign up and
-   that an outside Google account is refused.
-
-The production Auth service currently sets `GOTRUE_DISABLE_SIGNUP: 'true'`. While
-that stays on, Auth refuses every new user, including Google ones, so the hook
-has no effect. Turning it off would also reopen public email/password sign-up,
-which this hook deliberately allows for the admin API path. Do not turn sign-up
-back on until email/password self-registration is blocked separately.
+Anyone can create accounts, so the Users list fills with strangers over time; it
+shows the first 500 accounts by email. Leaving the hotel still requires blocking
+the Workstel account, because Google cannot be disabled centrally here.
 
 The hook and the Google provider are not enabled by this repository, and the
 steps above have not yet been verified against the production server.

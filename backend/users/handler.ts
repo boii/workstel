@@ -260,7 +260,13 @@ export function makeUsersHandler(config: UsersServerConfig, fetcher: typeof fetc
         const created = await call(config.supabaseUrl + '/auth/v1/admin/users', {
           method: 'POST',
           headers: serviceHeaders,
-          body: JSON.stringify({ email, password, email_confirm: true }),
+          // The sign-up hook admits email accounts only with this service-role-only flag.
+          body: JSON.stringify({
+            email,
+            password,
+            email_confirm: true,
+            app_metadata: { workstel_admin_created: true },
+          }),
         });
         if (created.status === 422 || created.status === 409) throw new SafeError('EMAIL_EXISTS');
         const id = String(created.body.id ?? '');

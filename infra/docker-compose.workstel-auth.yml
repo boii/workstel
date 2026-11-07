@@ -5,5 +5,14 @@ services:
       API_EXTERNAL_URL: https://workstel.gabot.my.id/auth/v1
       GOTRUE_SITE_URL: https://workstel.pages.dev
       GOTRUE_URI_ALLOW_LIST: https://workstel.pages.dev/
-      GOTRUE_DISABLE_SIGNUP: 'true'
+      # Open sign-up only together with the Before User Created hook, which admits Google and
+      # developer-created accounts and refuses every other self-service sign-up.
+      GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP:-true}
+      GOTRUE_HOOK_BEFORE_USER_CREATED_ENABLED: ${SIGNUP_HOOK_ENABLED:-false}
+      GOTRUE_HOOK_BEFORE_USER_CREATED_URI: pg-functions://postgres/workstel_private/before_user_created
       GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true'
+      # Google sign-in. Values come from the server .env; it stays off until GOOGLE_ENABLED=true.
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOOGLE_ENABLED:-false}
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOTRUE_EXTERNAL_GOOGLE_REDIRECT_URI: https://workstel.gabot.my.id/auth/v1/callback

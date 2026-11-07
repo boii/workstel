@@ -83,6 +83,7 @@ test('only developers create accounts, and the password is returned once', async
   const create = allowed.calls.find((c) => c.url.endsWith('/auth/v1/admin/users'))!;
   assert.equal(create.body.email, 'new@example.com');
   assert.equal(create.body.email_confirm, true);
+  assert.deepEqual(create.body.app_metadata, { workstel_admin_created: true });
   assert.equal(create.body.password, data.temporaryPassword);
   const flag = allowed.calls.find((c) => c.url.endsWith('workstel_user_admin_flag'))!;
   assert.deepEqual(flag.body, { p_user_id: data.userId, p_must_change: true });
