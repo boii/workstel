@@ -25,6 +25,8 @@ const props = defineProps<{
   modules: string[];
   selfId: string;
   api: UsersApi;
+  /** Reloads the directory; resolves once the props carry the saved state. */
+  reload: () => Promise<void>;
 }>();
 const emit = defineEmits<{
   changed: [message: MessageKey];
@@ -33,6 +35,14 @@ const emit = defineEmits<{
 }>();
 
 const busy = ref(false);
+// Access changes save as they are made. Each department (and the developer role) saves on
+// its own; it stays locked until the reloaded directory carries the change, so the next
+// change there never starts from stale values.
+const pending = ref(new Set<string>());
+const saved = ref(false);
+const status = computed(() =>
+  t(pending.value.size ? 'userSaving' : saved.value ? 'userAllSaved' : 'userAutosave'),
+);
 const confirm = ref<'block' | 'reset' | 'vault' | null>(null);
 // Vault offboarding: what the user owns, and where it should go.
 const owned = ref<OwnedVaultAccount[] | null>(null);
@@ -56,6 +66,7 @@ watch(
   [() => open.value, () => props.user?.id],
   ([isOpen]) => {
     if (isOpen) void loadOwned();
+    saved.value = false;
   },
   { immediate: true },
 );
@@ -128,11 +139,28 @@ async function run(action: () => Promise<void>) {
     busy.value = false;
   }
 }
+async function save(key: string, action: () => Promise<void>) {
+  if (busy.value || pending.value.has(key) || !props.user) return;
+  pending.value = new Set(pending.value).add(key);
+  try {
+    await action();
+    saved.value = true;
+  } catch (error) {
+    saved.value = false;
+    emit('failed', userErrorKey(error));
+  } finally {
+    await props.reload();
+    const rest = new Set(pending.value);
+    rest.delete(key);
+    pending.value = rest;
+  }
+}
+const locked = (key: string) => busy.value || pending.value.has(key);
 function setMember(departmentId: string, enabled: boolean) {
   const current = membership(departmentId);
   // A new membership starts read-only for Vault; developers widen it explicitly.
   const fresh = !props.user?.memberships.some((m) => m.departmentId === departmentId);
-  void run(() =>
+  void save(departmentId, () =>
     props.api.setMembership(props.user!.id, departmentId, {
       enabled,
       canRead: fresh ? true : current.canRead,
@@ -145,15 +173,17 @@ function setMember(departmentId: string, enabled: boolean) {
 function setFlag(departmentId: string, flag: (typeof vaultFlags)[number][0], value: boolean) {
   const { enabled, canRead, canWrite, canArchive, canAudit } = membership(departmentId);
   const current = { enabled, canRead, canWrite, canArchive, canAudit };
-  void run(() =>
+  void save(departmentId, () =>
     props.api.setMembership(props.user!.id, departmentId, { ...current, [flag]: value }),
   );
 }
 function setLevel(departmentId: string, moduleId: string, value: ModuleLevel) {
-  void run(() => props.api.setModuleLevel(props.user!.id, departmentId, moduleId, value));
+  void save(departmentId, () =>
+    props.api.setModuleLevel(props.user!.id, departmentId, moduleId, value),
+  );
 }
 function setDeveloper(value: boolean) {
-  void run(() => props.api.setDeveloper(props.user!.id, value));
+  void save('developer', () => props.api.setDeveloper(props.user!.id, value));
 }
 // Unblocking restores sign-in and needs no confirmation; blocking does.
 function unblock() {
@@ -189,16 +219,82 @@ async function confirmAction() {
     v-model="open"
     fullscreen
     :title="user?.email ?? ''"
-    :subtitle="t('userManage')"
-    :busy="busy"
+    :subtitle="status"
+    :busy="busy || pending.size > 0"
     :width="dialogWidth['4xl']"
   >
     <template v-if="user">
       <section
         class="user-section"
-        aria-labelledby="user-account"
+        aria-labelledby="user-departments"
       >
-        <h3 id="user-account">{{ t('userAccount') }}</h3>
+        <h3 id="user-departments">{{ t('userDepartmentAccess') }}</h3>
+        <ul class="user-departments">
+          <li
+            v-for="department in departments"
+            :key="department.id"
+            :class="{ 'user-department--off': !membership(department.id).enabled }"
+          >
+            <div class="user-department-head">
+              <strong :id="'dept-' + department.id">
+                {{ department.name }}
+                <small v-if="multiHotel">{{ department.hotelName }}</small>
+              </strong>
+              <v-switch
+                :model-value="membership(department.id).enabled"
+                :disabled="locked(department.id)"
+                :loading="pending.has(department.id) ? 'primary' : false"
+                color="primary"
+                inset
+                hide-details
+                density="compact"
+                :label="t('userMember')"
+                @update:model-value="(value) => setMember(department.id, !!value)"
+              />
+            </div>
+            <div
+              v-if="membership(department.id).enabled"
+              class="user-department-body"
+            >
+              <div
+                class="user-vault"
+                role="group"
+                :aria-label="t('userVault') + ' — ' + department.name"
+              >
+                <span class="user-label">{{ t('userVault') }}</span>
+                <v-checkbox
+                  v-for="[flag, key] in vaultFlags"
+                  :key="flag"
+                  :model-value="membership(department.id)[flag]"
+                  :label="t(key)"
+                  :disabled="locked(department.id)"
+                  color="primary"
+                  density="compact"
+                  hide-details
+                  @update:model-value="(value) => setFlag(department.id, flag, !!value)"
+                />
+              </div>
+              <div class="user-modules">
+                <v-select
+                  v-for="moduleId in modules"
+                  :key="moduleId"
+                  :model-value="level(department.id, moduleId)"
+                  :items="levelItems"
+                  :label="moduleTitle(moduleId)"
+                  :disabled="locked(department.id)"
+                  @update:model-value="(value) => setLevel(department.id, moduleId, value)"
+                />
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section
+        class="user-section"
+        aria-labelledby="user-role"
+      >
+        <h3 id="user-role">{{ t('userRole') }}</h3>
         <div class="user-row">
           <div class="user-row-text">
             <strong>{{ t('userDeveloperRole') }}</strong>
@@ -206,7 +302,8 @@ async function confirmAction() {
           </div>
           <v-switch
             :model-value="user.developer"
-            :disabled="busy || (isSelf && user.developer)"
+            :disabled="locked('developer') || (isSelf && user.developer)"
+            :loading="pending.has('developer') ? 'primary' : false"
             color="primary"
             inset
             hide-details
@@ -215,6 +312,13 @@ async function confirmAction() {
             @update:model-value="(value) => setDeveloper(!!value)"
           />
         </div>
+      </section>
+
+      <section
+        class="user-section"
+        aria-labelledby="user-security"
+      >
+        <h3 id="user-security">{{ t('userSecurity') }}</h3>
         <div class="user-actions">
           <v-btn
             variant="outlined"
@@ -305,71 +409,6 @@ async function confirmAction() {
             </ul>
           </template>
         </div>
-      </section>
-
-      <section
-        class="user-section"
-        aria-labelledby="user-departments"
-      >
-        <h3 id="user-departments">{{ t('userDepartmentAccess') }}</h3>
-        <ul class="user-departments">
-          <li
-            v-for="department in departments"
-            :key="department.id"
-            :class="{ 'user-department--off': !membership(department.id).enabled }"
-          >
-            <div class="user-department-head">
-              <strong :id="'dept-' + department.id">
-                {{ department.name }}
-                <small v-if="multiHotel">{{ department.hotelName }}</small>
-              </strong>
-              <v-switch
-                :model-value="membership(department.id).enabled"
-                :disabled="busy"
-                color="primary"
-                inset
-                hide-details
-                density="compact"
-                :label="t('userMember')"
-                @update:model-value="(value) => setMember(department.id, !!value)"
-              />
-            </div>
-            <div
-              v-if="membership(department.id).enabled"
-              class="user-department-body"
-            >
-              <div
-                class="user-vault"
-                role="group"
-                :aria-label="t('userVault') + ' — ' + department.name"
-              >
-                <span class="user-label">{{ t('userVault') }}</span>
-                <v-checkbox
-                  v-for="[flag, key] in vaultFlags"
-                  :key="flag"
-                  :model-value="membership(department.id)[flag]"
-                  :label="t(key)"
-                  :disabled="busy"
-                  color="primary"
-                  density="compact"
-                  hide-details
-                  @update:model-value="(value) => setFlag(department.id, flag, !!value)"
-                />
-              </div>
-              <div class="user-modules">
-                <v-select
-                  v-for="moduleId in modules"
-                  :key="moduleId"
-                  :model-value="level(department.id, moduleId)"
-                  :items="levelItems"
-                  :label="moduleTitle(moduleId)"
-                  :disabled="busy"
-                  @update:model-value="(value) => setLevel(department.id, moduleId, value)"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
       </section>
     </template>
     <ModuleDialog

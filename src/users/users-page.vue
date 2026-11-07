@@ -23,17 +23,28 @@ const failure = ref('');
 const search = ref('');
 const notice = ref('');
 
-async function load() {
-  failure.value = '';
-  try {
-    directory.value = await api.list();
-  } catch (error) {
-    failure.value = t(
-      userErrorKey(error) === 'userErrorDenied' ? 'userErrorDenied' : 'userLoadFailed',
-    );
-  } finally {
-    loading.value = false;
-  }
+// Saves reload the directory as they finish; only the last reload started may apply, and a
+// superseded reload resolves only once the latest one has, so a caller never sees old data.
+let sequence = 0;
+let latest: Promise<void> = Promise.resolve();
+function load(): Promise<void> {
+  const current = ++sequence;
+  const run = (async () => {
+    failure.value = '';
+    try {
+      const result = await api.list();
+      if (current === sequence) directory.value = result;
+    } catch (error) {
+      if (current === sequence)
+        failure.value = t(
+          userErrorKey(error) === 'userErrorDenied' ? 'userErrorDenied' : 'userLoadFailed',
+        );
+    } finally {
+      if (current === sequence) loading.value = false;
+    }
+  })();
+  latest = run;
+  return run.then(() => (current === sequence ? undefined : latest));
 }
 onMounted(load);
 const selfId = computed(() =>
@@ -294,6 +305,7 @@ function forgetPassword() {
     :modules="directory.modules"
     :self-id="selfId"
     :api="api"
+    :reload="load"
     @changed="changed"
     @failed="failed"
     @temporary-password="showPassword"
