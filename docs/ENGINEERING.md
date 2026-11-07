@@ -21,7 +21,7 @@ Do not treat a skill as a substitute for runtime validation, authorization tests
 
 This repository currently contains the approved prototype and reusable module scaffold.
 Next milestones should be implemented separately: shared shell/pages, routing, SSO/session integration, server authorization, then one complete operational module.
-Do not invent PMS/POS/EMS integrations. Backend technology, hosting and SSO provider remain undecided.
+Do not invent PMS/POS/EMS integrations. The backend is self-hosted Supabase on the hotel server, the frontend is hosted on Cloudflare Pages, and SSO is Google sign-in through Supabase Auth (see SESSION_AUTH.md).
 
 ## Review
 

@@ -103,7 +103,7 @@ The [Quality workflow](.github/workflows/ci.yml) runs `npm run check` and deploy
 
 ## Security and current limits
 
-- Sign-in comes first. Email/password sign-in is confirmed in production; Google sign-in is not configured.
+- Sign-in comes first. Email/password and Google sign-in are confirmed in production. Any Google account can sign up, but it has no hotel, department or module access until a developer grants it in Users; every other self-service sign-up is refused ([Session and auth](docs/SESSION_AUTH.md)).
 - The server derives hotel, department and user scope from the session and checks permissions on every RPC. Hiding UI is not authorization.
 - Create, update, archive, restore and secret access are audited on the server. Audit readers are scoped per module, and the platform audit reader is for platform developers only.
 - Vault accounts are private by default, with explicit read-only sharing. Passwords are encrypted server-side with AES-256-GCM ([Vault operations](docs/VAULT_OPERATIONS.md)). Off-server backup and a restore drill of the database plus keyring are not yet done.
