@@ -321,13 +321,13 @@ async function confirmAction() {
         <h3 id="user-security">{{ t('userSecurity') }}</h3>
         <div class="user-actions">
           <v-btn
-            variant="outlined"
+            variant="tonal"
             prepend-icon="mdi-lock-reset"
             :disabled="busy || isSelf"
             @click="confirm = 'reset'"
             >{{ t('userResetPassword') }}</v-btn
           ><v-btn
-            variant="outlined"
+            variant="tonal"
             :color="user.blocked ? 'primary' : 'error'"
             :prepend-icon="
               user.blocked ? 'mdi-account-check-outline' : 'mdi-account-cancel-outline'
@@ -381,7 +381,7 @@ async function confirmAction() {
               :disabled="busy"
             />
             <v-btn
-              variant="outlined"
+              variant="tonal"
               prepend-icon="mdi-account-switch-outline"
               :disabled="busy || !vaultTarget"
               @click="confirm = 'vault'"

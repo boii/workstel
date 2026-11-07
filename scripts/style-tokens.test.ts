@@ -120,3 +120,21 @@ test('flags unapproved breakpoints in feature code only', () => {
   );
   assert.deepEqual(rules('src/styles.css', ':root {\n}\n' + css), []);
 });
+
+test('flags outlined labelled buttons but not outlined choice toggles', () => {
+  const vue = [
+    '<template>',
+    '  <v-btn variant="outlined">Sign out</v-btn>',
+    '  <v-btn',
+    '    prepend-icon="mdi-lock-reset"',
+    '    variant="outlined"',
+    '  >Reset</v-btn>',
+    '  <v-btn-toggle variant="outlined"><v-btn value="a">A</v-btn></v-btn-toggle>',
+    '  <v-btn variant="tonal">Save</v-btn>',
+    '</template>',
+  ].join('\n');
+  assert.deepEqual(
+    checkStyleFile('src/shared/x.vue', vue).map((v) => v.line),
+    [2, 5],
+  );
+});

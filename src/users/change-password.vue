@@ -91,7 +91,7 @@ async function submit() {
     <div class="password-actions">
       <v-btn
         v-if="reauth"
-        variant="outlined"
+        variant="tonal"
         prepend-icon="mdi-login"
         @click="emit('signInAgain')"
         >{{ t('signInAgain') }}</v-btn

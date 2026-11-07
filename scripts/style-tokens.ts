@@ -83,6 +83,15 @@ export function checkTemplate(template: string, lines: string[], offset = 1): St
     if (size && ICON_SCALE.has(Number(size[1])))
       add((tag.index ?? 0) + size.index, 'icon size: use size="var(--workstel-icon-*)"');
   }
+  // Labelled buttons are filled, tonal or text; outlined is kept for v-btn-toggle choice groups.
+  for (const tag of template.matchAll(/<v-btn\b(?!-)[^<>]*?>/gs)) {
+    const variant = /\svariant="outlined"/.exec(tag[0]);
+    if (variant)
+      add(
+        (tag.index ?? 0) + variant.index,
+        'outlined button: use variant="tonal" (outlined is for v-btn-toggle only)',
+      );
+  }
   for (const match of template.matchAll(/\s:(?:max-)?width="\d+"/g))
     add(match.index ?? 0, 'dialog width: use dialogWidth from shared/dialog-widths');
   return found;

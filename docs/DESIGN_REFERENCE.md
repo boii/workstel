@@ -272,3 +272,12 @@ Every icon-only button uses one style: `v-btn` with `icon` and `variant="text"`.
 - **Recent cleanings:** the section appears only when the room has a finished cleaning; a new room shows just the choices.
 - **Room management:** Edit room and Archive/Restore room sit in one `ActionMenu` ⋮ ("Room actions") in the dialog header, beside Close, through the new `ModuleDialog` `#header-actions` slot, so the dialog has no footer. Archive is left out of the menu while a timer runs, instead of showing as a disabled button.
 - **Timer confirmations (approved 7 November 2026):** Start, Pause, Resume and Finish act at once; Start mistakes are undone with Cancel timer, and Pause/Resume reverse themselves. Cancel timer alone asks first, because it discards the timed work with no Undo: a `ModuleDialog` confirmation "Cancel this timer?" ("Batalkan timer ini?") names the room, kind and elapsed time, with a red **Cancel timer** and **Keep timing** ("Lanjutkan timer"). An Undo for Finish would need a server reopen action and is not built.
+
+## Tonal section actions — 7 November 2026
+
+Labelled secondary actions that stand alone in a section (not a row action, not a dialog footer) changed from outlined to tonal, like the row actions. They keep their colour: neutral actions get the grey tint, and destructive ones keep `color="error"` with a red tint.
+
+- Users dialog: Reset password, Block/Unblock (Account security) and Transfer (Vault ownership).
+- Settings: Sign out. Change password: Sign in again. Vault sharing: Transfer owner.
+- The only outlined buttons left are the `choice-group` toggles for labelled choices.
+- `npm run styles:check` (part of the build) now fails on a `v-btn` with `variant="outlined"`; outlined stays allowed on `v-btn-toggle`.

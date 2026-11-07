@@ -193,7 +193,7 @@ function granted(assignment: StaffAssignment) {
       <div class="settings-row settings-row--first">
         <p class="settings-muted">{{ demo ? t('temporaryData') : t('sessionPolicy') }}</p>
         <v-btn
-          variant="outlined"
+          variant="tonal"
           color="error"
           prepend-icon="mdi-logout"
           @click="emit('signOut')"
