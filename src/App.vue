@@ -656,7 +656,9 @@ function logout() {
       ><v-main :id="session ? 'workspace-main' : undefined"
         ><div class="workspace-content">
           <div
-            v-if="!route.meta.moduleId && view !== 'Audit log'"
+            v-if="
+              !route.meta.moduleId && view !== 'Audit log' && !(view === 'Users' && isDeveloper)
+            "
             class="page-heading"
           >
             <h1>
@@ -670,9 +672,7 @@ function logout() {
                         ? 'mdi-cog-outline'
                         : view === 'Help'
                           ? 'mdi-help-circle-outline'
-                          : view === 'Users'
-                            ? 'mdi-account-multiple-outline'
-                            : 'mdi-view-dashboard-outline'
+                          : 'mdi-view-dashboard-outline'
                 "
                 size="var(--workstel-icon-xl)"
               />{{ view === 'Not found' ? t('pageNotFound') : translate(view) }}
@@ -893,6 +893,7 @@ function logout() {
             @sign-out="logout"
             @open-shortcuts="shortcutsOpen = true"
           />
+          <!-- ModulePage inside renders the heading, as module pages do. -->
           <UsersPage
             v-else-if="view === 'Users' && isDeveloper"
             :demo="runtime.demo"
