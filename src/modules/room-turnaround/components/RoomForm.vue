@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { dialogWidth } from '../../../shared/dialog-widths';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import { errorMessage, useRoomTurnaroundMessages } from '../composables/useRoomTurnaroundMessages';
 import type { Room, RoomInput } from '../types';
@@ -17,11 +17,14 @@ const draft = ref<RoomInput>({ roomNumber: '', floor: '', roomType: '' });
 const errors = ref<Partial<Record<keyof RoomInput, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value);
 watch(open, (value) => {
   if (!value) return;
   draft.value = props.room
     ? { roomNumber: props.room.number, floor: props.room.floor, roomType: props.room.roomType }
     : { roomNumber: '', floor: '', roomType: '' };
+  initial.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -52,6 +55,7 @@ const fieldError = (field: keyof RoomInput) =>
     v-model="open"
     :title="room ? messages.editRoom : messages.addRoom"
     :busy="saving"
+    :dirty="dirty"
     :width="dialogWidth.md"
   >
     <v-form
@@ -110,11 +114,11 @@ const fieldError = (field: keyof RoomInput) =>
         :error-messages="fieldError('roomType')"
       />
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

@@ -15,6 +15,8 @@ const draft = ref<Record<ProfileField, string>>({ displayName: '', jobTitle: '',
 const errors = ref<ProfileErrors>({});
 const failure = ref<MessageKey | ''>('');
 const saving = ref(false);
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value);
 
 watch(open, (value) => {
   if (!value) return;
@@ -23,6 +25,7 @@ watch(open, (value) => {
     jobTitle: profile.value.jobTitle ?? '',
     extension: profile.value.extension ?? '',
   };
+  initial.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -57,6 +60,7 @@ async function submit() {
     v-model="open"
     :title="t('editProfile')"
     :busy="saving"
+    :dirty="dirty"
     :width="dialogWidth.md"
   >
     <v-form
@@ -124,11 +128,11 @@ async function submit() {
         </div>
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ t('cancelAction') }}</v-btn
       ><v-btn
         color="primary"

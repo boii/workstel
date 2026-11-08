@@ -152,7 +152,6 @@ function date(value: string) {
           class="admin-audit-refresh"
           icon="mdi-refresh"
           variant="text"
-          color="primary"
           :loading="loading"
           :aria-label="messages.refresh"
           :title="messages.refresh"

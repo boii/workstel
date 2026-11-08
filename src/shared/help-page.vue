@@ -364,12 +364,10 @@ kbd {
   overflow: hidden;
   clip-path: inset(50%);
 }
-@media (max-width: 900px) {
+@media (max-width: 680px) {
   .help-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-@media (max-width: 680px) {
   .help-grid,
   .help-column {
     gap: 11px;

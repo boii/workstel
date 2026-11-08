@@ -16,14 +16,14 @@
 }
 .vehicle-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 200px));
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 180px));
   gap: var(--workstel-space-2);
 }
 .vehicle-toolbar > * {
   min-width: 0;
 }
 .vehicle-toolbar:not(:has(> :nth-child(3))) {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 200px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 180px);
 }
 .vehicle-plate {
   font:

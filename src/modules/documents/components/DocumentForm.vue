@@ -30,6 +30,8 @@ const draft = ref<DocumentInput>({
 const errors = ref<Partial<Record<DocumentField, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value);
 watch(open, (value) => {
   if (!value) return;
   const document = props.document;
@@ -48,6 +50,7 @@ watch(open, (value) => {
         description: '',
         departmentId: props.departments[0]?.id ?? '',
       };
+  initial.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -81,6 +84,7 @@ const fieldError = (field: DocumentField) =>
     v-model="open"
     :title="document ? messages.edit : messages.add"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="document-form"
@@ -175,11 +179,11 @@ const fieldError = (field: DocumentField) =>
         />
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

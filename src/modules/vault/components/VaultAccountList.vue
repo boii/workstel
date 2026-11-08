@@ -128,7 +128,7 @@ function website(value: string) {
         class="vault-compact-actions"
         role="cell"
       >
-        <ActionMenu
+        <ActionMenu v-if="canEdit(entry) || canArchive(entry)"
           ><template #activator="{ props: menu }"
             ><v-btn
               v-bind="menu"

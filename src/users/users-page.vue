@@ -362,6 +362,7 @@ function forgetPassword() {
     v-model="createOpen"
     :title="t('addUser')"
     :busy="creating"
+    :dirty="!!email.trim() || !!copyFrom"
     :width="dialogWidth.md"
   >
     <v-form
@@ -413,11 +414,11 @@ function forgetPassword() {
         />
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="creating"
-        @click="createOpen = false"
+        @click="close"
         >{{ t('cancelAction') }}</v-btn
       ><v-btn
         color="primary"

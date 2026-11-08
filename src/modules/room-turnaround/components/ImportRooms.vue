@@ -14,6 +14,7 @@ const messages = useRoomTurnaroundMessages();
 const text = ref('');
 const saving = ref(false);
 const failure = ref('');
+const dirty = computed(() => !!text.value.trim());
 watch(open, (value) => {
   if (!value) return;
   text.value = '';
@@ -46,6 +47,7 @@ async function submit() {
     v-model="open"
     :title="messages.importRooms"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-alert
       v-if="failure"
@@ -82,11 +84,11 @@ async function submit() {
     >
       {{ parsed.rows.length }} {{ messages.importPreview }}
     </p>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

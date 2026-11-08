@@ -47,12 +47,21 @@
       .documents-toolbar,
       .sales-toolbar,
       .hk-toolbar,
-      .vault-toolbar
+      .vault-toolbar,
+      .users-toolbar
     ) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .module-page
-    :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search, .vault-search) {
+    :is(
+      .vehicle-search,
+      .bin-search,
+      .documents-search,
+      .sales-search,
+      .hk-search,
+      .vault-search,
+      .users-search
+    ) {
     grid-column: 1 / -1;
   }
 }
@@ -65,7 +74,8 @@
       .documents-toolbar,
       .sales-toolbar,
       .hk-toolbar,
-      .vault-toolbar
+      .vault-toolbar,
+      .users-toolbar
     ) {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -116,14 +126,23 @@
       .documents-toolbar,
       .sales-toolbar,
       .hk-toolbar,
-      .vault-toolbar
+      .vault-toolbar,
+      .users-toolbar
     ):has(> .filter-group-button) {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
   .module-page
     .module-page-toolbar
-    :is(.vehicle-search, .bin-search, .documents-search, .sales-search, .hk-search, .vault-search) {
+    :is(
+      .vehicle-search,
+      .bin-search,
+      .documents-search,
+      .sales-search,
+      .hk-search,
+      .vault-search,
+      .users-search
+    ) {
     grid-column: auto;
   }
   /* Centre the 44px button on the 40px search field. */

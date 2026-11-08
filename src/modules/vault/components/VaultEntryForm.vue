@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ModuleDialog from '../../../shared/module-dialog.vue';
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useVaultMessages } from '../composables/useVaultMessages';
 import { departmentIds } from '../types';
 import type { VaultEntry, VaultEntryInput, VaultField, VaultValidationError } from '../types';
@@ -32,6 +32,8 @@ const draft = ref<VaultEntryInput>({
   notes: '',
 });
 const errors = ref<Partial<Record<VaultField, VaultValidationError>>>({});
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value);
 const departmentKeys = {
   'front-office': 'frontOffice',
   sales: 'sales',
@@ -62,6 +64,7 @@ watch(open, (value) => {
           notes: '',
         },
   );
+  initial.value = JSON.stringify(draft.value);
   errors.value = {};
 });
 async function submit() {
@@ -89,6 +92,7 @@ function fieldError(field: VaultField) {
     class="vault-dialog"
     :title="entry ? messages.edit : messages.add"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="vault-account-form"
@@ -193,11 +197,11 @@ function fieldError(field: VaultField) {
         />
       </div>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       >
       <v-btn

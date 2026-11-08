@@ -25,6 +25,8 @@ const draft = ref({
 const errors = ref<Partial<Record<ItemField, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value);
 watch(open, (value) => {
   if (!value) return;
   const item = props.item;
@@ -45,6 +47,7 @@ watch(open, (value) => {
         minQuantity: '',
         departmentId: props.departments[0]?.id ?? '',
       };
+  initial.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -78,6 +81,7 @@ const fieldError = (field: ItemField) =>
     v-model="open"
     :title="item ? messages.edit : messages.add"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="bin-item-form"
@@ -186,11 +190,11 @@ const fieldError = (field: ItemField) =>
         {{ messages.unitLockedHint }}
       </p>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

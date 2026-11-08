@@ -33,10 +33,13 @@ let idempotencyKey = crypto.randomUUID();
 const errors = ref<Partial<Record<keyof ActivityInput, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value || !!followUp.value);
 watch(open, (value) => {
   if (!value) return;
   today.value = hotelToday();
   draft.value = blank();
+  initial.value = JSON.stringify(draft.value);
   followUp.value = '';
   idempotencyKey = crypto.randomUUID();
   errors.value = {};
@@ -85,6 +88,7 @@ const fieldError = (field: keyof ActivityInput) =>
     :title="messages.logActivity"
     :subtitle="accountName"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="sales-activity-form"
@@ -173,11 +177,11 @@ const fieldError = (field: keyof ActivityInput) =>
         />
       </template>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

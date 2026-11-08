@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { dialogWidth } from '../../../shared/dialog-widths';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import FilterGroup from '../../../shared/filter-group.vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import { vaultRpc, parseAudit } from '../live-api';
 import type { AuditEvent } from '../live-api';
@@ -35,6 +36,18 @@ const departments = computed(() =>
     .filter((a) => a.hotelId === props.hotelId && a.canAudit)
     .map((a) => ({ value: a.departmentId, title: a.departmentName })),
 );
+const filterCount = computed(() => (department.value ? 1 : 0) + (outcome.value !== 'all' ? 1 : 0));
+const hasFilters = computed(() => !!search.value.trim() || filterCount.value > 0);
+function resetFilterGroup() {
+  const reload = !!department.value;
+  department.value = null;
+  outcome.value = 'all';
+  if (reload) void load();
+}
+function resetFilters() {
+  search.value = '';
+  resetFilterGroup();
+}
 let sequence = 0;
 let controller: AbortController | undefined;
 async function load() {
@@ -93,37 +106,43 @@ onUnmounted(() => {
         <v-text-field
           v-model="search"
           class="vault-audit-search"
-          :label="messages.auditSearch"
+          :placeholder="messages.auditSearch"
+          :aria-label="messages.auditSearch"
           prepend-inner-icon="mdi-magnify"
+          single-line
           hide-details
           density="compact"
           clearable
           @update:model-value="search = $event ?? ''"
         />
-        <v-select
-          v-model="department"
-          :label="messages.department"
-          :items="departments"
-          hide-details
-          density="compact"
-          clearable
-          @update:model-value="load"
-        />
-        <v-select
-          v-model="outcome"
-          :label="messages.auditOutcome"
-          :items="[
-            { value: 'all', title: messages.auditAllOutcomes },
-            { value: 'success', title: messages.success },
-            { value: 'denied', title: messages.denied },
-          ]"
-          hide-details
-          density="compact"
-        />
+        <FilterGroup
+          :count="filterCount"
+          @reset="resetFilterGroup"
+        >
+          <v-select
+            v-model="department"
+            :label="messages.department"
+            :items="departments"
+            hide-details
+            density="compact"
+            clearable
+            @update:model-value="load"
+          />
+          <v-select
+            v-model="outcome"
+            :label="messages.auditOutcome"
+            :items="[
+              { value: 'all', title: messages.auditAllOutcomes },
+              { value: 'success', title: messages.success },
+              { value: 'denied', title: messages.denied },
+            ]"
+            hide-details
+            density="compact"
+          />
+        </FilterGroup>
         <v-btn
           icon="mdi-refresh"
           variant="text"
-          color="primary"
           :loading="loading"
           :aria-label="messages.refresh"
           :title="messages.refresh"
@@ -156,17 +175,15 @@ onUnmounted(() => {
         class="vault-audit-empty"
       >
         <v-icon
-          icon="mdi-history"
+          :icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-history'"
           size="var(--workstel-icon-xl)"
         />
-        <p>{{ events.length ? messages.auditNoResults : messages.auditEmpty }}</p>
+        <p>{{ hasFilters ? messages.auditNoResults : messages.auditEmpty }}</p>
         <v-btn
-          v-if="search || outcome !== 'all'"
+          v-if="hasFilters"
           variant="text"
-          @click="
-            search = '';
-            outcome = 'all';
-          "
+          color="primary"
+          @click="resetFilters"
           >{{ messages.reset }}</v-btn
         >
       </div>
@@ -235,7 +252,7 @@ onUnmounted(() => {
 }
 .vault-audit-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 0.8fr) 40px;
+  grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 180px)) 40px;
   gap: var(--workstel-space-2);
   align-items: center;
 }
@@ -348,10 +365,7 @@ onUnmounted(() => {
 }
 @media (max-width: 680px) {
   .vault-audit-controls {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
-  }
-  .vault-audit-search {
-    grid-column: 1/-1;
+    grid-template-columns: minmax(0, 1fr) auto 44px;
   }
   .vault-audit-controls :deep(.v-field__input) {
     min-height: var(--workstel-touch-target);

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import ModuleDialog from './module-dialog.vue';
+import UndoSnackbar from './undo-snackbar.vue';
 import { locale, t, translate } from '../i18n';
 import type { ModuleManifest } from '../core/module';
 import { createDemoModuleSwitch, createLiveModuleSwitch } from '../core/module-switch';
@@ -151,12 +152,11 @@ function changedLabel(state: ModuleState) {
         {{ t('moduleDisableBody') }}
       </p>
     </ModuleDialog>
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="null"
+      @close="notice = ''"
+    />
   </v-card>
 </template>
 <style scoped>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import { useVehicleMessages, errorMessage } from '../composables/useVehicleMessages';
 import type { Vehicle, VehicleInput } from '../types';
@@ -17,6 +17,8 @@ const draft = ref<VehicleInput>({ name: '', plateNumber: '', departmentId: '' })
 const errors = ref<Partial<Record<VehicleField, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
+const initial = ref('');
+const dirty = computed(() => JSON.stringify(draft.value) !== initial.value);
 watch(open, (value) => {
   if (!value) return;
   draft.value = props.vehicle
@@ -26,6 +28,7 @@ watch(open, (value) => {
         departmentId: props.vehicle.departmentId,
       }
     : { name: '', plateNumber: '', departmentId: props.departments[0]?.id ?? '' };
+  initial.value = JSON.stringify(draft.value);
   errors.value = {};
   failure.value = '';
 });
@@ -56,6 +59,7 @@ const fieldError = (field: VehicleField) =>
     v-model="open"
     :title="vehicle ? messages.edit : messages.add"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="vehicle-form"
@@ -107,11 +111,11 @@ const fieldError = (field: VehicleField) =>
         :error-messages="fieldError('departmentId')"
       />
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

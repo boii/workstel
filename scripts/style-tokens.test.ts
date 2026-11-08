@@ -97,6 +97,10 @@ test('flags raw Vuetify primitives in feature code only', () => {
     [2, 3, 4, 5],
   );
   assert.deepEqual(rules('src/users/a.vue', '<template><v-snackbar /></template>').length, 1);
+  assert.deepEqual(
+    rules('src/shared/settings-page.vue', '<template><v-snackbar /></template>').length,
+    1,
+  );
   assert.deepEqual(rules('src/shared/module-dialog.vue', vue), []);
 });
 

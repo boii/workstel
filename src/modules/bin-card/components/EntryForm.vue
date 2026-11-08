@@ -27,6 +27,9 @@ const notes = ref('');
 const errors = ref<Partial<Record<EntryField, ValidationError>>>({});
 const saving = ref(false);
 const failure = ref('');
+const dirty = computed(
+  () => type.value !== 'receipt' || !!quantity.value || !!reference.value || !!notes.value,
+);
 // One key per opened form, so a retried submit after a network error is not recorded twice.
 let idempotencyKey = '';
 watch(open, (value) => {
@@ -89,6 +92,7 @@ const unit = computed(() => props.item?.unit ?? '');
     :title="messages.entryTitle"
     :subtitle="item ? item.code + ' · ' + item.name : ''"
     :busy="saving"
+    :dirty="dirty"
   >
     <v-form
       id="bin-entry-form"
@@ -180,11 +184,11 @@ const unit = computed(() => props.item?.unit ?? '');
         />
       </OptionalFields>
     </v-form>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="saving"
-        @click="open = false"
+        @click="close"
         >{{ messages.cancel }}</v-btn
       ><v-btn
         color="primary"

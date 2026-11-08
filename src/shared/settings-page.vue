@@ -7,6 +7,7 @@ import type { StaffAssignment } from '../auth/useAuth';
 import type { ModuleManifest } from '../core/module';
 import ModuleSwitches from './module-switches.vue';
 import ModuleDialog from './module-dialog.vue';
+import UndoSnackbar from './undo-snackbar.vue';
 import ChangePassword from '../users/change-password.vue';
 import ProfileForm from '../profile/profile-form.vue';
 import { initialsOf, useProfile } from '../profile/use-profile';
@@ -228,12 +229,11 @@ function granted(assignment: StaffAssignment) {
       v-model="profileOpen"
       @saved="notice = t('profileSaved')"
     />
-    <v-snackbar
-      :model-value="!!notice"
-      timeout="3000"
-      @update:model-value="notice = ''"
-      >{{ notice }}</v-snackbar
-    >
+    <UndoSnackbar
+      :message="notice"
+      :undo="null"
+      @close="notice = ''"
+    />
   </div>
 </template>
 <style scoped>

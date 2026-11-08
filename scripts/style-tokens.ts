@@ -14,7 +14,8 @@ const ICON_SCALE = new Set([14, 16, 18, 22, 28, 32]);
 const LEADING = new Set(['1.4', '1.5', '1.6', '1.7']);
 const EXEMPT = /token-exempt:\s*\S/;
 /** Feature code (modules and app pages) must use the shared primitives in src/shared. */
-const FEATURE = /(?:^|\/)src\/(?:modules|users|admin|profile)\//;
+const FEATURE =
+  /(?:^|\/)src\/(?:modules|users|admin|profile|auth)\/|src\/shared\/(?:settings-page|module-switches|help-page)\.vue$/;
 /** Approved breakpoints: phone layout (shared/breakpoints.ts), narrow list rows, smallest phones. */
 const BREAKPOINTS = new Set([359, 680, 760]);
 const RAW_COMPONENTS: [RegExp, string][] = [

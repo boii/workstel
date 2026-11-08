@@ -178,7 +178,7 @@ function closeOverlays() {
     shortcutsOpen.value = false;
     return true;
   }
-  if (creating.value) {
+  if (creating.value && !title.value.trim()) {
     creating.value = false;
     return true;
   }
@@ -686,6 +686,7 @@ function logout() {
               color="primary"
               prepend-icon="mdi-plus"
               @click="
+                title = '';
                 creating = true;
                 error = '';
               "
@@ -942,6 +943,7 @@ function logout() {
       v-model="creating"
       :title="t('createTask')"
       :subtitle="t('taskHint')"
+      :dirty="!!title.trim()"
       :width="dialogWidth.md"
     >
       <v-form
@@ -961,10 +963,10 @@ function logout() {
           @update:model-value="error = ''"
         /><small class="task-form-note">{{ t('temporaryData') }}</small></v-form
       >
-      <template #actions>
+      <template #actions="{ close }">
         <v-btn
           variant="text"
-          @click="creating = false"
+          @click="close"
           >{{ t('cancelAction') }}</v-btn
         ><v-btn
           type="submit"

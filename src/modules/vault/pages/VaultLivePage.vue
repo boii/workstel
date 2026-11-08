@@ -504,6 +504,7 @@ onMounted(() => {
       :loading="showSkeleton"
       :error="formOpen ? '' : failure"
       :empty="!visibleEntries.length && !loading && !searching"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-shield-lock-outline'"
       :empty-title="hasFilters ? messages.noResults : messages.emptyTitle"
       :empty-description="hasFilters ? messages.noResultsHint : messages.liveEmpty"
       :retry-label="messages.retry"
@@ -629,6 +630,15 @@ onMounted(() => {
             >{{ messages.reset }}</v-btn
           >
         </div>
+        <v-btn
+          v-else-if="canWrite"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          :disabled="busy"
+          @click="edit()"
+          >{{ messages.add }}</v-btn
+        >
       </template>
       <VaultAccountList
         :entries="visibleEntries"

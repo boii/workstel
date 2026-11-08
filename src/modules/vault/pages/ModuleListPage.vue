@@ -107,6 +107,7 @@ function toggleDetailArchive(entry: VaultEntry) {
 const filterCount = computed(
   () => (department.value !== 'all' ? 1 : 0) + (status.value !== 'active' ? 1 : 0),
 );
+const hasFilters = computed(() => !!search.value.trim() || filterCount.value > 0);
 function resetFilterGroup() {
   department.value = 'all';
   status.value = 'active';
@@ -133,8 +134,9 @@ function resetFilters() {
         filtered.length + ' ' + (filtered.length === 1 ? messages.accountOne : messages.records)
       "
       :empty="!filtered.length"
-      :empty-title="entries.length ? messages.noResults : messages.emptyTitle"
-      :empty-description="entries.length ? messages.noResultsHint : messages.emptyDescription"
+      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-shield-lock-outline'"
+      :empty-title="hasFilters ? messages.noResults : messages.emptyTitle"
+      :empty-description="hasFilters ? messages.noResultsHint : messages.emptyDescription"
       :retry-label="messages.retry"
     >
       <template #actions
@@ -191,10 +193,18 @@ function resetFilters() {
       </template>
       <template #empty-action
         ><v-btn
+          v-if="hasFilters"
           variant="text"
           color="primary"
           @click="resetFilters"
           >{{ messages.reset }}</v-btn
+        ><v-btn
+          v-else
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-plus"
+          @click="openForm()"
+          >{{ messages.add }}</v-btn
         ></template
       >
       <VaultAccountList
