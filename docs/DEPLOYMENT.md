@@ -557,7 +557,7 @@ Deploy order: the migration, then the frontend. The frontend reads lists and the
 
 Rollback: deploy a frontend without outcomes (37e34d1 or earlier), then run `infra/rollback-sales-visit-outcomes.sql`, which copies the values to `workstel_private.sales_activity_outcomes_backup`, restores the previous functions and drops the columns.
 
-The commit was pushed to GitHub `main` without its own deployment record. No earlier publish of its frontend is recorded; it is in production with the 10 November release below (https://0708ce7a.workstel.pages.dev/), whose local `npm run check` run included `supabase/tests/sales-visit-outcomes.test.ts`. Whether the migration has been applied on the hotel server was not confirmed here; until the operator confirms it, activity logging in production may fail.
+The commit was pushed to GitHub `main` without its own deployment record. No earlier publish of its frontend is recorded; it is in production with the 10 November release below (https://0708ce7a.workstel.pages.dev/), whose local `npm run check` run included `supabase/tests/sales-visit-outcomes.test.ts`. On 10 November 2026 the operator confirmed the migration is applied on the hotel server; Claude's SSH access was not used, so the backup and the post-migration check were not seen here, and logging an activity with an outcome has not been tried in production.
 
 ## Search, request aborts, dialogs and shortcuts — 10 November 2026
 
