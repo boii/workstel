@@ -10,6 +10,7 @@ import {
   formatDay,
   formatMoney,
   formatStay,
+  outcomeKeys,
   stageKeys,
   useSalesMessages,
 } from '../composables/useSalesMessages';
@@ -273,6 +274,21 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
                   <template v-if="activity.dealTitle"> · {{ activity.dealTitle }}</template></small
                 >
                 <p>{{ activity.summary }}</p>
+                <div
+                  v-if="activity.outcome || activity.metWith || activity.reference"
+                  class="sales-outcome-line"
+                >
+                  <span
+                    v-if="activity.outcome"
+                    class="sales-outcome"
+                    :class="'sales-outcome--' + activity.outcome"
+                    >{{ messages[outcomeKeys[activity.outcome]] }}</span
+                  ><small v-if="activity.metWith"
+                    >{{ messages.activityWith }} {{ activity.metWith }}</small
+                  ><small v-if="activity.reference"
+                    >{{ messages.activityRef }} {{ activity.reference }}</small
+                  >
+                </div>
                 <small
                   ><template v-if="activity.createdByName || activity.createdByEmail"
                     >{{ messages.activityBy }}

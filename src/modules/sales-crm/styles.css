@@ -331,6 +331,52 @@
 .sales-entry--backdated {
   color: var(--workstel-danger-text);
 }
+/* Visit outcome: a small chip coloured by how far the deal moved, then contact and reference. */
+.sales-outcome-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--workstel-space-1) var(--workstel-space-2);
+  margin-bottom: var(--workstel-space-0_5);
+}
+.sales-timeline .sales-outcome-line small {
+  display: inline;
+}
+.sales-outcome {
+  display: inline-block;
+  padding: 0 var(--workstel-space-1_5);
+  border-radius: var(--workstel-radius-sm);
+  font-size: var(--workstel-font-xs);
+  font-weight: var(--workstel-weight-semibold);
+  background: var(--workstel-info-bg);
+  color: var(--workstel-info-text);
+}
+.sales-outcome--booked {
+  background: var(--workstel-success-bg);
+  color: var(--workstel-success-text);
+}
+/* No response and declined close the conversation, not an error. */
+.sales-outcome--no-response,
+.sales-outcome--declined {
+  background: var(--workstel-neutral-bg);
+  color: var(--workstel-text-secondary);
+}
+.sales-report-outcomes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--workstel-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.sales-report-outcomes li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--workstel-space-1_5);
+}
+.sales-report-outcomes strong {
+  font-size: var(--workstel-font-sm);
+}
 /* Entry report tab: month (and department) pickers, tiles, then two lists. */
 .sales-report-toolbar,
 .sales-report-toolbar:not(:has(> :nth-child(4))) {

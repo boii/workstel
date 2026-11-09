@@ -26,6 +26,7 @@ import {
   formatDay,
   formatMoney,
   formatMonth,
+  outcomeKeys,
   formatStay,
   segmentKeys,
   stageKeys,
@@ -33,7 +34,7 @@ import {
 } from '../composables/useSalesMessages';
 import { createDemoSalesCrmApi, demoDepartments, demoHotelId } from '../demo-api';
 import { createLiveSalesCrmApi } from '../live-api';
-import { accountTypes, openStages, stages } from '../types';
+import { accountTypes, activityOutcomes, openStages, stages } from '../types';
 import type {
   AccountInput,
   AccountType,
@@ -417,11 +418,11 @@ async function saveDeal(input: DealInput) {
 
 // Activity form, from a deal row or an account detail
 const activityFormOpen = ref(false);
-const activityAccount = ref<{ id: string; name: string } | null>(null);
+const activityAccount = ref<{ id: string; name: string; contactName?: string } | null>(null);
 const activityDeals = ref<Deal[]>([]);
 const activityDealId = ref<string | null>(null);
 function openActivityForm(
-  account: { id: string; name: string },
+  account: { id: string; name: string; contactName?: string },
   list: Deal[],
   dealId: string | null,
 ) {
@@ -515,6 +516,9 @@ const reportDepartmentItems = computed(() => [
   { value: null, title: messages.value.allDepartments },
   ...managedDepartments.value.map((d) => ({ value: d.id, title: d.name })),
 ]);
+const reportOutcomes = computed(() =>
+  report.value ? activityOutcomes.filter((o) => report.value!.outcomes[o] > 0) : [],
+);
 const onTimeRate = (onTime: number, total: number) =>
   total ? Math.round((onTime / total) * 100) + '%' : '–';
 const delayLabel = (days: number) =>
@@ -944,6 +948,29 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           </div>
         </div>
 
+        <h3 class="sales-report-heading">{{ messages.reportOutcomes }}</h3>
+        <ul
+          v-if="reportOutcomes.length"
+          class="sales-report-outcomes"
+        >
+          <li
+            v-for="outcome in reportOutcomes"
+            :key="outcome"
+          >
+            <span
+              class="sales-outcome"
+              :class="'sales-outcome--' + outcome"
+              >{{ messages[outcomeKeys[outcome]] }}</span
+            ><strong>{{ report.outcomes[outcome] }}</strong>
+          </li>
+        </ul>
+        <p
+          v-else
+          class="sales-muted"
+        >
+          {{ messages.reportNoOutcomes }}
+        </p>
+
         <h3 class="sales-report-heading">{{ messages.reportPeople }}</h3>
         <ul class="list-rows">
           <ListRow
@@ -1070,6 +1097,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
     <ActivityForm
       v-model="activityFormOpen"
       :account-name="activityAccount?.name ?? ''"
+      :contact-name="activityAccount?.contactName ?? ''"
       :deals="activityDeals"
       :deal-id="activityDealId"
       :save="saveActivity"

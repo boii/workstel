@@ -22,6 +22,22 @@ export const activityTypes = [
   'note',
 ] as const;
 export type ActivityType = (typeof activityTypes)[number];
+/** What an activity led to; required for face-to-face activities. */
+export const activityOutcomes = [
+  'interested',
+  'need-proposal',
+  'proposal-sent',
+  'tentative',
+  'booked',
+  'no-response',
+  'declined',
+] as const;
+export type ActivityOutcome = (typeof activityOutcomes)[number];
+export const outcomeRequiredTypes: readonly ActivityType[] = [
+  'visit',
+  'meeting',
+  'site-inspection',
+];
 /** How long after the activity it was logged; the server decides it from its own clock. */
 export const entryTimings = ['on-time', 'late', 'backdated'] as const;
 export type EntryTiming = (typeof entryTimings)[number];
@@ -101,6 +117,11 @@ export interface Activity {
   type: ActivityType;
   occurredOn: string;
   summary: string;
+  outcome: ActivityOutcome | null;
+  /** The client person met, as typed. */
+  metWith: string;
+  /** Proposal, contract or email number, as typed. */
+  reference: string;
   /** Server time of logging, never sent by the client. */
   createdAt: string;
   createdByEmail: string;
@@ -116,6 +137,9 @@ export interface ActivityInput {
   type: ActivityType;
   occurredOn: string;
   summary: string;
+  outcome: ActivityOutcome | null;
+  metWith: string;
+  reference: string;
   dealId: string | null;
   nextFollowUp: string | null;
 }
@@ -154,6 +178,8 @@ export interface EntryReport {
   entries: EntryReportItem[];
   /** All late and backdated entries in the month, which may exceed entries.length. */
   entriesTotal: number;
+  /** Activities per outcome in the month; activities without one are not counted. */
+  outcomes: Record<ActivityOutcome, number>;
 }
 export interface StageTotal {
   count: number;

@@ -1,8 +1,16 @@
 import { ModuleRequestError } from '../../core/module-rpc';
 import type { SalesCrmApi } from './api';
-import { openStages } from './types';
-import type { Activity, Deal, SalesAccount, SalesSummary, Stage } from './types';
-import { addDays, entryDelayDays, entryTiming, hotelToday, isEmail, isPhone } from './validation';
+import { activityOutcomes, openStages } from './types';
+import type { Activity, Deal, EntryReport, SalesAccount, SalesSummary, Stage } from './types';
+import {
+  addDays,
+  entryDelayDays,
+  entryTiming,
+  hotelToday,
+  isEmail,
+  isPhone,
+  validateActivity,
+} from './validation';
 
 export const demoHotelId = 'demo-hotel';
 export const demoDepartments = [{ id: 'sales', name: 'Sales & Marketing' }];
@@ -80,6 +88,9 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       type: 'site-inspection',
       occurredOn: addDays(today, -6),
       summary: 'Ballroom and breakout rooms viewed with the event committee.',
+      outcome: 'interested',
+      metWith: 'Event committee',
+      reference: '',
       createdAt: now,
       createdByEmail: 'sales@example.com',
       createdByName: 'Rudi Hartono',
@@ -93,6 +104,9 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       type: 'email',
       occurredOn: addDays(today, -4),
       summary: 'Proposal sent with room block and meeting package.',
+      outcome: 'proposal-sent',
+      metWith: '',
+      reference: 'PRO-2611-014',
       createdAt: now,
       createdByEmail: 'sales@example.com',
       createdByName: 'Rudi Hartono',
@@ -106,6 +120,9 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       type: 'visit',
       occurredOn: addDays(today, -9),
       summary: 'Courtesy visit to the HR office; met the new travel coordinator.',
+      outcome: 'interested',
+      metWith: 'Travel coordinator',
+      reference: '',
       createdAt: now,
       createdByEmail: 'sales@example.com',
       createdByName: 'Rudi Hartono',
@@ -114,11 +131,19 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
     // A second salesperson, so the entry report has more than one person.
     ...(
       [
-        [1, 'call', -3, -3, 'Called about the Christmas group block.'],
-        [2, 'meeting', -2, -2, 'Met the protocol team about the regional forum.'],
-        [3, 'visit', -5, -4, 'Showed the garden venue to the couple.'],
+        [1, 'call', -3, -3, 'Called about the Christmas group block.', null, ''],
+        [
+          2,
+          'meeting',
+          -2,
+          -2,
+          'Met the protocol team about the regional forum.',
+          'need-proposal',
+          'Dewi Lestari',
+        ],
+        [3, 'visit', -5, -4, 'Showed the garden venue to the couple.', 'tentative', 'Maya Putri'],
       ] as const
-    ).map(([index, type, occurredIn, recordedIn, summary]) => ({
+    ).map(([index, type, occurredIn, recordedIn, summary, outcome, metWith]) => ({
       id: 'demo-activity-' + (index + 3),
       accountId: accounts[index].id,
       dealId: null,
@@ -126,6 +151,9 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       type,
       occurredOn: addDays(today, occurredIn),
       summary,
+      outcome,
+      metWith,
+      reference: '',
       createdAt: now,
       createdByEmail: 'maya@example.com',
       createdByName: 'Maya Sari',
@@ -326,6 +354,8 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       const deal = input.dealId ? deals.find((d) => d.id === input.dealId) : undefined;
       if (input.dealId && deal?.accountId !== accountId)
         throw new ModuleRequestError('INVALID_INPUT');
+      if (Object.keys(validateActivity(input, today)).length)
+        throw new ModuleRequestError('INVALID_INPUT');
       if (input.nextFollowUp) {
         if (!deal) throw new ModuleRequestError('INVALID_INPUT');
         if (!isOpen(deal.stage)) throw new ModuleRequestError('DEAL_CLOSED');
@@ -340,6 +370,9 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
         type: input.type,
         occurredOn: input.occurredOn,
         summary: input.summary.trim(),
+        outcome: input.outcome,
+        metWith: input.metWith.trim(),
+        reference: input.reference.trim(),
         createdAt: new Date().toISOString(),
         createdByEmail: 'demo@example.com',
         createdByName: 'Demo User',
@@ -384,6 +417,9 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
           createdByName: a.createdByName,
         })),
         entriesTotal: late.length,
+        outcomes: Object.fromEntries(
+          activityOutcomes.map((o) => [o, inMonth.filter((a) => a.outcome === o).length]),
+        ) as EntryReport['outcomes'],
       };
     },
   };

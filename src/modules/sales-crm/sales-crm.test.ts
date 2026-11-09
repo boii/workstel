@@ -83,13 +83,33 @@ test('form rules match the server', () => {
     'departureBeforeArrival',
   );
   assert.equal(validateDeal({ ...dealInput, stage: 'lost' }).lostReason, 'required');
+  const activityInput = {
+    type: 'call' as const,
+    occurredOn: '2026-11-04',
+    summary: 'x',
+    dealId: null,
+    nextFollowUp: null,
+    outcome: null,
+    metWith: '',
+    reference: '',
+  };
   assert.equal(
-    validateActivity(
-      { type: 'call', occurredOn: '2026-11-05', summary: 'x', dealId: null, nextFollowUp: null },
-      '2026-11-04',
-    ).occurredOn,
+    validateActivity({ ...activityInput, occurredOn: '2026-11-05' }, '2026-11-04').occurredOn,
     'futureDate',
   );
+  // Face-to-face activities need an outcome; calls, emails and notes do not.
+  assert.deepEqual(validateActivity(activityInput, '2026-11-04'), {});
+  for (const type of ['visit', 'meeting', 'site-inspection'] as const)
+    assert.equal(validateActivity({ ...activityInput, type }, '2026-11-04').outcome, 'required');
+  assert.deepEqual(
+    validateActivity({ ...activityInput, type: 'visit', outcome: 'tentative' }, '2026-11-04'),
+    {},
+  );
+  const tooLong = validateActivity(
+    { ...activityInput, metWith: 'x'.repeat(101), reference: 'y'.repeat(101) },
+    '2026-11-04',
+  );
+  assert.deepEqual([tooLong.metWith, tooLong.reference], ['tooLong', 'tooLong']);
 });
 
 test('responses are validated before they are shown', () => {
@@ -163,6 +183,18 @@ test('activity rows carry the server entry timing', () => {
     () => parseActivities([{ ...row, created_by_name: 7 }], accountId),
     ModuleRequestError,
   );
+  // Servers before migration 202611090004 send no outcome fields.
+  assert.deepEqual([activity.outcome, activity.metWith, activity.reference], [null, '', '']);
+  const withOutcome = parseActivities(
+    [{ ...row, outcome: 'tentative', met_with: 'Budi', reference: 'PRO-1' }],
+    accountId,
+  )[0];
+  assert.deepEqual(
+    [withOutcome.outcome, withOutcome.metWith, withOutcome.reference],
+    ['tentative', 'Budi', 'PRO-1'],
+  );
+  for (const broken of [{ outcome: 'negotiating' }, { met_with: 1 }, { reference: null }])
+    assert.throws(() => parseActivities([{ ...row, ...broken }], accountId), ModuleRequestError);
   assert.equal(activity.recordedOn, '2026-11-04');
   assert.equal(activity.entryDelayDays, 3);
   assert.equal(activity.entryTiming, 'backdated');
@@ -202,6 +234,13 @@ test('entry reports are validated before they are shown', () => {
   assert.equal(report.people[0].name, 'Rina Wijaya');
   assert.equal(report.entries[0].entryTiming, 'backdated');
   assert.equal(report.entriesTotal, 2);
+  // Without outcomes (older servers) every count is zero; with them they are validated.
+  assert.equal(report.outcomes.booked, 0);
+  assert.equal(parseEntryReport({ ...data, outcomes: { booked: 2 } }, meta).outcomes.booked, 2);
+  assert.throws(
+    () => parseEntryReport({ ...data, outcomes: { booked: -1 } }, meta),
+    ModuleRequestError,
+  );
   for (const [brokenData, brokenMeta] of [
     [{ ...data, entries: [{ ...entry, entry_timing: 'on-time' }] }, meta],
     [{ ...data, people: [{ ...counts, email: 'x' }] }, meta],
@@ -261,6 +300,9 @@ test('demo CRM keeps the pipeline, follow-ups and archiving consistent', async (
       summary: 'Called',
       dealId: target.id,
       nextFollowUp: '2026-11-20',
+      outcome: 'proposal-sent',
+      metWith: ' Rina ',
+      reference: '',
     },
     'key-1',
   );
@@ -273,6 +315,9 @@ test('demo CRM keeps the pipeline, follow-ups and archiving consistent', async (
       summary: 'Called',
       dealId: target.id,
       nextFollowUp: '2026-11-20',
+      outcome: 'proposal-sent',
+      metWith: ' Rina ',
+      reference: '',
     },
     'key-1',
   );
@@ -281,7 +326,27 @@ test('demo CRM keeps the pipeline, follow-ups and archiving consistent', async (
   assert.equal(called.length, 1);
   assert.equal(called[0].entryTiming, 'on-time');
   assert.ok(activities.data.some((a) => a.entryTiming === 'backdated'));
+  assert.deepEqual([called[0].outcome, called[0].metWith], ['proposal-sent', 'Rina']);
+  await assert.rejects(
+    api.logActivity(
+      'demo-hotel',
+      target.accountId,
+      {
+        type: 'visit',
+        occurredOn: today,
+        summary: 'No outcome',
+        dealId: null,
+        nextFollowUp: null,
+        outcome: null,
+        metWith: '',
+        reference: '',
+      },
+      'key-2',
+    ),
+    ModuleRequestError,
+  );
   const report = await api.entryReport('demo-hotel', null, today.slice(0, 7));
+  assert.ok(report.outcomes['proposal-sent'] >= 1);
   assert.equal(
     report.totals.total,
     report.totals.onTime + report.totals.late + report.totals.backdated,

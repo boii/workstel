@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
-import { activityKeys, errorMessage, useSalesMessages } from '../composables/useSalesMessages';
-import { activityTypes, openStages } from '../types';
+import {
+  activityKeys,
+  errorMessage,
+  outcomeKeys,
+  useSalesMessages,
+} from '../composables/useSalesMessages';
+import { activityOutcomes, activityTypes, openStages, outcomeRequiredTypes } from '../types';
 import type { ActivityInput, Deal } from '../types';
 import {
   entryDelayDays,
@@ -16,6 +21,8 @@ import type { ValidationError } from '../validation';
 const open = defineModel<boolean>({ required: true });
 const props = defineProps<{
   accountName: string;
+  /** The account's main contact, offered as the client contact. */
+  contactName?: string;
   /** Deals of the account; only open deals can take a new follow-up date. */
   deals: Deal[];
   dealId: string | null;
@@ -29,6 +36,9 @@ function blank(): ActivityInput {
     type: 'call',
     occurredOn: today.value,
     summary: '',
+    outcome: null,
+    metWith: props.contactName ?? '',
+    reference: '',
     dealId: props.dealId,
     nextFollowUp: null,
   };
@@ -54,6 +64,11 @@ watch(open, (value) => {
 const typeItems = computed(() =>
   activityTypes.map((value) => ({ value, title: messages.value[activityKeys[value]] })),
 );
+const outcomeRequired = computed(() => outcomeRequiredTypes.includes(draft.value.type));
+const outcomeItems = computed(() => [
+  ...(outcomeRequired.value ? [] : [{ value: null, title: messages.value.outcomeNone }]),
+  ...activityOutcomes.map((value) => ({ value, title: messages.value[outcomeKeys[value]] })),
+]);
 const dealItems = computed(() => [
   { value: null, title: messages.value.activityNoDeal },
   ...props.deals.map((deal) => ({ value: deal.id, title: deal.title })),
@@ -162,6 +177,51 @@ const fieldError = (field: keyof ActivityInput) =>
         autofocus
         :error-messages="fieldError('summary')"
       />
+      <label
+        for="sales-activity-outcome"
+        class="field-label"
+        >{{ messages.activityOutcome }}</label
+      ><v-select
+        id="sales-activity-outcome"
+        v-model="draft.outcome"
+        :disabled="saving"
+        :items="outcomeItems"
+        :placeholder="outcomeRequired ? undefined : messages.outcomeNone"
+        :hint="outcomeRequired ? '' : messages.activityOutcomeOptional"
+        :persistent-hint="!outcomeRequired"
+        :error-messages="fieldError('outcome')"
+        @update:model-value="errors.outcome = undefined"
+      />
+      <div class="sales-form-grid">
+        <div>
+          <label
+            for="sales-activity-metWith"
+            class="field-label"
+            >{{ messages.activityMetWith }}</label
+          ><v-text-field
+            id="sales-activity-metWith"
+            v-model="draft.metWith"
+            :disabled="saving"
+            :placeholder="messages.activityMetWithPlaceholder"
+            maxlength="100"
+            :error-messages="fieldError('metWith')"
+          />
+        </div>
+        <div>
+          <label
+            for="sales-activity-reference"
+            class="field-label"
+            >{{ messages.activityReference }}</label
+          ><v-text-field
+            id="sales-activity-reference"
+            v-model="draft.reference"
+            :disabled="saving"
+            :placeholder="messages.activityReferencePlaceholder"
+            maxlength="100"
+            :error-messages="fieldError('reference')"
+          />
+        </div>
+      </div>
       <template v-if="deals.length">
         <label
           for="sales-activity-dealId"

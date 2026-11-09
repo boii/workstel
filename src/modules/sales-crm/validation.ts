@@ -1,4 +1,11 @@
-import { accountTypes, activityTypes, segments, stages } from './types';
+import {
+  accountTypes,
+  activityOutcomes,
+  activityTypes,
+  outcomeRequiredTypes,
+  segments,
+  stages,
+} from './types';
 import type { AccountInput, ActivityInput, DealInput, EntryTiming } from './types';
 
 export type ValidationError =
@@ -93,6 +100,14 @@ export function validateActivity(input: ActivityInput, today = hotelToday()) {
   else if (input.summary.trim().length > 1000) errors.summary = 'tooLong';
   if (input.nextFollowUp !== null && !isCalendarDate(input.nextFollowUp))
     errors.nextFollowUp = 'invalidDate';
+  if (
+    input.outcome === null
+      ? outcomeRequiredTypes.includes(input.type)
+      : !activityOutcomes.includes(input.outcome)
+  )
+    errors.outcome = 'required';
+  if (input.metWith.trim().length > 100) errors.metWith = 'tooLong';
+  if (input.reference.trim().length > 100) errors.reference = 'tooLong';
   return errors;
 }
 

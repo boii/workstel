@@ -1,6 +1,14 @@
 import { ModuleRequestError, moduleRpc, parseCursor, uuidPattern } from '../../core/module-rpc';
 import type { SalesCrmApi } from './api';
-import { accountTypes, activityTypes, entryTimings, openStages, segments, stages } from './types';
+import {
+  accountTypes,
+  activityOutcomes,
+  activityTypes,
+  entryTimings,
+  openStages,
+  segments,
+  stages,
+} from './types';
 import type { Activity, Deal, EntryCounts, EntryReport, SalesAccount, SalesSummary } from './types';
 import { isCalendarDate } from './validation';
 
@@ -174,6 +182,9 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
       !isTime(raw.created_at) ||
       !isText(raw.created_by_email) ||
       !(raw.created_by_name === undefined || isText(raw.created_by_name)) ||
+      !(raw.outcome == null || activityOutcomes.includes(raw.outcome as never)) ||
+      !(raw.met_with === undefined || isText(raw.met_with)) ||
+      !(raw.reference === undefined || isText(raw.reference)) ||
       !isText(raw.recorded_on) ||
       !isCalendarDate(raw.recorded_on) ||
       !Number.isInteger(raw.entry_delay_days) ||
@@ -189,6 +200,10 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
       type: raw.activity_type as Activity['type'],
       occurredOn: raw.occurred_on,
       summary: raw.summary,
+      // Servers before migration 202611090004 send no outcome fields.
+      outcome: (raw.outcome as Activity['outcome'] | undefined) ?? null,
+      metWith: (raw.met_with as string | undefined) ?? '',
+      reference: (raw.reference as string | undefined) ?? '',
       createdAt: String(raw.created_at),
       createdByEmail: raw.created_by_email,
       // Servers before migration 202611090002 send no name; the email is shown instead.
@@ -209,6 +224,18 @@ function parseCounts(raw: Raw | null | undefined): EntryCounts {
     late: Number(raw.late),
     backdated: Number(raw.backdated),
   };
+}
+/** Per-outcome counts; servers before migration 202611090004 send none, read as zero. */
+function parseOutcomes(raw: unknown): EntryReport['outcomes'] {
+  const counts = (raw ?? {}) as Raw;
+  if (typeof counts !== 'object' || Array.isArray(counts)) throw invalid();
+  return Object.fromEntries(
+    activityOutcomes.map((outcome) => {
+      const value = counts[outcome] ?? 0;
+      if (!isCount(value)) throw invalid();
+      return [outcome, value];
+    }),
+  ) as EntryReport['outcomes'];
 }
 export function parseEntryReport(data: unknown, meta: Raw | undefined): EntryReport {
   const raw = data as Raw | null;
@@ -262,6 +289,7 @@ export function parseEntryReport(data: unknown, meta: Raw | undefined): EntryRep
       };
     }),
     entriesTotal: Number(meta.entriesTotal),
+    outcomes: parseOutcomes(raw.outcomes),
   };
 }
 
@@ -396,6 +424,9 @@ export function createLiveSalesCrmApi(rpc: Rpc = moduleRpc): SalesCrmApi {
           occurredOn: input.occurredOn,
           summary: input.summary.trim(),
           nextFollowUp: input.nextFollowUp,
+          outcome: input.outcome,
+          metWith: input.metWith.trim(),
+          reference: input.reference.trim(),
         },
         p_idempotency_key: idempotencyKey,
       });

@@ -3,7 +3,7 @@ import { locale } from '../../../i18n';
 import { ModuleRequestError } from '../../../core/module-rpc';
 import en from '../locales/en';
 import id from '../locales/id';
-import type { AccountType, ActivityType, Segment, Stage } from '../types';
+import type { AccountType, ActivityOutcome, ActivityType, Segment, Stage } from '../types';
 
 export type SalesMessages = Record<keyof typeof en, string>;
 type Key = keyof typeof en;
@@ -42,6 +42,15 @@ export const activityKeys: Record<ActivityType, Key> = {
   meeting: 'activityMeeting',
   'site-inspection': 'activitySiteInspection',
   note: 'activityNote',
+};
+export const outcomeKeys: Record<ActivityOutcome, Key> = {
+  interested: 'outcomeInterested',
+  'need-proposal': 'outcomeNeedProposal',
+  'proposal-sent': 'outcomeProposalSent',
+  tentative: 'outcomeTentative',
+  booked: 'outcomeBooked',
+  'no-response': 'outcomeNoResponse',
+  declined: 'outcomeDeclined',
 };
 export const activityIcons: Record<ActivityType, string> = {
   call: 'mdi-phone-outline',
