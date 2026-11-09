@@ -66,7 +66,9 @@ test('temporary passwords are random, grouped and unambiguous', () => {
 
 test('only developers create accounts, and the password is returned once', async () => {
   const denied = backend({ actor: staff, developer: false });
-  const refused = await denied.handle(request('create', { email: 'new@example.com' }, staff));
+  const refused = await denied.handle(
+    request('create', { email: 'new@example.com', name: 'New Staff' }, staff),
+  );
   assert.equal(refused.status, 403);
   assert.ok(
     denied.calls.some(
@@ -76,7 +78,14 @@ test('only developers create accounts, and the password is returned once', async
   assert.ok(!denied.calls.some((c) => c.url.endsWith('/auth/v1/admin/users')));
 
   const allowed = backend({ actor: developer, developer: true });
-  const created = await allowed.handle(request('create', { email: ' New@Example.com ' }));
+  for (const name of [undefined, '', '   ', 'x'.repeat(81), 'BadName']) {
+    const bad = await allowed.handle(request('create', { email: 'new@example.com', name }));
+    assert.equal((await bad.json()).error.code, 'INVALID_INPUT');
+  }
+  assert.ok(!allowed.calls.some((c) => c.url.endsWith('/auth/v1/admin/users')));
+  const created = await allowed.handle(
+    request('create', { email: ' New@Example.com ', name: '  Siti   Rahma ' }),
+  );
   assert.equal(created.status, 200);
   assert.equal(created.headers.get('cache-control'), 'no-store, max-age=0');
   const { data } = await created.json();
@@ -84,12 +93,15 @@ test('only developers create accounts, and the password is returned once', async
   assert.equal(create.body.email, 'new@example.com');
   assert.equal(create.body.email_confirm, true);
   assert.deepEqual(create.body.app_metadata, { workstel_admin_created: true });
+  assert.deepEqual(create.body.user_metadata, { full_name: 'Siti Rahma' });
   assert.equal(create.body.password, data.temporaryPassword);
   const flag = allowed.calls.find((c) => c.url.endsWith('workstel_user_admin_flag'))!;
   assert.deepEqual(flag.body, { p_user_id: data.userId, p_must_change: true });
 
   const duplicate = backend({ actor: developer, developer: true, createStatus: 422 });
-  const exists = await duplicate.handle(request('create', { email: 'staff@example.com' }));
+  const exists = await duplicate.handle(
+    request('create', { email: 'staff@example.com', name: 'Staff' }),
+  );
   assert.equal((await exists.json()).error.code, 'EMAIL_EXISTS');
 });
 
@@ -138,7 +150,7 @@ test('users change their own password only after a recent sign-in', async () => 
 test('foreign origins, wrong methods and unknown operations fail closed', async () => {
   const api = backend({ actor: developer, developer: true });
   const foreign = await api.handle(
-    new Request(request('create', { email: 'a@b.co' }), {
+    new Request(request('create', { email: 'a@b.co', name: 'A' }), {
       headers: {
         origin: 'https://evil.example',
         authorization: 'Bearer ' + token(developer),

@@ -60,7 +60,11 @@ export interface UsersApi {
     level: ModuleLevel,
   ): Promise<void>;
   setDeveloper(userId: string, developer: boolean): Promise<void>;
-  create(email: string): Promise<{ userId: string; email: string; temporaryPassword: string }>;
+  /** The name becomes the new account's profile display name. */
+  create(
+    email: string,
+    name: string,
+  ): Promise<{ userId: string; email: string; temporaryPassword: string }>;
   resetPassword(userId: string): Promise<{ temporaryPassword: string }>;
   setBlocked(userId: string, blocked: boolean): Promise<void>;
   /** Vault accounts the user owns; null when the server has no ownership support yet. */
@@ -202,8 +206,8 @@ export function createLiveUsersApi(rpc = moduleRpc, call = usersFunction): Users
     async setDeveloper(userId, developer) {
       await rpc('workstel_admin_set_developer', { p_user_id: userId, p_developer: developer });
     },
-    async create(email) {
-      const data = await call('create', { email });
+    async create(email, name) {
+      const data = await call('create', { email, name });
       if (!isText(data.userId) || !isText(data.email)) throw invalid();
       return {
         userId: data.userId,

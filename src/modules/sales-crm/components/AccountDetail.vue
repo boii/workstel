@@ -274,8 +274,12 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
                 >
                 <p>{{ activity.summary }}</p>
                 <small
-                  ><template v-if="activity.createdByEmail"
-                    >{{ messages.activityBy }} {{ activity.createdByEmail }} · </template
+                  ><template v-if="activity.createdByName || activity.createdByEmail"
+                    >{{ messages.activityBy }}
+                    <span :title="activity.createdByEmail">{{
+                      activity.createdByName || activity.createdByEmail
+                    }}</span>
+                    · </template
                   >{{ messages.entryRecorded }} {{ formatDay(activity.recordedOn) }}</small
                 ><span
                   v-if="activity.entryTiming !== 'on-time'"

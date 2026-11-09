@@ -104,6 +104,8 @@ export interface Activity {
   /** Server time of logging, never sent by the client. */
   createdAt: string;
   createdByEmail: string;
+  /** Profile display name of the logger, or the part of the email before @ (server side). */
+  createdByName: string;
   /** Hotel calendar day of createdAt (YYYY-MM-DD). */
   recordedOn: string;
   /** Calendar days between occurredOn and recordedOn, never negative. */

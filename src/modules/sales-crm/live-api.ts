@@ -173,6 +173,7 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
       !isText(raw.summary) ||
       !isTime(raw.created_at) ||
       !isText(raw.created_by_email) ||
+      !(raw.created_by_name === undefined || isText(raw.created_by_name)) ||
       !isText(raw.recorded_on) ||
       !isCalendarDate(raw.recorded_on) ||
       !Number.isInteger(raw.entry_delay_days) ||
@@ -190,6 +191,8 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
       summary: raw.summary,
       createdAt: String(raw.created_at),
       createdByEmail: raw.created_by_email,
+      // Servers before migration 202611090002 send no name; the email is shown instead.
+      createdByName: (raw.created_by_name as string | undefined) ?? '',
       recordedOn: raw.recorded_on,
       entryDelayDays: raw.entry_delay_days as number,
       entryTiming: raw.entry_timing as Activity['entryTiming'],

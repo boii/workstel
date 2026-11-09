@@ -14,7 +14,7 @@ import { createLiveUsersApi } from './users-api';
 import type { UserDirectory, UserRecord, UsersApi } from './users-api';
 import TemporaryPassword from './temporary-password.vue';
 import UserDialog from './user-dialog.vue';
-import { emailPattern, userErrorKey } from './user-errors';
+import { emailPattern, isDisplayName, userErrorKey } from './user-errors';
 
 const props = defineProps<{ demo: boolean; selfEmail: string }>();
 const api: UsersApi = props.demo ? createDemoUsersApi() : createLiveUsersApi();
@@ -141,6 +141,8 @@ function failed(message: MessageKey) {
 const createOpen = ref(false);
 const email = ref('');
 const emailError = ref('');
+const fullName = ref('');
+const nameError = ref('');
 const creating = ref(false);
 const createFailure = ref('');
 const copyFrom = ref<string | null>(null);
@@ -154,6 +156,8 @@ const copySources = computed(() =>
 function openCreate() {
   email.value = '';
   emailError.value = '';
+  fullName.value = '';
+  nameError.value = '';
   createFailure.value = '';
   copyFrom.value = null;
   createOpen.value = true;
@@ -183,14 +187,18 @@ async function copyAccess(source: UserRecord, userId: string) {
 async function create() {
   if (creating.value) return;
   const value = email.value.trim();
-  if (!emailPattern.test(value) || value.length > 254) {
-    emailError.value = t('userErrorInvalidEmail');
+  const name = fullName.value.trim().replace(/\s+/g, ' ');
+  emailError.value =
+    !emailPattern.test(value) || value.length > 254 ? t('userErrorInvalidEmail') : '';
+  nameError.value = isDisplayName(name) ? '' : t('userErrorName');
+  if (emailError.value || nameError.value) {
+    document.getElementById(emailError.value ? 'user-create-email' : 'user-create-name')?.focus();
     return;
   }
   creating.value = true;
   createFailure.value = '';
   try {
-    const created = await api.create(value);
+    const created = await api.create(value, name);
     // Copy from the source's current access, not from when the page last loaded.
     if (copyFrom.value) await load();
     const source = directory.value.users.find((u) => u.id === copyFrom.value);
@@ -362,7 +370,7 @@ function forgetPassword() {
     v-model="createOpen"
     :title="t('addUser')"
     :busy="creating"
-    :dirty="!!email.trim() || !!copyFrom"
+    :dirty="!!email.trim() || !!fullName.trim() || !!copyFrom"
     :width="dialogWidth.md"
   >
     <v-form
@@ -392,6 +400,21 @@ function forgetPassword() {
         :disabled="creating"
         :error-messages="emailError"
         @update:model-value="emailError = ''"
+      />
+      <label
+        for="user-create-name"
+        class="field-label"
+        >{{ t('userFullName') }}</label
+      ><v-text-field
+        id="user-create-name"
+        v-model="fullName"
+        autocomplete="off"
+        maxlength="80"
+        :disabled="creating"
+        :hint="t('userFullNameHint')"
+        persistent-hint
+        :error-messages="nameError"
+        @update:model-value="nameError = ''"
       />
       <OptionalFields
         v-if="copySources.length"

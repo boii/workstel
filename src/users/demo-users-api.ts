@@ -1,5 +1,6 @@
 import { ModuleRequestError } from '../core/module-rpc';
 import type { DepartmentRef, UserRecord, UsersApi } from './users-api';
+import { isDisplayName } from './user-errors';
 
 const demoSelf = '00000000-0000-4000-8000-000000000001';
 const departments: DepartmentRef[] = [
@@ -90,7 +91,8 @@ export function createDemoUsersApi(): UsersApi {
       if (!developer && userId === demoSelf) throw new ModuleRequestError('SELF_LOCKOUT');
       find(userId).developer = developer;
     },
-    async create(email) {
+    async create(email, name) {
+      if (!isDisplayName(name.trim())) throw new ModuleRequestError('INVALID_INPUT');
       const normalized = email.trim().toLowerCase();
       if (users.some((user) => user.email === normalized))
         throw new ModuleRequestError('EMAIL_EXISTS');

@@ -82,6 +82,7 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       summary: 'Ballroom and breakout rooms viewed with the event committee.',
       createdAt: now,
       createdByEmail: 'sales@example.com',
+      createdByName: 'Rudi Hartono',
       ...timing(addDays(today, -6), addDays(today, -6)),
     },
     {
@@ -94,6 +95,7 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       summary: 'Proposal sent with room block and meeting package.',
       createdAt: now,
       createdByEmail: 'sales@example.com',
+      createdByName: 'Rudi Hartono',
       ...timing(addDays(today, -4), addDays(today, -3)),
     },
     {
@@ -106,6 +108,7 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       summary: 'Courtesy visit to the HR office; met the new travel coordinator.',
       createdAt: now,
       createdByEmail: 'sales@example.com',
+      createdByName: 'Rudi Hartono',
       ...timing(addDays(today, -9), addDays(today, -2)),
     },
   ];
@@ -319,6 +322,7 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
         summary: input.summary.trim(),
         createdAt: new Date().toISOString(),
         createdByEmail: 'demo@example.com',
+        createdByName: 'Demo User',
         ...timing(input.occurredOn, today),
       });
     },

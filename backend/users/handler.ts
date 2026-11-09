@@ -9,6 +9,9 @@ type Operation = 'create' | 'reset-password' | 'block' | 'unblock' | 'change-pas
 const operations: Operation[] = ['create', 'reset-password', 'block', 'unblock', 'change-password'];
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Same rule as the profile display name: 1-80 characters, no control characters. */
+export const isDisplayName = (name: string) =>
+  name.length >= 1 && name.length <= 80 && !/\p{Cc}/u.test(name);
 // Unambiguous characters only, so a temporary password can be read out or typed reliably.
 const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
 const recentAuthSeconds = 600;
@@ -250,10 +253,12 @@ export function makeUsersHandler(config: UsersServerConfig, fetcher: typeof fetc
 
       if (operation === 'create') {
         const email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
+        const name = typeof input.name === 'string' ? input.name.trim().replace(/\s+/g, ' ') : '';
         if (
-          Object.keys(input).some((key) => key !== 'email') ||
+          Object.keys(input).some((key) => key !== 'email' && key !== 'name') ||
           email.length > 254 ||
-          !emailPattern.test(email)
+          !emailPattern.test(email) ||
+          !isDisplayName(name)
         )
           throw new SafeError('INVALID_INPUT');
         const password = temporaryPassword();
@@ -266,6 +271,8 @@ export function makeUsersHandler(config: UsersServerConfig, fetcher: typeof fetc
             password,
             email_confirm: true,
             app_metadata: { workstel_admin_created: true },
+            // Migration 202611090002 copies this into the new profile's display name.
+            user_metadata: { full_name: name },
           }),
         });
         if (created.status === 422 || created.status === 409) throw new SafeError('EMAIL_EXISTS');

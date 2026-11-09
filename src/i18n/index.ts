@@ -133,7 +133,7 @@ export const english = {
   editProfile: 'Edit profile',
   displayName: 'Display name',
   displayNameHint:
-    'Shown in the account menu, and to colleagues in Room Turnaround, instead of your email.',
+    'Shown in the account menu, and to colleagues in Room Turnaround and the Sales CRM activity log, instead of your email.',
   addProfileDetails: 'Add job title and extension',
   jobTitle: 'Job title',
   extensionLabel: 'Extension',
@@ -256,6 +256,9 @@ export const english = {
   userCreateHint:
     'The account gets a temporary password. Give it to the user securely; they must change it at first sign-in.',
   userCreate: 'Create account',
+  userFullName: 'Full name',
+  userFullNameHint: 'Shown to colleagues instead of the email. The user can change it in Profile.',
+  userErrorName: 'Enter the full name (up to 80 characters).',
   tempPasswordTitle: 'Temporary password',
   tempPasswordHint:
     'Shown only once. Share it in person or through a secure channel. The user must change it at first sign-in.',
@@ -437,7 +440,7 @@ const indonesian: Record<MessageKey, string> = {
   editProfile: 'Ubah profil',
   displayName: 'Nama tampilan',
   displayNameHint:
-    'Ditampilkan di menu akun, dan kepada rekan kerja di Room Turnaround, sebagai pengganti email.',
+    'Ditampilkan di menu akun, dan kepada rekan kerja di Room Turnaround dan log aktivitas Sales CRM, sebagai pengganti email.',
   addProfileDetails: 'Tambah jabatan dan ekstensi',
   jobTitle: 'Jabatan',
   extensionLabel: 'Ekstensi',
@@ -563,6 +566,10 @@ const indonesian: Record<MessageKey, string> = {
   userCreateHint:
     'Akun dibuat dengan password sementara. Berikan ke user dengan aman; user wajib menggantinya saat login pertama.',
   userCreate: 'Buat akun',
+  userFullName: 'Nama lengkap',
+  userFullNameHint:
+    'Ditampilkan ke rekan kerja sebagai pengganti email. User bisa mengubahnya di Profil.',
+  userErrorName: 'Isi nama lengkap (maksimal 80 karakter).',
   tempPasswordTitle: 'Password sementara',
   tempPasswordHint:
     'Hanya ditampilkan sekali. Berikan langsung atau lewat saluran yang aman. User wajib menggantinya saat login pertama.',

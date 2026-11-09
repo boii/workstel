@@ -16,3 +16,6 @@ export function userErrorKey(error: unknown): MessageKey {
   return keys[code] ?? 'userErrorFailed';
 }
 export const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Same rule as the profile display name and the workstel-users function. */
+export const isDisplayName = (name: string) =>
+  name.length >= 1 && name.length <= 80 && !/\p{Cc}/u.test(name);

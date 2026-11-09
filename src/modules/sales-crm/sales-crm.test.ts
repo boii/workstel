@@ -147,6 +147,16 @@ test('activity rows carry the server entry timing', () => {
     entry_timing: 'backdated',
   };
   const [activity] = parseActivities([row], accountId);
+  // A server before migration 202611090002 sends no name.
+  assert.equal(activity.createdByName, '');
+  assert.equal(
+    parseActivities([{ ...row, created_by_name: 'Rina Wijaya' }], accountId)[0].createdByName,
+    'Rina Wijaya',
+  );
+  assert.throws(
+    () => parseActivities([{ ...row, created_by_name: 7 }], accountId),
+    ModuleRequestError,
+  );
   assert.equal(activity.recordedOn, '2026-11-04');
   assert.equal(activity.entryDelayDays, 3);
   assert.equal(activity.entryTiming, 'backdated');
