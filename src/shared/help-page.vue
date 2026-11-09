@@ -370,10 +370,10 @@ kbd {
   }
   .help-grid,
   .help-column {
-    gap: 11px;
+    gap: var(--workstel-space-2_5);
   }
   .help-card {
-    padding: 17px;
+    padding: var(--workstel-space-3_5);
   }
   .help-card .v-btn {
     min-height: var(--workstel-touch-target);

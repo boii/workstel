@@ -589,6 +589,16 @@ async function confirmAction() {
   color: var(--workstel-warning-text) !important;
 }
 @media (max-width: 680px) {
+  .user-section + .user-section {
+    margin-top: var(--workstel-space-4);
+    padding-top: var(--workstel-space-3_5);
+  }
+  .user-departments li {
+    padding: var(--workstel-space-2) var(--workstel-space-2_5);
+  }
+  .user-modules {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
   .user-actions .v-btn,
   .user-vault-transfer .v-btn {
     min-height: var(--workstel-touch-target);

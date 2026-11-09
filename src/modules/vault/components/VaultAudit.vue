@@ -364,6 +364,9 @@ onUnmounted(() => {
   margin: var(--workstel-space-2) 0;
 }
 @media (max-width: 680px) {
+  .vault-audit-hint {
+    margin-bottom: var(--workstel-space-2);
+  }
   .vault-audit-controls {
     grid-template-columns: minmax(0, 1fr) auto 44px;
   }
@@ -373,8 +376,8 @@ onUnmounted(() => {
   .vault-audit-event summary {
     grid-template-columns: minmax(0, 1fr) auto 18px;
     gap: var(--workstel-space-1) var(--workstel-space-2_5);
-    padding: var(--workstel-space-2_5) var(--workstel-space-4);
-    min-height: var(--workstel-row-lg);
+    padding: var(--workstel-space-2) var(--workstel-space-3_5);
+    min-height: var(--workstel-row-md);
   }
   .vault-audit-action {
     grid-column: 1;

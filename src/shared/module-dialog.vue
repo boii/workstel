@@ -205,7 +205,7 @@ watch(open, (value) => {
     flex: 1 1 auto;
   }
   .module-dialog-heading {
-    padding: var(--workstel-space-3) var(--workstel-space-4);
+    padding: var(--workstel-space-2_5) var(--workstel-space-3_5);
   }
   /* Vuetify sets the button height inline from the global VBtn default. */
   .module-dialog-heading > .v-btn {
@@ -213,13 +213,13 @@ watch(open, (value) => {
     height: var(--workstel-touch-target) !important;
   }
   .module-dialog-toolbar {
-    padding: 0 var(--workstel-space-4) var(--workstel-space-3);
+    padding: 0 var(--workstel-space-3_5) var(--workstel-space-2_5);
   }
   .module-dialog-body:not(.module-dialog-body--flush) {
-    padding: var(--workstel-space-3_5) var(--workstel-space-4) !important;
+    padding: var(--workstel-space-3) var(--workstel-space-3_5) !important;
   }
   .module-dialog-actions {
-    padding: var(--workstel-space-2_5) var(--workstel-space-4);
+    padding: var(--workstel-space-2) var(--workstel-space-3_5);
   }
   /* Slot buttons carry the parent's scope, so they are reached with :deep(). */
   .module-dialog-actions :deep(.v-btn) {

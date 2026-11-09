@@ -349,8 +349,8 @@ function date(value: string) {
   .admin-audit-event summary {
     grid-template-columns: minmax(0, 1fr) auto 18px;
     gap: var(--workstel-space-1) var(--workstel-space-2_5);
-    padding: var(--workstel-space-2_5) var(--workstel-space-3);
-    min-height: var(--workstel-row-lg);
+    padding: var(--workstel-space-2) var(--workstel-space-3);
+    min-height: var(--workstel-row-md);
   }
   .admin-audit-action {
     grid-column: 1;

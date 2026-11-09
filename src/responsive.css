@@ -99,6 +99,26 @@
   .workspace-content {
     padding-inline: var(--workstel-page-gutter);
   }
+  :is(
+    .vehicle-breadcrumb,
+    .bin-breadcrumb,
+    .documents-breadcrumb,
+    .sales-breadcrumb,
+    .hk-breadcrumb,
+    .vault-breadcrumb
+  ) {
+    margin-bottom: var(--workstel-space-1_5);
+  }
+  :is(
+    .vehicle-notice,
+    .bin-notice,
+    .documents-notice,
+    .sales-notice,
+    .hk-notice,
+    .vault-module .vault-notice
+  ) {
+    margin-bottom: var(--workstel-space-2_5);
+  }
   .module-grid {
     grid-template-columns: minmax(0, 1fr);
   }

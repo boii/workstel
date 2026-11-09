@@ -112,6 +112,9 @@ defineEmits<{ retry: [] }>();
   flex-wrap: wrap;
   gap: var(--workstel-space-2);
 }
+.module-page-actions:empty {
+  display: none;
+}
 .module-page h1 {
   font-size: var(--workstel-font-xl);
   font-weight: var(--workstel-weight-regular);
@@ -167,6 +170,7 @@ defineEmits<{ retry: [] }>();
   .module-page-heading {
     align-items: flex-start;
     flex-direction: column;
+    gap: var(--workstel-space-2_5);
   }
   /* In a column the 240px basis would become height and leave an empty gap. */
   .module-page-title {
@@ -175,6 +179,16 @@ defineEmits<{ retry: [] }>();
   }
   .module-page h1 {
     font-size: var(--workstel-font-xl);
+  }
+  .module-page p {
+    margin-top: var(--workstel-space-1);
+    line-height: var(--workstel-leading-normal);
+  }
+  .module-page-toolbar {
+    margin: var(--workstel-space-3_5) 0;
+  }
+  .module-empty {
+    padding: var(--workstel-space-6) var(--workstel-space-4);
   }
   .module-page-actions {
     width: 100%;

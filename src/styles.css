@@ -797,10 +797,8 @@ footer small {
     height: 112px;
     flex-wrap: wrap;
     gap: 0;
-    padding: var(--workstel-space-2) 18px 0;
+    padding: var(--workstel-space-2) var(--workstel-page-gutter) 0;
     align-content: space-between;
-    padding-left: var(--workstel-space-3_5);
-    padding-right: var(--workstel-space-3_5);
   }
   .wordmark {
     font-size: 21px; /* token-exempt: wordmark */
@@ -813,7 +811,12 @@ footer small {
     order: 2;
     height: var(--workstel-touch-target);
     width: 100%;
-    gap: var(--workstel-space-6);
+    gap: var(--workstel-space-4);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .top-nav::-webkit-scrollbar {
+    display: none;
   }
   .switch-button .v-btn__content,
   .switch-button .v-btn__append {
@@ -828,12 +831,11 @@ footer small {
     height: var(--workstel-touch-target) !important;
   }
   .workspace-content {
-    padding: 26px 18px var(--workstel-space-5);
-    padding-top: var(--workstel-space-6);
+    padding: var(--workstel-space-4) var(--workstel-page-gutter) var(--workstel-space-4);
   }
   .page-heading {
-    margin-bottom: 22px;
-    gap: var(--workstel-space-3);
+    margin-bottom: var(--workstel-space-3_5);
+    gap: var(--workstel-space-2_5);
     flex-wrap: wrap;
   }
   .page-heading h1 {
@@ -843,7 +845,7 @@ footer small {
 
   .module-toolbar {
     gap: var(--workstel-space-2);
-    margin-bottom: 18px;
+    margin-bottom: var(--workstel-space-3_5);
     align-items: center;
     flex-wrap: nowrap;
   }
@@ -864,12 +866,12 @@ footer small {
   }
   .module-grid {
     grid-template-columns: 1fr;
-    gap: 11px;
+    gap: var(--workstel-space-2_5);
   }
   .module-open {
-    min-height: 87px;
-    padding: var(--workstel-space-4);
-    gap: 13px;
+    min-height: 76px;
+    padding: var(--workstel-space-3_5);
+    gap: var(--workstel-space-3);
   }
   .module-open h2 {
     font-size: var(--workstel-font-md);
@@ -881,10 +883,11 @@ footer small {
     margin-top: var(--workstel-space-3);
   }
   .task-panel {
-    padding: 17px;
+    padding: var(--workstel-space-3_5);
   }
   .task-row {
     gap: var(--workstel-space-2);
+    padding: var(--workstel-space-2_5) 0;
   }
   .task-row strong {
     font-size: var(--workstel-font-sm);
@@ -894,10 +897,18 @@ footer small {
     flex-shrink: 0;
   }
   .login-header {
-    padding: 0 var(--workstel-space-5);
+    height: var(--workstel-header-height);
+    padding: 0 var(--workstel-space-4);
   }
   .login-panel {
-    padding: var(--workstel-space-7) var(--workstel-space-6);
+    padding: var(--workstel-space-6) var(--workstel-space-5);
+  }
+  .sso-button {
+    margin-top: var(--workstel-space-5);
+  }
+  .demo-access {
+    margin-top: var(--workstel-space-5);
+    padding-top: var(--workstel-space-4);
   }
   .login-note {
     align-items: flex-start;
@@ -915,23 +926,26 @@ footer small {
   .favorite-button.v-btn--icon {
     min-width: var(--workstel-touch-target);
     height: var(--workstel-touch-target);
-    margin: var(--workstel-space-2) var(--workstel-space-1) 0 0;
+    margin: var(--workstel-space-1_5) var(--workstel-space-1) 0 0;
   }
   .task-row > div {
     min-width: 0;
     overflow-wrap: anywhere;
   }
   .login-main {
-    padding: var(--workstel-space-7) 18px;
+    min-height: calc(100dvh - var(--workstel-header-height));
+    padding: var(--workstel-space-5) var(--workstel-page-gutter);
   }
   .empty-state {
-    padding: var(--workstel-space-8) var(--workstel-space-4);
+    padding: var(--workstel-space-6) var(--workstel-space-4);
   }
   .info-panel {
-    padding: 22px;
+    padding: var(--workstel-space-4);
   }
   footer {
-    gap: var(--workstel-space-3);
+    margin-top: var(--workstel-space-5);
+    padding-top: var(--workstel-space-3);
+    gap: var(--workstel-space-2);
     flex-wrap: wrap;
   }
 }

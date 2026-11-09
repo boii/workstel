@@ -26,8 +26,8 @@
   .stack-table tr {
     display: grid;
     grid-template-columns: repeat(var(--stack-columns, 2), minmax(0, 1fr));
-    gap: var(--workstel-space-2) var(--workstel-space-3_5);
-    padding: var(--workstel-space-3) var(--workstel-space-3_5);
+    gap: var(--workstel-space-1_5) var(--workstel-space-3);
+    padding: var(--workstel-space-2_5) var(--workstel-space-3);
     border-top: 1px solid var(--workstel-border);
   }
   .stack-table tbody tr:first-child {

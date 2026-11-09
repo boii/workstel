@@ -449,17 +449,7 @@
   font-weight: var(--workstel-weight-regular);
   color: var(--workstel-text-secondary);
 }
-@media (max-width: 680px) {
-  .hk-mine {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .hk-mine-actions {
-    grid-column: 1 / -1;
-  }
-  .hk-mine-actions .v-btn {
-    flex: 1;
-    min-height: var(--workstel-control-lg);
-  }
+@media (max-width: 760px) {
   .hk-toolbar,
   .hk-toolbar:not(:has(> :nth-child(3))):has(> :nth-child(2)) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -470,22 +460,69 @@
   .hk-search {
     grid-column: 1 / -1;
   }
+}
+@media (max-width: 680px) {
+  .hk-mine {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--workstel-space-2_5);
+    margin-bottom: var(--workstel-space-3);
+    padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  }
+  .hk-mine-time {
+    font-size: 22px; /* token-exempt: timer figure */
+  }
+  .hk-mine-actions {
+    grid-column: 1 / -1;
+  }
+  .hk-mine-actions .v-btn {
+    flex: 1;
+    min-height: var(--workstel-touch-target);
+  }
   .hk-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--workstel-space-2);
+  }
+  .hk-card {
+    min-height: 84px;
+    padding: var(--workstel-space-2) var(--workstel-space-2_5);
+  }
+  .hk-room-list {
+    padding: var(--workstel-space-0_5) var(--workstel-space-3);
   }
   .hk-form-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+  .hk-panel {
+    padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  }
   .hk-choices {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--workstel-space-1_5);
+  }
+  .hk-choices .v-btn {
+    height: var(--workstel-control-lg) !important;
   }
   .hk-running-actions .v-btn {
     min-height: var(--workstel-control-xl);
+  }
+  .hk-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hk-stat {
+    padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  }
+  .hk-stat strong {
+    font-size: var(--workstel-font-md);
   }
   .hk-history li {
     grid-template-columns: 44px minmax(0, 1fr) auto;
     gap: var(--workstel-space-2);
     padding: var(--workstel-space-2_5) var(--workstel-space-3);
+  }
+}
+@media (max-width: 359px) {
+  .hk-stats {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 /* On narrow screens the room list keeps two lines per room instead of the stacked card:

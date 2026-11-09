@@ -371,13 +371,14 @@ function granted(assignment: StaffAssignment) {
 @media (max-width: 680px) {
   .settings-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 11px;
+    gap: var(--workstel-space-2_5);
   }
   .settings-card {
-    padding: 17px;
+    padding: var(--workstel-space-3_5);
   }
   .settings-row {
     flex-wrap: wrap;
+    padding: var(--workstel-space-2_5) 0;
   }
   .settings-language {
     width: 100%;
@@ -394,6 +395,8 @@ function granted(assignment: StaffAssignment) {
   .settings-access li {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--workstel-space-1_5);
+    padding: var(--workstel-space-2) 0;
   }
   .settings-permissions {
     justify-content: flex-start;

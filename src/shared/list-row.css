@@ -88,12 +88,14 @@
   .list-row,
   .list-row--no-status {
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--workstel-space-1_5) var(--workstel-space-2_5);
-    padding: var(--workstel-space-3) var(--workstel-space-2) var(--workstel-space-2_5)
-      var(--workstel-space-3_5);
+    gap: var(--workstel-space-1) var(--workstel-space-2);
+    min-height: var(--workstel-row-md);
+    padding: var(--workstel-space-2_5) var(--workstel-space-2) var(--workstel-space-2)
+      var(--workstel-space-3);
   }
   .list-row-identity {
     grid-column: 1 / -1;
+    gap: var(--workstel-space-2_5);
   }
   .list-row--no-status .list-row-actions {
     grid-column: 2;

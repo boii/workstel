@@ -313,7 +313,12 @@ const fieldError = (field: InspectionField) => {
   }
   /* Stacked columns need the normal gap above the second label. */
   .inspection-row > div + div .inspection-first-label {
-    margin-top: var(--workstel-space-5);
+    margin-top: var(--workstel-space-3);
+  }
+  .inspection-items li {
+    min-height: var(--workstel-row-sm);
+    padding: var(--workstel-space-1_5) var(--workstel-space-2) var(--workstel-space-1_5)
+      var(--workstel-space-2_5);
   }
   .inspection-checklist-heading .v-btn {
     min-height: var(--workstel-touch-target);

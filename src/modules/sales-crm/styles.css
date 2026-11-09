@@ -338,6 +338,22 @@
   }
 }
 @media (max-width: 680px) {
+  .sales-summary {
+    gap: var(--workstel-space-1_5);
+    margin-bottom: var(--workstel-space-3);
+  }
+  .sales-tile {
+    padding: var(--workstel-space-2) var(--workstel-space-2_5);
+  }
+  .sales-tile > strong {
+    font-size: var(--workstel-font-md);
+  }
+  .sales-tabs {
+    margin-bottom: var(--workstel-space-2_5);
+  }
+  .sales-contact a {
+    min-height: var(--workstel-touch-target);
+  }
   .sales-mini-list .v-btn--icon {
     width: var(--workstel-touch-target) !important;
     height: var(--workstel-touch-target) !important;
