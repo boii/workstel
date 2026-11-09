@@ -113,6 +113,7 @@ onUnmounted(() => {
           hide-details
           density="compact"
           clearable
+          maxlength="150"
           @update:model-value="search = $event ?? ''"
         />
         <FilterGroup
@@ -197,7 +198,13 @@ onUnmounted(() => {
         >
           <details class="vault-audit-event">
             <summary :title="messages.auditDetails">
-              <strong class="vault-audit-action">{{ event.action }}</strong>
+              <strong class="vault-audit-action"
+                ><template
+                  v-for="(part, index) in event.action.split('.')"
+                  :key="index"
+                  ><template v-if="index">.<wbr /></template>{{ part }}</template
+                ></strong
+              >
               <time
                 class="vault-audit-time"
                 :datetime="event.occurred_at"

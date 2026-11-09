@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
 import { useLocale } from 'vuetify';
@@ -164,13 +164,8 @@ const hotelName = computed(() =>
 const shortcutsOpen = ref(false);
 const searchField = ref<FocusableField | null>(null);
 const showsModuleList = computed(() => ['Dashboard', 'Favorites'].includes(view.value));
-/** Focus the module search so `/` behaves like the shortcuts printed in the shortcut list. */
+/** Focus the module search when on a module list view. */
 function focusModuleSearch() {
-  if (!showsModuleList.value) {
-    nav('Dashboard');
-    void nextTick(() => focusFieldInput(searchField.value));
-    return;
-  }
   focusFieldInput(searchField.value);
 }
 function closeOverlays() {
@@ -186,12 +181,21 @@ function closeOverlays() {
 }
 useShortcuts(
   () => [
-    { key: '/', run: focusModuleSearch },
-    { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
+    {
+      key: '/',
+      when: () =>
+        showsModuleList.value && !shortcutsOpen.value && !creating.value && !paletteOpen.value,
+      run: focusModuleSearch,
+    },
+    {
+      key: '?',
+      shift: true,
+      when: () => !paletteOpen.value,
+      run: () => (shortcutsOpen.value = true),
+    },
     { key: 'Escape', allowInInputs: true, run: closeOverlays },
   ],
-  // Module pages register their own shortcuts; the shell must not capture the same keys twice.
-  () => session.value && !route.meta.moduleId,
+  () => session.value && !mustChangePassword.value,
 );
 const paletteOpen = ref(false);
 const paletteKeys = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘ K' : 'Ctrl K';
@@ -302,7 +306,7 @@ const shortcutRows = computed(() => [
   { keys: '?', label: t('shortcutList') },
   { keys: 'Esc', label: t('shortcutClose') },
 ]);
-// Help lists the shell shortcuts; module pages may add their own.
+// Help lists the shell shortcuts.
 const helpShortcutRows = computed(() => [
   { keys: paletteKeys, label: t('paletteShortcut') },
   { keys: '/', label: t('helpSearchShortcut') },

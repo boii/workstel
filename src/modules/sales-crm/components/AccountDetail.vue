@@ -51,20 +51,21 @@ async function load() {
   if (!account) return;
   controller?.abort();
   controller = new AbortController();
+  const signal = controller.signal;
   loading.value = true;
   failure.value = '';
   try {
     const [dealPage, activityPage] = await Promise.all([
-      props.loadDeals(account.id, controller.signal),
-      props.loadActivities(account.id, null, controller.signal),
+      props.loadDeals(account.id, signal),
+      props.loadActivities(account.id, null, signal),
     ]);
     deals.value = dealPage.data;
     activities.value = activityPage.data;
     nextActivity.value = activityPage.nextCursor;
   } catch (error) {
-    if (!controller.signal.aborted) failure.value = errorMessage(messages.value, error);
+    if (!signal.aborted) failure.value = errorMessage(messages.value, error);
   } finally {
-    loading.value = false;
+    if (!signal.aborted) loading.value = false;
   }
 }
 async function loadMore() {

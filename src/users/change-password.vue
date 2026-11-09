@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { t } from '../i18n';
 import type { MessageKey } from '../i18n';
 import { usersFunction } from './users-api';
@@ -7,12 +7,13 @@ import { userErrorKey } from './user-errors';
 
 /** New-password form; the value is sent once to the server and never stored by the page. */
 const props = defineProps<{ demo: boolean; required?: boolean }>();
-const emit = defineEmits<{ changed: []; signInAgain: []; cancel: [] }>();
+const emit = defineEmits<{ changed: []; signInAgain: [] }>();
 const password = ref('');
 const confirmation = ref('');
 const error = ref<MessageKey | ''>('');
 const saving = ref(false);
 const reauth = ref(false);
+const dirty = computed(() => Boolean(password.value || confirmation.value));
 
 async function submit() {
   if (saving.value) return;
@@ -39,9 +40,11 @@ async function submit() {
     saving.value = false;
   }
 }
+defineExpose({ saving, dirty, reauth, submit });
 </script>
 <template>
   <v-form
+    id="change-password-form"
     class="password-form"
     @submit.prevent="submit"
   >
@@ -66,6 +69,7 @@ async function submit() {
     <label
       for="new-password"
       class="field-label"
+      :class="{ 'mt-0': !required && !error }"
       >{{ t('newPassword') }}</label
     ><v-text-field
       id="new-password"
@@ -88,19 +92,16 @@ async function submit() {
       maxlength="128"
       :disabled="saving"
     />
-    <div class="password-actions">
+    <div
+      v-if="required"
+      class="password-actions"
+    >
       <v-btn
         v-if="reauth"
         variant="tonal"
         prepend-icon="mdi-login"
         @click="emit('signInAgain')"
         >{{ t('signInAgain') }}</v-btn
-      ><v-btn
-        v-else-if="!required"
-        variant="text"
-        :disabled="saving"
-        @click="emit('cancel')"
-        >{{ t('cancelAction') }}</v-btn
       ><v-btn
         color="primary"
         type="submit"

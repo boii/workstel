@@ -307,7 +307,7 @@ export const english = {
 } as const;
 export type English = typeof english;
 export type MessageKey = keyof typeof english;
-const indonesian: Record<MessageKey, string> = {
+export const indonesian: Record<MessageKey, string> = {
   pageNotFound: 'Halaman tidak ditemukan.',
   loading: 'Memulihkan sesi Anda',
   productionPending: 'Belum tersedia di produksi.',
@@ -636,7 +636,7 @@ export function translate(value: string): string {
 watch(
   locale,
   (value) => {
-    document.documentElement.lang = value;
+    if (typeof document !== 'undefined') document.documentElement.lang = value;
     try {
       localStorage.setItem('workstel.locale', value);
     } catch {

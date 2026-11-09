@@ -484,6 +484,7 @@ const departmentItems = computed(() => [
               single-line
               clearable
               maxlength="10"
+              @update:model-value="search = $event ?? ''"
             />
             <FilterGroup
               :count="filterCount"

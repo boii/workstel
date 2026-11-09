@@ -189,6 +189,9 @@ onUnmounted(() => {
     "
     :subtitle="entry.name"
     :busy="busy"
+    :dirty="
+      Boolean((mode === 'write' && (password || confirmation)) || (requiresAuth && loginPassword))
+    "
   >
     <v-alert
       v-if="failure"
@@ -281,11 +284,11 @@ onUnmounted(() => {
         </p>
       </template>
     </template>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="busy"
-        @click="open = false"
+        @click="close"
         >{{ messages.close }}</v-btn
       >
       <v-btn

@@ -25,16 +25,17 @@ let controller: AbortController | null = null;
 async function fetchPage(before: string | null) {
   controller?.abort();
   controller = new AbortController();
+  const signal = controller.signal;
   loading.value = true;
   failure.value = '';
   try {
-    const page = await props.load(before, controller.signal);
+    const page = await props.load(before, signal);
     entries.value = before ? [...entries.value, ...page.data] : page.data;
     next.value = page.nextCursor;
   } catch (error) {
-    if (!controller.signal.aborted) failure.value = errorMessage(messages.value, error);
+    if (!signal.aborted) failure.value = errorMessage(messages.value, error);
   } finally {
-    loading.value = false;
+    if (!signal.aborted) loading.value = false;
   }
 }
 watch(open, (value) => {

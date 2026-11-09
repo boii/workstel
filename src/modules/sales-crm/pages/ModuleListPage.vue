@@ -6,13 +6,8 @@ import FilterGroup from '../../../shared/filter-group.vue';
 import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useUndoNotice } from '../../../core/use-optimistic-archive';
-import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
-import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
-import { useShortcuts } from '../../../core/use-shortcuts';
-import { focusFieldInput } from '../../../core/focus-field';
-import type { FocusableField } from '../../../core/focus-field';
 import AccountDetail from '../components/AccountDetail.vue';
 import AccountForm from '../components/AccountForm.vue';
 import ActivityForm from '../components/ActivityForm.vue';
@@ -119,18 +114,20 @@ async function loadSummary() {
   if (!hotelId.value) return;
   summaryController?.abort();
   summaryController = new AbortController();
+  const signal = summaryController.signal;
   try {
-    summary.value = await api.summary(hotelId.value, departmentId.value, summaryController.signal);
+    summary.value = await api.summary(hotelId.value, departmentId.value, signal);
     today.value = summary.value.today;
   } catch {
     // The figures are optional; the list shows its own error.
-    if (!summaryController.signal.aborted) summary.value = null;
+    if (!signal.aborted) summary.value = null;
   }
 }
 async function load(after: string | null = null) {
   if (!hotelId.value) return;
   controller?.abort();
   controller = new AbortController();
+  const signal = controller.signal;
   if (after) loadingMore.value = true;
   else loading.value = true;
   failure.value = '';
@@ -140,7 +137,7 @@ async function load(after: string | null = null) {
         hotelId.value,
         reportDepartment.value,
         reportMonth.value,
-        controller.signal,
+        signal,
       );
       nextCursor.value = null;
     } else if (tab.value === 'pipeline') {
@@ -151,10 +148,10 @@ async function load(after: string | null = null) {
           stage: stage.value,
           accountId: null,
           followUp: followUp.value,
-          search: search.value ?? '',
+          search: search.value,
           after,
         },
-        controller.signal,
+        signal,
       );
       deals.value = after ? [...deals.value, ...page.data] : page.data;
       nextCursor.value = page.nextCursor;
@@ -165,19 +162,21 @@ async function load(after: string | null = null) {
           departmentId: departmentId.value,
           status: accountStatus.value,
           type: accountType.value,
-          search: search.value ?? '',
+          search: search.value,
           after,
         },
-        controller.signal,
+        signal,
       );
       accounts.value = after ? [...accounts.value, ...page.data] : page.data;
       nextCursor.value = page.nextCursor;
     }
   } catch (error) {
-    if (!controller.signal.aborted) failure.value = errorMessage(messages.value, error);
+    if (!signal.aborted) failure.value = errorMessage(messages.value, error);
   } finally {
-    loading.value = false;
-    loadingMore.value = false;
+    if (!signal.aborted) {
+      loading.value = false;
+      loadingMore.value = false;
+    }
   }
 }
 function refresh() {
@@ -438,41 +437,6 @@ async function saveActivity(input: ActivityInput, key: string) {
   refresh();
 }
 
-const searchField = ref<FocusableField | null>(null);
-const shortcutsOpen = ref(false);
-const anyDialog = computed(
-  () =>
-    accountFormOpen.value ||
-    dealFormOpen.value ||
-    activityFormOpen.value ||
-    detailOpen.value ||
-    shortcutsOpen.value,
-);
-useShortcuts(() => [
-  { key: '/', run: () => focusFieldInput(searchField.value) },
-  { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
-  { key: 'n', when: () => canWriteAny.value && !anyDialog.value, run: () => void openDealForm() },
-  {
-    key: 'a',
-    when: () => canWriteAny.value && !anyDialog.value,
-    run: () => openAccountForm(),
-  },
-]);
-const shortcutRows = computed(() => [
-  {
-    keys: '/',
-    label: tab.value === 'pipeline' ? messages.value.searchDeals : messages.value.searchAccounts,
-  },
-  ...(canWriteAny.value
-    ? [
-        { keys: 'N', label: messages.value.addDeal },
-        { keys: 'A', label: messages.value.addAccount },
-      ]
-    : []),
-  { keys: '?', label: t('shortcutList') },
-  { keys: 'Esc', label: t('shortcutClose') },
-]);
-
 const stageItems = computed(() => [
   { value: 'open', title: messages.value.stageOpen },
   ...stages.map((value) => ({ value, title: messages.value[stageKeys[value]] })),
@@ -716,7 +680,6 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           class="sales-toolbar"
         >
           <v-text-field
-            ref="searchField"
             v-model="search"
             class="sales-search"
             :placeholder="tab === 'pipeline' ? messages.searchDeals : messages.searchAccounts"
@@ -725,6 +688,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
             single-line
             clearable
             maxlength="150"
+            @update:model-value="search = $event ?? ''"
           />
           <FilterGroup
             :count="filterCount"
@@ -1115,10 +1079,6 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       @add-deal="openDealForm(null, detailAccount)"
       @edit-deal="(deal: Deal) => openDealForm(deal)"
       @log="(list: Deal[]) => detailAccount && openActivityForm(detailAccount, list, null)"
-    />
-    <KeyboardShortcuts
-      v-model="shortcutsOpen"
-      :rows="shortcutRows"
     />
     <UndoSnackbar
       :message="notice"

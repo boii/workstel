@@ -70,6 +70,7 @@ function save() {
         single-line
         clearable
         maxlength="150"
+        @update:model-value="search = $event ?? ''"
     /></template>
     <template #empty-action
       ><v-btn
@@ -102,6 +103,7 @@ function save() {
   <ModuleDialog
     v-model="dialog"
     :title="messages.create"
+    :dirty="Boolean(name.trim())"
   >
     <v-form
       id="template-record-form"

@@ -6,13 +6,8 @@ import FilterGroup from '../../../shared/filter-group.vue';
 import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
-import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
-import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
-import { useShortcuts } from '../../../core/use-shortcuts';
-import { focusFieldInput } from '../../../core/focus-field';
-import type { FocusableField } from '../../../core/focus-field';
 import DocumentForm from '../components/DocumentForm.vue';
 import {
   categoryIcons,
@@ -75,6 +70,7 @@ async function load(after: string | null = null) {
   if (!hotelId.value) return;
   controller?.abort();
   controller = new AbortController();
+  const signal = controller.signal;
   if (after) loadingMore.value = true;
   else loading.value = true;
   failure.value = '';
@@ -88,15 +84,17 @@ async function load(after: string | null = null) {
         search: search.value,
         after,
       },
-      controller.signal,
+      signal,
     );
     documents.value = after ? [...documents.value, ...page.data] : page.data;
     nextCursor.value = page.nextCursor;
   } catch (error) {
-    if (!controller.signal.aborted) failure.value = errorMessage(messages.value, error);
+    if (!signal.aborted) failure.value = errorMessage(messages.value, error);
   } finally {
-    loading.value = false;
-    loadingMore.value = false;
+    if (!signal.aborted) {
+      loading.value = false;
+      loadingMore.value = false;
+    }
   }
 }
 watch([departmentId, category, status], () => void load());
@@ -154,23 +152,6 @@ const { toggle: toggleArchive } = useOptimisticArchive({
   reload: () => load(),
 });
 
-const searchField = ref<FocusableField | null>(null);
-const shortcutsOpen = ref(false);
-useShortcuts(() => [
-  { key: '/', run: () => focusFieldInput(searchField.value) },
-  { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
-  {
-    key: 'n',
-    when: () => writableDepartments.value.length > 0 && !formOpen.value && !shortcutsOpen.value,
-    run: () => openForm(),
-  },
-]);
-const shortcutRows = computed(() => [
-  { keys: '/', label: messages.value.search },
-  ...(writableDepartments.value.length ? [{ keys: 'N', label: messages.value.add }] : []),
-  { keys: '?', label: t('shortcutList') },
-  { keys: 'Esc', label: t('shortcutClose') },
-]);
 const statusItems = computed(() => [
   { value: 'active', title: messages.value.active },
   { value: 'archived', title: messages.value.archived },
@@ -241,7 +222,6 @@ const departmentItems = computed(() => [
         >
         <div class="documents-toolbar">
           <v-text-field
-            ref="searchField"
             v-model="search"
             class="documents-search"
             :placeholder="messages.search"
@@ -250,6 +230,7 @@ const departmentItems = computed(() => [
             single-line
             clearable
             maxlength="150"
+            @update:model-value="search = $event ?? ''"
           />
           <FilterGroup
             :count="filterCount"
@@ -357,10 +338,6 @@ const departmentItems = computed(() => [
       :document="editing"
       :departments="writableDepartments"
       :save="saveDocument"
-    />
-    <KeyboardShortcuts
-      v-model="shortcutsOpen"
-      :rows="shortcutRows"
     />
     <UndoSnackbar
       :message="notice"

@@ -29,12 +29,25 @@ test('shortcut copy is typed in both shell locales and rendered where it is used
   assert.ok(app.includes("t('skipToContent')"), 'shell renders the skip link');
 });
 
-test('Vault has no page shortcuts and keeps empty-state copy in both module locales', () => {
+test('modules have no page shortcuts and Vault keeps empty-state copy in both module locales', async () => {
   assert.ok(en.filteredOnlyLoaded.trim(), 'filteredOnlyLoaded has English module copy');
   assert.ok(id.filteredOnlyLoaded.trim(), 'filteredOnlyLoaded has Indonesian module copy');
   assert.ok(!vault.includes('useShortcuts'), 'vault registers no keyboard shortcuts');
   assert.ok(vault.includes('FilterGroup'), 'vault filters use the shared FilterGroup');
   assert.ok(vault.includes('activeFilters'), 'the empty state explains active filters');
+  for (const moduleId of ['bin-card', 'documents', 'room-turnaround', 'sales-crm', 'vehicle']) {
+    const page = await readFile(`src/modules/${moduleId}/pages/ModuleListPage.vue`, 'utf8');
+    assert.ok(!page.includes('useShortcuts'), `${moduleId} registers no page shortcuts`);
+    assert.ok(!page.includes('KeyboardShortcuts'), `${moduleId} mounts no shortcut dialog`);
+  }
+  assert.ok(
+    app.includes('showsModuleList.value && !shortcutsOpen.value'),
+    'shell / shortcut is scoped to module list views',
+  );
+  assert.ok(
+    app.includes('() => session.value && !mustChangePassword.value'),
+    'shell ? and Escape shortcuts stay active across the authenticated workspace',
+  );
 });
 
 test('shortcuts never capture browser combinations or typing in fields', async () => {

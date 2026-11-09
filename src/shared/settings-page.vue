@@ -54,6 +54,7 @@ const permissions: [keyof StaffAssignment, MessageKey][] = [
   ['canAudit', 'permAudit'],
 ];
 const passwordOpen = ref(false);
+const passwordForm = ref<InstanceType<typeof ChangePassword> | null>(null);
 const notice = ref('');
 function passwordChanged() {
   passwordOpen.value = false;
@@ -215,15 +216,39 @@ function granted(assignment: StaffAssignment) {
     <ModuleDialog
       v-model="passwordOpen"
       :title="t('changePasswordTitle')"
+      :busy="passwordForm?.saving ?? false"
+      :dirty="passwordForm?.dirty ?? false"
       :width="dialogWidth.md"
     >
       <ChangePassword
         v-if="passwordOpen"
+        ref="passwordForm"
         :demo="demo"
         @changed="passwordChanged"
-        @cancel="passwordOpen = false"
         @sign-in-again="emit('signOut')"
       />
+      <template #actions="{ close }">
+        <v-btn
+          v-if="passwordForm?.reauth"
+          variant="tonal"
+          prepend-icon="mdi-login"
+          @click="emit('signOut')"
+          >{{ t('signInAgain') }}</v-btn
+        ><v-btn
+          v-else
+          variant="text"
+          :disabled="passwordForm?.saving"
+          @click="close"
+          >{{ t('cancelAction') }}</v-btn
+        ><v-btn
+          color="primary"
+          type="submit"
+          form="change-password-form"
+          :loading="passwordForm?.saving"
+          @click.prevent="passwordForm?.submit()"
+          >{{ t('savePassword') }}</v-btn
+        >
+      </template>
     </ModuleDialog>
     <ProfileForm
       v-model="profileOpen"

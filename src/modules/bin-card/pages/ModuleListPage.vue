@@ -6,13 +6,8 @@ import FilterGroup from '../../../shared/filter-group.vue';
 import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
-import KeyboardShortcuts from '../../../shared/keyboard-shortcuts.vue';
 import { runtime } from '../../../config/runtime';
-import { t } from '../../../i18n';
 import type { ModuleAssignment } from '../../../core/module-access';
-import { useShortcuts } from '../../../core/use-shortcuts';
-import { focusFieldInput } from '../../../core/focus-field';
-import type { FocusableField } from '../../../core/focus-field';
 import EntryForm from '../components/EntryForm.vue';
 import ItemForm from '../components/ItemForm.vue';
 import StockLedger from '../components/StockLedger.vue';
@@ -75,6 +70,7 @@ async function load(after: string | null = null) {
   if (!hotelId.value) return;
   controller?.abort();
   controller = new AbortController();
+  const signal = controller.signal;
   if (after) loadingMore.value = true;
   else loading.value = true;
   failure.value = '';
@@ -88,15 +84,17 @@ async function load(after: string | null = null) {
         lowOnly: lowOnly.value,
         after,
       },
-      controller.signal,
+      signal,
     );
     items.value = after ? [...items.value, ...page.data] : page.data;
     nextCursor.value = page.nextCursor;
   } catch (error) {
-    if (!controller.signal.aborted) failure.value = errorMessage(messages.value, error);
+    if (!signal.aborted) failure.value = errorMessage(messages.value, error);
   } finally {
-    loading.value = false;
-    loadingMore.value = false;
+    if (!signal.aborted) {
+      loading.value = false;
+      loadingMore.value = false;
+    }
   }
 }
 watch([departmentId, status, lowOnly], () => void load());
@@ -173,26 +171,6 @@ async function recordEntry(input: StockEntryInput, key: string) {
 const loadLedger = (before: string | null, signal: AbortSignal) =>
   api.listEntries(hotelId.value, selected.value!.id, before, signal);
 
-const searchField = ref<FocusableField | null>(null);
-const shortcutsOpen = ref(false);
-const anyOpen = computed(
-  () => formOpen.value || entryOpen.value || ledgerOpen.value || shortcutsOpen.value,
-);
-useShortcuts(() => [
-  { key: '/', run: () => focusFieldInput(searchField.value) },
-  { key: '?', shift: true, run: () => (shortcutsOpen.value = true) },
-  {
-    key: 'n',
-    when: () => manageableDepartments.value.length > 0 && !anyOpen.value,
-    run: () => openForm(),
-  },
-]);
-const shortcutRows = computed(() => [
-  { keys: '/', label: messages.value.search },
-  ...(manageableDepartments.value.length ? [{ keys: 'N', label: messages.value.add }] : []),
-  { keys: '?', label: t('shortcutList') },
-  { keys: 'Esc', label: t('shortcutClose') },
-]);
 const stockItems = computed(() => [
   { value: false, title: messages.value.allStock },
   { value: true, title: messages.value.lowOnly },
@@ -259,7 +237,6 @@ const departmentItems = computed(() => [
         >
         <div class="bin-toolbar">
           <v-text-field
-            ref="searchField"
             v-model="search"
             class="bin-search"
             :placeholder="messages.search"
@@ -268,6 +245,7 @@ const departmentItems = computed(() => [
             single-line
             clearable
             maxlength="150"
+            @update:model-value="search = $event ?? ''"
           />
           <FilterGroup
             :count="filterCount"
@@ -387,10 +365,6 @@ const departmentItems = computed(() => [
       v-model="ledgerOpen"
       :item="selected"
       :load="loadLedger"
-    />
-    <KeyboardShortcuts
-      v-model="shortcutsOpen"
-      :rows="shortcutRows"
     />
     <UndoSnackbar
       :message="notice"
