@@ -6,6 +6,7 @@ import type {
   Deal,
   DealInput,
   DealQuery,
+  EntryReport,
   Page,
   SalesAccount,
   SalesSummary,
@@ -46,4 +47,11 @@ export interface SalesCrmApi {
     input: ActivityInput,
     idempotencyKey: string,
   ): Promise<void>;
+  /** Needs sales-crm:manage in every department covered; month is YYYY-MM. */
+  entryReport(
+    hotelId: string,
+    departmentId: string | null,
+    month: string,
+    signal?: AbortSignal,
+  ): Promise<EntryReport>;
 }

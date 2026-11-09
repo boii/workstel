@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ModuleRequestError } from '../../core/module-rpc';
 import { createDemoSalesCrmApi } from './demo-api';
-import { parseAccounts, parseActivities, parseDeals, parseSummary } from './live-api';
+import {
+  parseAccounts,
+  parseActivities,
+  parseDeals,
+  parseEntryReport,
+  parseSummary,
+} from './live-api';
 import type { DealInput } from './types';
 import {
   entryDelayDays,
@@ -170,6 +176,42 @@ test('activity rows carry the server entry timing', () => {
     assert.throws(() => parseActivities([{ ...row, ...broken }], accountId), ModuleRequestError);
 });
 
+test('entry reports are validated before they are shown', () => {
+  const counts = { total: 3, on_time: 1, late: 1, backdated: 1 };
+  const entry = {
+    id: deal.id,
+    account_id: accountId,
+    account_name: 'PT Maju Jaya',
+    activity_type: 'visit',
+    occurred_on: '2026-11-01',
+    recorded_on: '2026-11-05',
+    created_at: '2026-11-05T03:00:00Z',
+    entry_delay_days: 4,
+    entry_timing: 'backdated',
+    created_by_email: 'rina@example.com',
+    created_by_name: 'Rina Wijaya',
+  };
+  const data = {
+    totals: counts,
+    people: [{ ...counts, email: 'rina@example.com', name: 'Rina Wijaya' }],
+    entries: [entry],
+  };
+  const meta = { month: '2026-11', entriesTotal: 2 };
+  const report = parseEntryReport(data, meta);
+  assert.deepEqual(report.totals, { total: 3, onTime: 1, late: 1, backdated: 1 });
+  assert.equal(report.people[0].name, 'Rina Wijaya');
+  assert.equal(report.entries[0].entryTiming, 'backdated');
+  assert.equal(report.entriesTotal, 2);
+  for (const [brokenData, brokenMeta] of [
+    [{ ...data, entries: [{ ...entry, entry_timing: 'on-time' }] }, meta],
+    [{ ...data, people: [{ ...counts, email: 'x' }] }, meta],
+    [{ ...data, totals: { ...counts, late: -1 } }, meta],
+    [data, { ...meta, month: '2026-13' }],
+    [data, { month: '2026-11' }],
+  ] as const)
+    assert.throws(() => parseEntryReport(brokenData, brokenMeta), ModuleRequestError);
+});
+
 test('entry timing thresholds match the server', () => {
   assert.equal(entryDelayDays('2026-11-04', '2026-11-04'), 0);
   assert.equal(entryDelayDays('2026-10-30', '2026-11-04'), 5);
@@ -239,6 +281,17 @@ test('demo CRM keeps the pipeline, follow-ups and archiving consistent', async (
   assert.equal(called.length, 1);
   assert.equal(called[0].entryTiming, 'on-time');
   assert.ok(activities.data.some((a) => a.entryTiming === 'backdated'));
+  const report = await api.entryReport('demo-hotel', null, today.slice(0, 7));
+  assert.equal(
+    report.totals.total,
+    report.totals.onTime + report.totals.late + report.totals.backdated,
+  );
+  assert.equal(
+    report.people.reduce((sum, p) => sum + p.total, 0),
+    report.totals.total,
+  );
+  assert.ok(report.entries.every((e) => e.entryTiming !== ('on-time' as string)));
+  await assert.rejects(api.entryReport('demo-hotel', null, '2099-01'), ModuleRequestError);
   assert.equal((await api.summary('demo-hotel', null)).overdue, 0);
   await assert.rejects(
     api.saveDeal('demo-hotel', { ...dealInput, accountId: target.accountId, stage: 'lost' }),

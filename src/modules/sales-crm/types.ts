@@ -119,6 +119,42 @@ export interface ActivityInput {
   dealId: string | null;
   nextFollowUp: string | null;
 }
+export interface EntryCounts {
+  total: number;
+  onTime: number;
+  late: number;
+  backdated: number;
+}
+/** One person's entry timing for a report month. */
+export interface EntryPerson extends EntryCounts {
+  email: string;
+  /** Profile display name, or the part of the email before @ (server side). */
+  name: string;
+}
+/** A late or backdated activity in the report; its summary text is not included. */
+export interface EntryReportItem {
+  id: string;
+  accountId: string;
+  accountName: string;
+  type: ActivityType;
+  occurredOn: string;
+  recordedOn: string;
+  entryDelayDays: number;
+  entryTiming: Exclude<EntryTiming, 'on-time'>;
+  createdByEmail: string;
+  createdByName: string;
+}
+/** Activities recorded by the server in one hotel month (managers only). */
+export interface EntryReport {
+  /** YYYY-MM */
+  month: string;
+  totals: EntryCounts;
+  people: EntryPerson[];
+  /** Up to 100 late and backdated entries, largest delay first. */
+  entries: EntryReportItem[];
+  /** All late and backdated entries in the month, which may exceed entries.length. */
+  entriesTotal: number;
+}
 export interface StageTotal {
   count: number;
   value: number;

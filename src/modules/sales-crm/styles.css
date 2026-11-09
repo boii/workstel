@@ -331,6 +331,34 @@
 .sales-entry--backdated {
   color: var(--workstel-danger-text);
 }
+/* Entry report tab: month (and department) pickers, tiles, then two lists. */
+.sales-report-toolbar,
+.sales-report-toolbar:not(:has(> :nth-child(4))) {
+  grid-template-columns: repeat(2, minmax(0, 220px));
+}
+.sales-report > .sales-muted {
+  margin: 0 0 var(--workstel-space-3);
+  font-size: var(--workstel-font-sm);
+}
+.sales-report-heading {
+  margin: var(--workstel-space-5) 0 var(--workstel-space-2);
+  font-size: var(--workstel-font-sm);
+  font-weight: var(--workstel-weight-semibold);
+}
+.sales-report .list-row-status {
+  flex-wrap: wrap;
+  gap: var(--workstel-space-1) var(--workstel-space-2);
+}
+.sales-report-rate {
+  background: var(--workstel-neutral-bg);
+  color: var(--workstel-text-secondary);
+}
+.sales-tile > strong.sales-entry--late {
+  color: var(--workstel-warning-text);
+}
+.sales-tile > strong.sales-entry--backdated {
+  color: var(--workstel-danger-text);
+}
 /* token-exempt: four summary tiles fold to two columns before the list breakpoint */
 @media (max-width: 900px) {
   .sales-summary {

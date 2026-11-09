@@ -1,7 +1,7 @@
 import { ModuleRequestError, moduleRpc, parseCursor, uuidPattern } from '../../core/module-rpc';
 import type { SalesCrmApi } from './api';
 import { accountTypes, activityTypes, entryTimings, openStages, segments, stages } from './types';
-import type { Activity, Deal, SalesAccount, SalesSummary } from './types';
+import type { Activity, Deal, EntryCounts, EntryReport, SalesAccount, SalesSummary } from './types';
 import { isCalendarDate } from './validation';
 
 type Rpc = typeof moduleRpc;
@@ -200,8 +200,81 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
   });
 }
 
+function parseCounts(raw: Raw | null | undefined): EntryCounts {
+  if (!raw || !['total', 'on_time', 'late', 'backdated'].every((key) => isCount(raw[key])))
+    throw invalid();
+  return {
+    total: Number(raw.total),
+    onTime: Number(raw.on_time),
+    late: Number(raw.late),
+    backdated: Number(raw.backdated),
+  };
+}
+export function parseEntryReport(data: unknown, meta: Raw | undefined): EntryReport {
+  const raw = data as Raw | null;
+  const people = raw?.people;
+  const entries = raw?.entries;
+  if (
+    !raw ||
+    !Array.isArray(people) ||
+    !Array.isArray(entries) ||
+    entries.length > 100 ||
+    !isText(meta?.month) ||
+    !/^\d{4}-(0[1-9]|1[0-2])$/.test(meta.month) ||
+    !isCount(meta.entriesTotal)
+  )
+    throw invalid();
+  return {
+    month: meta.month,
+    totals: parseCounts(raw.totals as Raw),
+    people: people.map((row: Raw) => {
+      if (!row || !isText(row.email) || !isText(row.name)) throw invalid();
+      return { ...parseCounts(row), email: row.email, name: row.name };
+    }),
+    entries: entries.map((row: Raw) => {
+      if (
+        !row ||
+        !isText(row.id) ||
+        !uuidPattern.test(row.id) ||
+        !isText(row.account_id) ||
+        !uuidPattern.test(row.account_id) ||
+        !allText(row, ['account_name', 'created_by_email', 'created_by_name']) ||
+        !activityTypes.includes(row.activity_type as never) ||
+        !isText(row.occurred_on) ||
+        !isCalendarDate(row.occurred_on) ||
+        !isText(row.recorded_on) ||
+        !isCalendarDate(row.recorded_on) ||
+        !isCount(row.entry_delay_days) ||
+        (row.entry_timing !== 'late' && row.entry_timing !== 'backdated')
+      )
+        throw invalid();
+      return {
+        id: row.id,
+        accountId: row.account_id,
+        accountName: String(row.account_name),
+        type: row.activity_type as EntryReport['entries'][number]['type'],
+        occurredOn: row.occurred_on,
+        recordedOn: row.recorded_on,
+        entryDelayDays: row.entry_delay_days,
+        entryTiming: row.entry_timing,
+        createdByEmail: String(row.created_by_email),
+        createdByName: String(row.created_by_name),
+      };
+    }),
+    entriesTotal: Number(meta.entriesTotal),
+  };
+}
+
 export function createLiveSalesCrmApi(rpc: Rpc = moduleRpc): SalesCrmApi {
   return {
+    async entryReport(hotelId, departmentId, month, signal) {
+      const result = await rpc(
+        'sales_entry_report',
+        { p_hotel_id: hotelId, p_department_id: departmentId, p_month: month + '-01' },
+        signal,
+      );
+      return parseEntryReport(result.data, result.meta);
+    },
     async summary(hotelId, departmentId, signal) {
       const result = await rpc(
         'sales_summary',

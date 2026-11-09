@@ -111,6 +111,26 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       createdByName: 'Rudi Hartono',
       ...timing(addDays(today, -9), addDays(today, -2)),
     },
+    // A second salesperson, so the entry report has more than one person.
+    ...(
+      [
+        [1, 'call', -3, -3, 'Called about the Christmas group block.'],
+        [2, 'meeting', -2, -2, 'Met the protocol team about the regional forum.'],
+        [3, 'visit', -5, -4, 'Showed the garden venue to the couple.'],
+      ] as const
+    ).map(([index, type, occurredIn, recordedIn, summary]) => ({
+      id: 'demo-activity-' + (index + 3),
+      accountId: accounts[index].id,
+      dealId: null,
+      dealTitle: '',
+      type,
+      occurredOn: addDays(today, occurredIn),
+      summary,
+      createdAt: now,
+      createdByEmail: 'maya@example.com',
+      createdByName: 'Maya Sari',
+      ...timing(addDays(today, occurredIn), addDays(today, recordedIn)),
+    })),
   ];
   const keys = new Set<string>();
   const account = (id: string) => {
@@ -325,6 +345,46 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
         createdByName: 'Demo User',
         ...timing(input.occurredOn, today),
       });
+    },
+    async entryReport(_hotelId, _departmentId, month) {
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || month > today.slice(0, 7))
+        throw new ModuleRequestError('INVALID_INPUT');
+      const inMonth = activities.filter((a) => a.recordedOn.startsWith(month));
+      const count = (list: Activity[]) => ({
+        total: list.length,
+        onTime: list.filter((a) => a.entryTiming === 'on-time').length,
+        late: list.filter((a) => a.entryTiming === 'late').length,
+        backdated: list.filter((a) => a.entryTiming === 'backdated').length,
+      });
+      const people = [...new Set(inMonth.map((a) => a.createdByEmail))]
+        .map((email) => {
+          const own = inMonth.filter((a) => a.createdByEmail === email);
+          return { ...count(own), email, name: own[0].createdByName };
+        })
+        .sort(
+          (a, b) => b.backdated - a.backdated || b.late - a.late || a.name.localeCompare(b.name),
+        );
+      const late = inMonth
+        .filter((a) => a.entryTiming !== 'on-time')
+        .sort((a, b) => b.entryDelayDays - a.entryDelayDays);
+      return {
+        month,
+        totals: count(inMonth),
+        people,
+        entries: late.slice(0, 100).map((a) => ({
+          id: a.id,
+          accountId: a.accountId,
+          accountName: account(a.accountId).name,
+          type: a.type,
+          occurredOn: a.occurredOn,
+          recordedOn: a.recordedOn,
+          entryDelayDays: a.entryDelayDays,
+          entryTiming: a.entryTiming as 'late' | 'backdated',
+          createdByEmail: a.createdByEmail,
+          createdByName: a.createdByName,
+        })),
+        entriesTotal: late.length,
+      };
     },
   };
 }

@@ -20,9 +20,12 @@ import DealForm from '../components/DealForm.vue';
 import {
   accountTypeIcons,
   accountTypeKeys,
+  activityIcons,
+  activityKeys,
   errorMessage,
   formatDay,
   formatMoney,
+  formatMonth,
   formatStay,
   segmentKeys,
   stageKeys,
@@ -37,6 +40,7 @@ import type {
   ActivityInput,
   Deal,
   DealInput,
+  EntryReport,
   FollowUpFilter,
   RecordStatus,
   SalesAccount,
@@ -77,8 +81,15 @@ const writableDepartments = computed(() =>
     .map((row) => ({ id: row.departmentId, name: row.departmentName })),
 );
 const canWriteAny = computed(() => writableDepartments.value.length > 0);
+// The entry report is for managers; the server checks sales-crm:manage per department.
+const managedDepartments = computed(() =>
+  hotelScope.value
+    .filter((row) => row.canManage)
+    .map((row) => ({ id: row.departmentId, name: row.departmentName })),
+);
+const canManageAny = computed(() => managedDepartments.value.length > 0);
 
-type Tab = 'pipeline' | 'accounts';
+type Tab = 'pipeline' | 'accounts' | 'report';
 const tab = ref<Tab>('pipeline');
 const search = ref('');
 const departmentId = ref<string | null>(null);
@@ -87,6 +98,9 @@ const followUp = ref<FollowUpFilter>('any');
 const accountType = ref<AccountType | null>(null);
 const accountStatus = ref<RecordStatus | 'all'>('active');
 const today = ref(hotelToday());
+const reportMonth = ref(hotelToday().slice(0, 7));
+const reportDepartment = ref<string | null>(null);
+const report = ref<EntryReport | null>(null);
 
 const deals = ref<Deal[]>([]);
 const accounts = ref<SalesAccount[]>([]);
@@ -120,7 +134,15 @@ async function load(after: string | null = null) {
   else loading.value = true;
   failure.value = '';
   try {
-    if (tab.value === 'pipeline') {
+    if (tab.value === 'report') {
+      report.value = await api.entryReport(
+        hotelId.value,
+        reportDepartment.value,
+        reportMonth.value,
+        controller.signal,
+      );
+      nextCursor.value = null;
+    } else if (tab.value === 'pipeline') {
       const page = await api.listDeals(
         {
           hotelId: hotelId.value,
@@ -168,6 +190,11 @@ watch(tab, () => {
   void load();
 });
 watch([stage, followUp, accountType, accountStatus], () => void load());
+watch([reportMonth, reportDepartment], () => void load());
+// Losing the manage level (or the tab) while on the report returns to the pipeline.
+watch(canManageAny, (value) => {
+  if (!value && tab.value === 'report') tab.value = 'pipeline';
+});
 watch(departmentId, () => refresh());
 watch(search, () => {
   clearTimeout(searchTimer);
@@ -189,11 +216,12 @@ onBeforeUnmount(() => {
 
 const hasFilters = computed(
   () =>
-    !!search.value ||
-    !!departmentId.value ||
-    (tab.value === 'pipeline'
-      ? stage.value !== 'open' || followUp.value !== 'any'
-      : !!accountType.value || accountStatus.value !== 'active'),
+    tab.value !== 'report' &&
+    (!!search.value ||
+      !!departmentId.value ||
+      (tab.value === 'pipeline'
+        ? stage.value !== 'open' || followUp.value !== 'any'
+        : !!accountType.value || accountStatus.value !== 'active')),
 );
 // Filters other than search; on phones they share one Filters button.
 const filterCount = computed(
@@ -251,7 +279,7 @@ async function saveAccount(input: AccountInput) {
     };
   refresh();
 }
-async function openAccount(accountId: string) {
+async function openAccount(accountId: string, accountName = '') {
   const known = accounts.value.find((a) => a.id === accountId);
   if (known) {
     detailAccount.value = known;
@@ -266,7 +294,7 @@ async function openAccount(accountId: string) {
       departmentId: null,
       status: 'all',
       type: null,
-      search: deal?.accountName ?? '',
+      search: deal?.accountName ?? accountName,
       after: null,
     });
     const found = page.data.find((a) => a.id === accountId);
@@ -468,8 +496,29 @@ const departmentItems = computed(() => [
   ...hotelScope.value.map((row) => ({ value: row.departmentId, title: row.departmentName })),
 ]);
 const rows = computed(() =>
-  tab.value === 'pipeline' ? deals.value.length : accounts.value.length,
+  tab.value === 'report'
+    ? (report.value?.totals.total ?? 0)
+    : tab.value === 'pipeline'
+      ? deals.value.length
+      : accounts.value.length,
 );
+// The last 12 hotel months, newest first.
+const monthItems = computed(() => {
+  const [year, month] = today.value.split('-').map(Number);
+  return Array.from({ length: 12 }, (_, back) => {
+    const date = new Date(Date.UTC(year, month - 1 - back, 1));
+    const value = date.toISOString().slice(0, 7);
+    return { value, title: formatMonth(value) };
+  });
+});
+const reportDepartmentItems = computed(() => [
+  { value: null, title: messages.value.allDepartments },
+  ...managedDepartments.value.map((d) => ({ value: d.id, title: d.name })),
+]);
+const onTimeRate = (onTime: number, total: number) =>
+  total ? Math.round((onTime / total) * 100) + '%' : '–';
+const delayLabel = (days: number) =>
+  days + ' ' + (days === 1 ? messages.value.entryDayAfter : messages.value.entryDaysAfter);
 const pipelineTotal = computed(() =>
   summary.value ? openStages.reduce((sum, name) => sum + summary.value!.stages[name].value, 0) : 0,
 );
@@ -501,33 +550,47 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
       :description="
         rows +
         ' ' +
-        (tab === 'pipeline'
+        (tab === 'report'
           ? rows === 1
-            ? messages.dealOne
-            : messages.deals
-          : rows === 1
-            ? messages.accountOne
-            : messages.accounts)
+            ? messages.reportActivity
+            : messages.reportActivities
+          : tab === 'pipeline'
+            ? rows === 1
+              ? messages.dealOne
+              : messages.deals
+            : rows === 1
+              ? messages.accountOne
+              : messages.accounts)
       "
-      :empty-icon="hasFilters ? 'mdi-filter-off-outline' : 'mdi-handshake-outline'"
+      :empty-icon="
+        tab === 'report'
+          ? 'mdi-clipboard-text-clock-outline'
+          : hasFilters
+            ? 'mdi-filter-off-outline'
+            : 'mdi-handshake-outline'
+      "
       :loading="loading"
       :error="failure"
       :empty="!rows"
       :empty-title="
-        hasFilters
-          ? messages.noResults
-          : tab === 'pipeline'
-            ? messages.emptyDealsTitle
-            : messages.emptyAccountsTitle
+        tab === 'report'
+          ? messages.reportEmptyTitle
+          : hasFilters
+            ? messages.noResults
+            : tab === 'pipeline'
+              ? messages.emptyDealsTitle
+              : messages.emptyAccountsTitle
       "
       :empty-description="
-        hasFilters
-          ? messages.noResultsHint
-          : !canWriteAny
-            ? messages.emptyReadOnly
-            : tab === 'pipeline'
-              ? messages.emptyDealsDescription
-              : messages.emptyAccountsDescription
+        tab === 'report'
+          ? messages.reportEmptyHint
+          : hasFilters
+            ? messages.noResultsHint
+            : !canWriteAny
+              ? messages.emptyReadOnly
+              : tab === 'pipeline'
+                ? messages.emptyDealsDescription
+                : messages.emptyAccountsDescription
       "
       :retry-label="messages.retry"
       @retry="load()"
@@ -559,7 +622,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           >{{ messages.demoNotice }}</v-alert
         >
         <div
-          v-if="summary"
+          v-if="summary && tab !== 'report'"
           class="sales-summary"
         >
           <div class="sales-tile">
@@ -621,9 +684,33 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
             value="accounts"
             prepend-icon="mdi-domain"
             >{{ messages.tabAccounts }}</v-tab
+          ><v-tab
+            v-if="canManageAny"
+            value="report"
+            prepend-icon="mdi-clipboard-text-clock-outline"
+            >{{ messages.tabReport }}</v-tab
           >
         </v-tabs>
-        <div class="sales-toolbar">
+        <div
+          v-if="tab === 'report'"
+          class="sales-toolbar sales-report-toolbar"
+        >
+          <v-select
+            v-model="reportMonth"
+            :items="monthItems"
+            :label="messages.reportMonth"
+          />
+          <v-select
+            v-if="managedDepartments.length > 1"
+            v-model="reportDepartment"
+            :items="reportDepartmentItems"
+            :label="messages.department"
+          />
+        </div>
+        <div
+          v-else
+          class="sales-toolbar"
+        >
           <v-text-field
             ref="searchField"
             v-model="search"
@@ -680,7 +767,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           @click="resetFilters"
           >{{ messages.reset }}</v-btn
         ><v-btn
-          v-else-if="canWriteAny"
+          v-else-if="canWriteAny && tab !== 'report'"
           variant="tonal"
           color="primary"
           prepend-icon="mdi-plus"
@@ -773,7 +860,7 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
         </ListRow>
       </ul>
       <ul
-        v-else
+        v-else-if="tab === 'accounts'"
         class="list-rows"
       >
         <ListRow
@@ -825,6 +912,136 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
           </template>
         </ListRow>
       </ul>
+      <div
+        v-else-if="report"
+        class="sales-report"
+      >
+        <p class="sales-muted">{{ messages.reportHint }}</p>
+        <div class="sales-summary">
+          <div class="sales-tile">
+            <span>{{ messages.reportRecorded }}</span>
+            <strong>{{ report.totals.total }}</strong>
+            <small>{{ formatMonth(report.month) }}</small>
+          </div>
+          <div class="sales-tile">
+            <span>{{ messages.reportOnTime }}</span>
+            <strong>{{ onTimeRate(report.totals.onTime, report.totals.total) }}</strong>
+            <small>{{ report.totals.onTime }} {{ messages.reportActivities }}</small>
+          </div>
+          <div class="sales-tile">
+            <span>{{ messages.entryLate }}</span>
+            <strong :class="{ 'sales-entry--late': report.totals.late }">{{
+              report.totals.late
+            }}</strong>
+            <small>{{ messages.reportActivities }}</small>
+          </div>
+          <div class="sales-tile">
+            <span>{{ messages.entryBackdated }}</span>
+            <strong :class="{ 'sales-entry--backdated': report.totals.backdated }">{{
+              report.totals.backdated
+            }}</strong>
+            <small>{{ messages.reportActivities }}</small>
+          </div>
+        </div>
+
+        <h3 class="sales-report-heading">{{ messages.reportPeople }}</h3>
+        <ul class="list-rows">
+          <ListRow
+            v-for="person in report.people"
+            :key="person.email"
+            class="sales-row"
+            icon="mdi-account-outline"
+          >
+            <strong :title="person.email">{{ person.name || person.email }}</strong>
+            <small>{{ person.total }} {{ messages.reportActivities }}</small>
+            <template #status>
+              <span class="list-row-chip sales-report-rate"
+                >{{ onTimeRate(person.onTime, person.total) }}
+                {{ messages.reportOnTime.toLowerCase() }}</span
+              ><span
+                v-if="person.late"
+                class="sales-entry sales-entry--late"
+                ><v-icon
+                  icon="mdi-clock-alert-outline"
+                  size="15"
+                />{{ person.late }} {{ messages.entryLate.toLowerCase() }}</span
+              ><span
+                v-if="person.backdated"
+                class="sales-entry sales-entry--backdated"
+                ><v-icon
+                  icon="mdi-calendar-alert-outline"
+                  size="15"
+                />{{ person.backdated }} {{ messages.entryBackdated.toLowerCase() }}</span
+              >
+            </template>
+          </ListRow>
+        </ul>
+
+        <h3 class="sales-report-heading">{{ messages.reportEntries }}</h3>
+        <p
+          v-if="!report.entries.length"
+          class="sales-muted"
+        >
+          {{ messages.reportAllOnTime }}
+        </p>
+        <ul
+          v-else
+          class="list-rows"
+        >
+          <ListRow
+            v-for="entry in report.entries"
+            :key="entry.id"
+            class="sales-row"
+            :icon="activityIcons[entry.type]"
+          >
+            <strong>{{ entry.accountName }}</strong>
+            <small
+              >{{ messages[activityKeys[entry.type]] }} · {{ messages.reportHappened }}
+              {{ formatDay(entry.occurredOn) }} · {{ messages.entryRecorded.toLowerCase() }}
+              {{ formatDay(entry.recordedOn) }}</small
+            >
+            <small
+              >{{ messages.activityBy }}
+              <span :title="entry.createdByEmail">{{
+                entry.createdByName || entry.createdByEmail
+              }}</span></small
+            >
+            <template #status>
+              <span
+                class="sales-entry"
+                :class="'sales-entry--' + entry.entryTiming"
+                ><v-icon
+                  :icon="
+                    entry.entryTiming === 'backdated'
+                      ? 'mdi-calendar-alert-outline'
+                      : 'mdi-clock-alert-outline'
+                  "
+                  size="15"
+                />{{
+                  entry.entryTiming === 'backdated' ? messages.entryBackdated : messages.entryLate
+                }}
+                · {{ delayLabel(entry.entryDelayDays) }}</span
+              >
+            </template>
+            <template #actions>
+              <v-btn
+                variant="tonal"
+                class="row-primary-action"
+                append-icon="mdi-chevron-right"
+                :aria-label="messages.viewAccount + ' — ' + entry.accountName"
+                @click="openAccount(entry.accountId, entry.accountName)"
+                >{{ messages.viewAccount }}</v-btn
+              >
+            </template>
+          </ListRow>
+        </ul>
+        <p
+          v-if="report.entriesTotal > report.entries.length"
+          class="sales-muted"
+        >
+          {{ messages.reportEntriesLimited }}
+        </p>
+      </div>
       <v-btn
         v-if="nextCursor"
         variant="text"

@@ -91,6 +91,12 @@ export function formatDay(value: string) {
     new Date(value + 'T00:00:00Z'),
   );
 }
+/** A report month (YYYY-MM) as "November 2026". */
+export function formatMonth(value: string) {
+  return new Intl.DateTimeFormat(tag(), { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+    new Date(value + '-01T00:00:00Z'),
+  );
+}
 export function formatStay(arrival: string | null, departure: string | null) {
   if (!arrival) return '';
   return departure && departure !== arrival
