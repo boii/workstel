@@ -8,6 +8,8 @@ import VaultAccountList from '../components/VaultAccountList.vue';
 import VaultAudit from '../components/VaultAudit.vue';
 import VaultSharing from '../components/VaultSharing.vue';
 import VaultSecretDialog from '../components/VaultSecretDialog.vue';
+import VaultUsernameCopy from '../components/VaultUsernameCopy.vue';
+import EmptyFilterChips from '../../../shared/empty-filter-chips.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
@@ -18,6 +20,7 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultEntryForm from '../components/VaultEntryForm.vue';
 import type { VaultEntry, VaultEntryInput, DepartmentId } from '../types';
 import { departmentIds } from '../types';
+import { safeWebsiteUrl } from '../validation';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
@@ -602,34 +605,13 @@ onMounted(() => {
         </p>
       </template>
       <template #empty-action>
-        <div
+        <EmptyFilterChips
           v-if="activeFilters.length"
-          class="vault-empty-filters"
-        >
-          <span
-            v-if="next"
-            class="vault-field-hint"
-            >{{ messages.filteredOnlyLoaded }}</span
-          >
-          <div class="vault-empty-chips">
-            <v-chip
-              v-for="filter in activeFilters"
-              :key="filter.key"
-              size="small"
-              variant="tonal"
-              closable
-              :aria-label="messages.reset + ': ' + filter.label"
-              @click:close="filter.clear"
-              >{{ filter.label }}</v-chip
-            >
-          </div>
-          <v-btn
-            variant="text"
-            color="primary"
-            @click="resetFilters"
-            >{{ messages.reset }}</v-btn
-          >
-        </div>
+          :filters="activeFilters"
+          :reset-label="messages.reset"
+          :hint="next ? messages.filteredOnlyLoaded : undefined"
+          @reset="resetFilters"
+        />
         <v-btn
           v-else-if="canWrite"
           variant="tonal"
@@ -705,9 +687,28 @@ onMounted(() => {
           <dt>{{ messages.access }}</dt>
           <dd>{{ detail.isOwner ? messages.ownedByMe : messages.sharedWithMe }}</dd>
           <dt>{{ messages.username }}</dt>
-          <dd>{{ detail.username }}</dd>
+          <dd>
+            <VaultUsernameCopy
+              :value="detail.username"
+              :name="detail.name"
+            />
+          </dd>
           <dt>{{ messages.website }}</dt>
-          <dd>{{ detail.website || '—' }}</dd>
+          <dd>
+            <a
+              v-if="safeWebsiteUrl(detail.website)"
+              class="vault-compact-domain"
+              :href="safeWebsiteUrl(detail.website)!.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              :aria-label="messages.openWebsite + ' — ' + detail.name"
+              >{{ detail.website
+              }}<v-icon
+                icon="mdi-open-in-new"
+                size="11"
+            /></a>
+            <template v-else>{{ detail.website || '—' }}</template>
+          </dd>
           <dt>{{ messages.notes }}</dt>
           <dd>{{ detail.notes || '—' }}</dd>
           <dt>{{ messages.updated }}</dt>

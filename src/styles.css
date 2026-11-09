@@ -981,3 +981,37 @@ footer small {
 .v-field-label.v-field-label--floating {
   font-size: var(--workstel-font-xs);
 }
+
+/* Shared module breadcrumb and backend/demo notice rules across all module pages. */
+:is(
+  .module-breadcrumb,
+  .vehicle-breadcrumb,
+  .bin-breadcrumb,
+  .documents-breadcrumb,
+  .sales-breadcrumb,
+  .hk-breadcrumb,
+  .vault-breadcrumb
+) {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  font-size: var(--workstel-font-sm);
+  color: var(--workstel-text-secondary);
+  margin-bottom: var(--workstel-space-2_5);
+  padding: var(--workstel-space-1) 0;
+}
+:is(
+  .module-notice,
+  .vehicle-notice,
+  .bin-notice,
+  .documents-notice,
+  .sales-notice,
+  .hk-notice,
+  .vault-notice
+) {
+  font-size: var(--workstel-font-xs) !important;
+  line-height: var(--workstel-leading-normal);
+  margin-bottom: var(--workstel-space-3);
+}

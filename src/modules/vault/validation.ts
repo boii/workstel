@@ -1,5 +1,13 @@
 import { departmentIds } from './types';
 import type { VaultEntryInput, VaultField, VaultValidationError } from './types';
+export function safeWebsiteUrl(value: string): URL | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && !url.username && !url.password ? url : null;
+  } catch {
+    return null;
+  }
+}
 export function validateEntry(
   input: VaultEntryInput,
 ): Partial<Record<VaultField, VaultValidationError>> {
@@ -11,12 +19,7 @@ export function validateEntry(
   if (!departmentIds.includes(input.departmentId)) errors.departmentId = 'required';
   if (input.notes.length > 1000) errors.notes = 'tooLong';
   if (input.website) {
-    try {
-      const url = new URL(input.website);
-      if (url.protocol !== 'https:' || url.username || url.password) errors.website = 'invalidUrl';
-    } catch {
-      errors.website = 'invalidUrl';
-    }
+    if (!safeWebsiteUrl(input.website)) errors.website = 'invalidUrl';
     if (input.website.length > 2048) errors.website = 'tooLong';
   }
   return errors;

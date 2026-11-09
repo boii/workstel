@@ -2,6 +2,7 @@
 import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import EmptyFilterChips from '../../../shared/empty-filter-chips.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
 import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
@@ -217,7 +218,7 @@ onBeforeUnmount(() => {
 const hasFilters = computed(
   () =>
     tab.value !== 'report' &&
-    (!!search.value ||
+    (!!search.value.trim() ||
       !!departmentId.value ||
       (tab.value === 'pipeline'
         ? stage.value !== 'open' || followUp.value !== 'any'
@@ -231,6 +232,63 @@ const filterCount = computed(
       ? (stage.value !== 'open' ? 1 : 0) + (followUp.value !== 'any' ? 1 : 0)
       : (accountType.value ? 1 : 0) + (accountStatus.value !== 'active' ? 1 : 0)),
 );
+const activeFilters = computed(() => {
+  if (tab.value === 'report') return [];
+  const rows: { key: string; label: string; clear: () => void }[] = [];
+  if (search.value.trim())
+    rows.push({
+      key: 'search',
+      label: `${
+        tab.value === 'pipeline' ? messages.value.searchDeals : messages.value.searchAccounts
+      }: “${search.value.trim()}”`,
+      clear: () => (search.value = ''),
+    });
+  if (tab.value === 'pipeline') {
+    if (stage.value !== 'open')
+      rows.push({
+        key: 'stage',
+        label: `${messages.value.stage}: ${
+          stage.value === 'all' ? messages.value.stageAll : messages.value[stageKeys[stage.value]]
+        }`,
+        clear: () => (stage.value = 'open'),
+      });
+    if (followUp.value !== 'any')
+      rows.push({
+        key: 'followUp',
+        label: `${messages.value.followUp}: ${
+          followUp.value === 'overdue'
+            ? messages.value.followUpOverdue
+            : messages.value.followUpWeek
+        }`,
+        clear: () => (followUp.value = 'any'),
+      });
+  } else {
+    if (accountType.value)
+      rows.push({
+        key: 'accountType',
+        label: `${messages.value.accountType}: ${messages.value[accountTypeKeys[accountType.value]]}`,
+        clear: () => (accountType.value = null),
+      });
+    if (accountStatus.value !== 'active')
+      rows.push({
+        key: 'accountStatus',
+        label: `${messages.value.status}: ${
+          accountStatus.value === 'archived' ? messages.value.archived : messages.value.allAccounts
+        }`,
+        clear: () => (accountStatus.value = 'active'),
+      });
+  }
+  if (departmentId.value)
+    rows.push({
+      key: 'department',
+      label: `${messages.value.department}: ${
+        hotelScope.value.find((row) => row.departmentId === departmentId.value)?.departmentName ??
+        departmentId.value
+      }`,
+      clear: () => (departmentId.value = null),
+    });
+  return rows;
+});
 function resetFilterGroup() {
   departmentId.value = null;
   stage.value = 'open';
@@ -728,13 +786,12 @@ const isOpenStage = (deal: Deal) => (openStages as readonly string[]).includes(d
         </div>
       </template>
       <template #empty-action>
-        <v-btn
-          v-if="hasFilters"
-          variant="text"
-          color="primary"
-          @click="resetFilters"
-          >{{ messages.reset }}</v-btn
-        ><v-btn
+        <EmptyFilterChips
+          v-if="activeFilters.length"
+          :filters="activeFilters"
+          :reset-label="messages.reset"
+          @reset="resetFilters"
+        /><v-btn
           v-else-if="canWriteAny && tab !== 'report'"
           variant="tonal"
           color="primary"

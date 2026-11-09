@@ -2,6 +2,7 @@
 import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import EmptyFilterChips from '../../../shared/empty-filter-chips.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
 import ListRow from '../../../shared/list-row.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
@@ -109,13 +110,46 @@ onBeforeUnmount(() => {
 });
 
 const hasFilters = computed(
-  () => !!search.value || !!departmentId.value || status.value !== 'active' || lowOnly.value,
+  () => !!search.value.trim() || !!departmentId.value || status.value !== 'active' || lowOnly.value,
 );
 // Filters other than search; on phones they share one Filters button.
 const filterCount = computed(
   () =>
     (departmentId.value ? 1 : 0) + (status.value !== 'active' ? 1 : 0) + (lowOnly.value ? 1 : 0),
 );
+const activeFilters = computed(() => {
+  const rows: { key: string; label: string; clear: () => void }[] = [];
+  if (search.value.trim())
+    rows.push({
+      key: 'search',
+      label: `${messages.value.search}: “${search.value.trim()}”`,
+      clear: () => (search.value = ''),
+    });
+  if (departmentId.value)
+    rows.push({
+      key: 'department',
+      label: `${messages.value.department}: ${
+        hotelScope.value.find((row) => row.departmentId === departmentId.value)?.departmentName ??
+        departmentId.value
+      }`,
+      clear: () => (departmentId.value = null),
+    });
+  if (status.value !== 'active')
+    rows.push({
+      key: 'status',
+      label: `${messages.value.status}: ${
+        status.value === 'archived' ? messages.value.archived : messages.value.all
+      }`,
+      clear: () => (status.value = 'active'),
+    });
+  if (lowOnly.value)
+    rows.push({
+      key: 'lowOnly',
+      label: `${messages.value.stockFilter}: ${messages.value.lowOnly}`,
+      clear: () => (lowOnly.value = false),
+    });
+  return rows;
+});
 function resetFilterGroup() {
   departmentId.value = null;
   status.value = 'active';
@@ -271,13 +305,12 @@ const departmentItems = computed(() => [
         </div>
       </template>
       <template #empty-action>
-        <v-btn
-          v-if="hasFilters"
-          variant="text"
-          color="primary"
-          @click="resetFilters"
-          >{{ messages.reset }}</v-btn
-        ><v-btn
+        <EmptyFilterChips
+          v-if="activeFilters.length"
+          :filters="activeFilters"
+          :reset-label="messages.reset"
+          @reset="resetFilters"
+        /><v-btn
           v-else-if="manageableDepartments.length"
           variant="tonal"
           color="primary"

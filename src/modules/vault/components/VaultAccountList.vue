@@ -2,6 +2,7 @@
 import ActionMenu from '../../../shared/action-menu.vue';
 import type { VaultEntry } from '../types';
 import { useVaultMessages } from '../composables/useVaultMessages';
+import { safeWebsiteUrl as website } from '../validation';
 import VaultPasswordCell from './VaultPasswordCell.vue';
 import VaultUsernameCopy from './VaultUsernameCopy.vue';
 import VaultDepartmentMark from './VaultDepartmentMark.vue';
@@ -27,14 +28,6 @@ defineEmits<{
   restore: [entry: VaultEntry];
 }>();
 const messages = useVaultMessages();
-function website(value: string) {
-  try {
-    const url = new globalThis.URL(value);
-    return url.protocol === 'https:' && !url.username && !url.password ? url : null;
-  } catch {
-    return null;
-  }
-}
 </script>
 <template>
   <div

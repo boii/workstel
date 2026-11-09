@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateEntry, normalizeEntry } from './validation';
+import { validateEntry, normalizeEntry, safeWebsiteUrl } from './validation';
 import { useVault } from './composables/useVault';
 import type { VaultEntryInput } from './types';
 import { isModuleEnabled } from '../../core/module';
@@ -17,8 +17,14 @@ test('vault rejects unsafe websites and requires metadata without accepting a pa
     'javascript:alert(1)',
     'http://service.example.com',
     'https://user:pass@example.com',
-  ])
+  ]) {
     assert.equal(validateEntry({ ...input, website }).website, 'invalidUrl');
+    assert.equal(safeWebsiteUrl(website), null);
+  }
+  assert.equal(
+    safeWebsiteUrl('https://service.example.com/login')?.hostname,
+    'service.example.com',
+  );
   assert.equal(validateEntry({ ...input, name: ' ' }).name, 'required');
   assert.deepEqual(validateEntry(input), {});
   assert.equal(normalizeEntry(input).name, 'Sample account');

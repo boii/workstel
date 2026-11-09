@@ -2,6 +2,7 @@
 import ActionMenu from '../../../shared/action-menu.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import EmptyFilterChips from '../../../shared/empty-filter-chips.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useUndoNotice } from '../../../core/use-optimistic-archive';
@@ -190,9 +191,36 @@ function sortBy(key: SortKey) {
 const ariaSort = (key: SortKey) =>
   sortKey.value === key ? (sortDesc.value ? 'descending' : 'ascending') : 'none';
 const myRoom = computed(() => rooms.value.find((r) => r.openTask?.mine) ?? null);
-const hasFilters = computed(() => !!search.value || floor.value !== null || !!departmentId.value);
+const hasFilters = computed(
+  () => !!search.value.trim() || floor.value !== null || !!departmentId.value,
+);
 // Filters other than search; on phones they share one Filters button.
 const filterCount = computed(() => (floor.value !== null ? 1 : 0) + (departmentId.value ? 1 : 0));
+const activeFilters = computed(() => {
+  const rows: { key: string; label: string; clear: () => void }[] = [];
+  if (search.value.trim())
+    rows.push({
+      key: 'search',
+      label: `${messages.value.search}: “${search.value.trim()}”`,
+      clear: () => (search.value = ''),
+    });
+  if (floor.value !== null)
+    rows.push({
+      key: 'floor',
+      label: `${messages.value.floor}: ${floor.value || messages.value.noFloor}`,
+      clear: () => (floor.value = null),
+    });
+  if (departmentId.value)
+    rows.push({
+      key: 'department',
+      label: `${messages.value.department}: ${
+        hotelScope.value.find((row) => row.departmentId === departmentId.value)?.departmentName ??
+        departmentId.value
+      }`,
+      clear: () => (departmentId.value = null),
+    });
+  return rows;
+});
 function resetFilterGroup() {
   floor.value = null;
   departmentId.value = null;
@@ -541,13 +569,12 @@ const departmentItems = computed(() => [
         </div>
       </template>
       <template #empty-action>
-        <v-btn
-          v-if="hasFilters"
-          variant="text"
-          color="primary"
-          @click="resetFilters"
-          >{{ messages.reset }}</v-btn
-        ><v-btn
+        <EmptyFilterChips
+          v-if="activeFilters.length"
+          :filters="activeFilters"
+          :reset-label="messages.reset"
+          @reset="resetFilters"
+        /><v-btn
           v-else-if="canManageAny"
           variant="tonal"
           color="primary"

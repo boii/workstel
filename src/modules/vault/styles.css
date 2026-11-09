@@ -1,21 +1,6 @@
-.vault-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border: 0;
-  background: transparent;
-  font-size: var(--workstel-font-sm);
-  color: var(--workstel-text-secondary);
-  margin-bottom: 18px;
-  padding: var(--workstel-space-1) 0;
-}
-
 /* Compact production list: preserve the shared shell and touch targets. */
 .vault-compact-page .module-page-toolbar {
   margin: var(--workstel-space-3_5) 0;
-}
-.vault-compact-page .vault-breadcrumb {
-  margin-bottom: var(--workstel-space-2_5);
 }
 .vault-compact-service-hint {
   font-size: var(--workstel-font-xs);
@@ -158,27 +143,6 @@
   margin: var(--workstel-space-1) 0 !important;
   overflow-wrap: anywhere;
 }
-.vault-empty-filters {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--workstel-space-2_5);
-  margin-top: var(--workstel-space-1);
-}
-.vault-empty-chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--workstel-space-1_5);
-}
-.vault-empty-chips .v-chip {
-  font-size: var(--workstel-font-xs);
-  max-width: 100%;
-}
-.vault-empty-chips .v-chip__content {
-  overflow-wrap: anywhere;
-  white-space: normal;
-}
 .vault-compact-footer {
   display: flex;
   align-items: center;
@@ -237,11 +201,6 @@
   .vault-inline-secret {
     max-width: 100%;
   }
-}
-.vault-notice {
-  font-size: var(--workstel-font-sm) !important;
-  line-height: var(--workstel-leading-loose);
-  margin-bottom: var(--workstel-space-5);
 }
 /* Same grid as the other module toolbars: search, then 180px filter columns. */
 .vault-toolbar {
@@ -504,10 +463,7 @@
   padding: var(--workstel-space-1_5) 0;
 }
 .vault-module .vault-notice {
-  margin-bottom: var(--workstel-space-3);
   padding-block: var(--workstel-space-2);
-  font-size: var(--workstel-font-xs) !important;
-  line-height: var(--workstel-leading-normal);
 }
 @media (max-width: 680px) {
   .vault-dialog .v-field__input {

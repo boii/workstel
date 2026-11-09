@@ -100,6 +100,7 @@
     padding-inline: var(--workstel-page-gutter);
   }
   :is(
+    .module-breadcrumb,
     .vehicle-breadcrumb,
     .bin-breadcrumb,
     .documents-breadcrumb,
@@ -110,11 +111,13 @@
     margin-bottom: var(--workstel-space-1_5);
   }
   :is(
+    .module-notice,
     .vehicle-notice,
     .bin-notice,
     .documents-notice,
     .sales-notice,
     .hk-notice,
+    .vault-notice,
     .vault-module .vault-notice
   ) {
     margin-bottom: var(--workstel-space-2_5);

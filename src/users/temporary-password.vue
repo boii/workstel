@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { dialogWidth } from '../shared/dialog-widths';
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 import ModuleDialog from '../shared/module-dialog.vue';
 import { t } from '../i18n';
 
@@ -10,6 +10,11 @@ defineProps<{ email: string; password: string }>();
 const emit = defineEmits<{ closed: [] }>();
 const copyState = ref<'idle' | 'copied' | 'failed'>('idle');
 let timer: ReturnType<typeof setTimeout> | undefined;
+watch(open, (value) => {
+  if (timer) clearTimeout(timer);
+  copyState.value = 'idle';
+  if (!value) emit('closed');
+});
 onUnmounted(() => {
   if (timer) clearTimeout(timer);
 });
@@ -22,10 +27,6 @@ async function copy(value: string) {
   }
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => (copyState.value = 'idle'), 2000);
-}
-function close() {
-  open.value = false;
-  emit('closed');
 }
 </script>
 <template>
@@ -48,7 +49,7 @@ function close() {
         }}</v-btn
       >
     </div>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         color="primary"
         @click="close"

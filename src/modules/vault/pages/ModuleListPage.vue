@@ -7,6 +7,8 @@ import ModuleDialog from '../../../shared/module-dialog.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { useOptimisticArchive, useUndoNotice } from '../../../core/use-optimistic-archive';
 import VaultAccountList from '../components/VaultAccountList.vue';
+import VaultUsernameCopy from '../components/VaultUsernameCopy.vue';
+import EmptyFilterChips from '../../../shared/empty-filter-chips.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import FilterGroup from '../../../shared/filter-group.vue';
 import { locale } from '../../../i18n';
@@ -15,6 +17,7 @@ import { useVaultMessages } from '../composables/useVaultMessages';
 import VaultEntryForm from '../components/VaultEntryForm.vue';
 import { departmentIds } from '../types';
 import type { VaultEntry, VaultEntryInput, VaultAction } from '../types';
+import { safeWebsiteUrl } from '../validation';
 const emit = defineEmits<{ back: [] }>();
 const { entries, activity, save, setStatus } = useVault();
 const messages = useVaultMessages(),
@@ -108,6 +111,32 @@ const filterCount = computed(
   () => (department.value !== 'all' ? 1 : 0) + (status.value !== 'active' ? 1 : 0),
 );
 const hasFilters = computed(() => !!search.value.trim() || filterCount.value > 0);
+const activeFilters = computed(() => {
+  const rows: { key: string; label: string; clear: () => void }[] = [];
+  if (search.value.trim())
+    rows.push({
+      key: 'search',
+      label: `${messages.value.search}: “${search.value.trim()}”`,
+      clear: () => (search.value = ''),
+    });
+  if (department.value !== 'all')
+    rows.push({
+      key: 'department',
+      label: `${messages.value.department}: ${
+        messages.value[departmentKeys[department.value as keyof typeof departmentKeys]]
+      }`,
+      clear: () => (department.value = 'all'),
+    });
+  if (status.value !== 'active')
+    rows.push({
+      key: 'status',
+      label: `${messages.value.status}: ${
+        status.value === 'archived' ? messages.value.archived : messages.value.all
+      }`,
+      clear: () => (status.value = 'active'),
+    });
+  return rows;
+});
 function resetFilterGroup() {
   department.value = 'all';
   status.value = 'active';
@@ -192,13 +221,12 @@ function resetFilters() {
         </div>
       </template>
       <template #empty-action
-        ><v-btn
-          v-if="hasFilters"
-          variant="text"
-          color="primary"
-          @click="resetFilters"
-          >{{ messages.reset }}</v-btn
-        ><v-btn
+        ><EmptyFilterChips
+          v-if="activeFilters.length"
+          :filters="activeFilters"
+          :reset-label="messages.reset"
+          @reset="resetFilters"
+        /><v-btn
           v-else
           variant="tonal"
           color="primary"
@@ -240,9 +268,28 @@ function resetFilters() {
         </p>
         <dl class="vault-details">
           <dt>{{ messages.username }}</dt>
-          <dd>{{ detail.username }}</dd>
+          <dd>
+            <VaultUsernameCopy
+              :value="detail.username"
+              :name="detail.name"
+            />
+          </dd>
           <dt>{{ messages.website }}</dt>
-          <dd>{{ detail.website || '—' }}</dd>
+          <dd>
+            <a
+              v-if="safeWebsiteUrl(detail.website)"
+              class="vault-compact-domain"
+              :href="safeWebsiteUrl(detail.website)!.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              :aria-label="messages.openWebsite + ' — ' + detail.name"
+              >{{ detail.website
+              }}<v-icon
+                icon="mdi-open-in-new"
+                size="11"
+            /></a>
+            <template v-else>{{ detail.website || '—' }}</template>
+          </dd>
           <dt>{{ messages.password }}</dt>
           <dd class="vault-password-line">
             <span>••••••••</span

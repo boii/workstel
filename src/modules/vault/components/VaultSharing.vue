@@ -170,6 +170,7 @@ onUnmounted(() => {
     :title="messages.shareTitle"
     :subtitle="entry.name"
     :busy="busy"
+    :dirty="Boolean(email.trim() || newOwner.trim())"
   >
     <p class="vault-field-hint vault-panel-intro">{{ messages.shareHint }}</p>
     <v-alert
@@ -312,11 +313,11 @@ onUnmounted(() => {
       </p>
       <p class="vault-transfer-confirm-body">{{ messages.transferConfirmBody }}</p>
     </ModuleDialog>
-    <template #actions>
+    <template #actions="{ close }">
       <v-btn
         variant="text"
         :disabled="busy"
-        @click="open = false"
+        @click="close"
         >{{ messages.close }}</v-btn
       >
       <v-btn

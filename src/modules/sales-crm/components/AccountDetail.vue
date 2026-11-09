@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { dialogWidth } from '../../../shared/dialog-widths';
-import { ref, watch } from 'vue';
+import { onBeforeUnmount, ref, watch } from 'vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
   accountTypeKeys,
@@ -45,14 +45,17 @@ const loading = ref(false);
 const loadingMore = ref(false);
 const failure = ref('');
 let controller: AbortController | null = null;
+let moreController: AbortController | null = null;
 
 async function load() {
   const account = props.account;
   if (!account) return;
   controller?.abort();
+  moreController?.abort();
   controller = new AbortController();
   const signal = controller.signal;
   loading.value = true;
+  loadingMore.value = false;
   failure.value = '';
   try {
     const [dealPage, activityPage] = await Promise.all([
@@ -70,19 +73,19 @@ async function load() {
 }
 async function loadMore() {
   if (!props.account || !nextActivity.value) return;
+  moreController?.abort();
+  moreController = new AbortController();
+  const signal = moreController.signal;
   loadingMore.value = true;
   try {
-    const page = await props.loadActivities(
-      props.account.id,
-      nextActivity.value,
-      new AbortController().signal,
-    );
+    const page = await props.loadActivities(props.account.id, nextActivity.value, signal);
+    if (signal.aborted) return;
     activities.value = [...activities.value, ...page.data];
     nextActivity.value = page.nextCursor;
   } catch (error) {
-    failure.value = errorMessage(messages.value, error);
+    if (!signal.aborted) failure.value = errorMessage(messages.value, error);
   } finally {
-    loadingMore.value = false;
+    if (!signal.aborted) loadingMore.value = false;
   }
 }
 watch(open, (value) => {
@@ -90,7 +93,14 @@ watch(open, (value) => {
     deals.value = [];
     activities.value = [];
     void load();
-  } else controller?.abort();
+  } else {
+    controller?.abort();
+    moreController?.abort();
+  }
+});
+onBeforeUnmount(() => {
+  controller?.abort();
+  moreController?.abort();
 });
 watch(
   () => props.refreshKey,

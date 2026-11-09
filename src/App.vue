@@ -726,7 +726,7 @@ function logout() {
             <div class="module-toolbar">
               <v-text-field
                 ref="searchField"
-                v-model="query"
+                :model-value="query"
                 class="module-search"
                 :placeholder="t('searchPlaceholder')"
                 :aria-label="t('search')"
@@ -734,7 +734,7 @@ function logout() {
                 rounded="pill"
                 single-line
                 clearable
-                @click:clear="query = ''"
+                @update:model-value="query = $event ?? ''"
               /><v-btn-toggle
                 v-model="category"
                 mandatory
