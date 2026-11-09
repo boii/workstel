@@ -312,6 +312,25 @@
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
+/* Entry timing reuses the follow-up marker: icon and text, coloured by urgency. */
+.sales-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--workstel-space-1);
+  margin-top: var(--workstel-space-0_5);
+  font-size: var(--workstel-font-xs);
+  font-weight: var(--workstel-weight-bold);
+}
+.sales-timeline .sales-entry .v-icon {
+  margin-top: 0;
+  color: inherit;
+}
+.sales-entry--late {
+  color: var(--workstel-warning-text);
+}
+.sales-entry--backdated {
+  color: var(--workstel-danger-text);
+}
 /* token-exempt: four summary tiles fold to two columns before the list breakpoint */
 @media (max-width: 900px) {
   .sales-summary {

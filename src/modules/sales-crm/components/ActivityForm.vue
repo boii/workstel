@@ -4,7 +4,13 @@ import ModuleDialog from '../../../shared/module-dialog.vue';
 import { activityKeys, errorMessage, useSalesMessages } from '../composables/useSalesMessages';
 import { activityTypes, openStages } from '../types';
 import type { ActivityInput, Deal } from '../types';
-import { hotelToday, validateActivity } from '../validation';
+import {
+  entryDelayDays,
+  entryTiming,
+  hotelToday,
+  isCalendarDate,
+  validateActivity,
+} from '../validation';
 import type { ValidationError } from '../validation';
 
 const open = defineModel<boolean>({ required: true });
@@ -79,6 +85,13 @@ async function submit() {
     saving.value = false;
   }
 }
+// Preview of the server's entry timing, so a past date is not a surprise in the log.
+const dateHint = computed(() => {
+  if (!isCalendarDate(draft.value.occurredOn) || draft.value.occurredOn > today.value) return '';
+  const timing = entryTiming(entryDelayDays(draft.value.occurredOn, today.value));
+  if (timing === 'late') return messages.value.entryLateHint;
+  return timing === 'backdated' ? messages.value.entryBackdatedHint : '';
+});
 const fieldError = (field: keyof ActivityInput) =>
   errors.value[field] ? messages.value[errors.value[field]!] : '';
 </script>
@@ -128,6 +141,8 @@ const fieldError = (field: keyof ActivityInput) =>
             type="date"
             min="2000-01-01"
             :max="today"
+            :hint="dateHint"
+            :persistent-hint="!!dateHint"
             :error-messages="fieldError('occurredOn')"
           />
         </div>

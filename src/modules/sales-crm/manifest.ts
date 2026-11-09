@@ -1,7 +1,7 @@
 import { defineModule } from '../../core/module';
 export default defineModule({
   id: 'sales-crm',
-  version: '1.0.0',
+  version: '1.1.0',
   title: 'Sales CRM',
   description: 'Manage leads and sales follow-ups.',
   category: 'Commercial',

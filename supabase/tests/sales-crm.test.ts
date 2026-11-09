@@ -26,6 +26,7 @@ test('Sales CRM accounts, deals and activities follow module grants per departme
       '202611040006_module_switch',
       '202611040009_documents',
       '202611040010_sales_crm',
+      '202611090001_sales_activity_entry_timing',
     ])
       await db.exec(await readFile('supabase/migrations/' + migration + '.sql', 'utf8'));
     for (const [index, user] of [manager, writer, reader, outsider].entries())
@@ -300,6 +301,14 @@ test('Sales CRM accounts, deals and activities follow module grants per departme
           ['Sent revised rate', 'Office visit'],
         );
         assert.equal(list[0].deal_title, 'Annual meeting');
+        // Timing comes from the server clock: logged today is on time, three days back is backdated.
+        assert.deepEqual(
+          list.map((a) => [a.recorded_on, a.entry_delay_days, a.entry_timing]),
+          [
+            [today, 0, 'on-time'],
+            [today, 3, 'backdated'],
+          ],
+        );
         assert.equal(list[0].created_by_email, 'user1@example.com');
         assert.equal(
           (await rpc('sales_activities_list', [hotel, accountId, dealId])).data!.length,

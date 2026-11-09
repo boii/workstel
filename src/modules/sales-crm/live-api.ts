@@ -1,6 +1,6 @@
 import { ModuleRequestError, moduleRpc, parseCursor, uuidPattern } from '../../core/module-rpc';
 import type { SalesCrmApi } from './api';
-import { accountTypes, activityTypes, openStages, segments, stages } from './types';
+import { accountTypes, activityTypes, entryTimings, openStages, segments, stages } from './types';
 import type { Activity, Deal, SalesAccount, SalesSummary } from './types';
 import { isCalendarDate } from './validation';
 
@@ -172,7 +172,12 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
       !isCalendarDate(raw.occurred_on) ||
       !isText(raw.summary) ||
       !isTime(raw.created_at) ||
-      !isText(raw.created_by_email)
+      !isText(raw.created_by_email) ||
+      !isText(raw.recorded_on) ||
+      !isCalendarDate(raw.recorded_on) ||
+      !Number.isInteger(raw.entry_delay_days) ||
+      (raw.entry_delay_days as number) < 0 ||
+      !entryTimings.includes(raw.entry_timing as never)
     )
       throw invalid();
     return {
@@ -185,6 +190,9 @@ export function parseActivities(data: unknown, accountId: string): Activity[] {
       summary: raw.summary,
       createdAt: String(raw.created_at),
       createdByEmail: raw.created_by_email,
+      recordedOn: raw.recorded_on,
+      entryDelayDays: raw.entry_delay_days as number,
+      entryTiming: raw.entry_timing as Activity['entryTiming'],
     };
   });
 }

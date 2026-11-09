@@ -6,6 +6,7 @@
 - [x] Accounts validate type, phone and email; deals validate values, room nights, stay dates and the lost reason.
 - [x] Won and lost deals record `closed_at` and clear follow-ups; reopening clears `closed_at`. Edits need the current version (`VERSION_CONFLICT`).
 - [x] Activities are append-only, idempotent per submit, cannot be dated in the future, and can move an open deal's follow-up.
+- [x] Every activity shows the day it was recorded by the server and is marked as a late entry (1–2 days after) or backdated (3 or more days after); the form warns before a past date is saved.
 - [x] Archiving an account needs manage and blocks new deals and activities; its deals leave the pipeline and summary.
 - [x] The module switch blocks every Sales CRM RPC when off; tables are not readable by clients.
 - [x] Lists, writes and denials are audited under `sales-crm.*`.

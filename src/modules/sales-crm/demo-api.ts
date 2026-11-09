@@ -2,7 +2,7 @@ import { ModuleRequestError } from '../../core/module-rpc';
 import type { SalesCrmApi } from './api';
 import { openStages } from './types';
 import type { Activity, Deal, SalesAccount, SalesSummary, Stage } from './types';
-import { addDays, hotelToday, isEmail, isPhone } from './validation';
+import { addDays, entryDelayDays, entryTiming, hotelToday, isEmail, isPhone } from './validation';
 
 export const demoHotelId = 'demo-hotel';
 export const demoDepartments = [{ id: 'sales', name: 'Sales & Marketing' }];
@@ -11,6 +11,10 @@ const isOpen = (stage: Stage) => (openStages as readonly string[]).includes(stag
 /** In-memory demo CRM that mirrors the server rules; it resets on reload. */
 export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
   const now = new Date().toISOString();
+  const timing = (occurredOn: string, recordedOn: string) => {
+    const days = entryDelayDays(occurredOn, recordedOn);
+    return { recordedOn, entryDelayDays: days, entryTiming: entryTiming(days) };
+  };
   const department = demoDepartments[0];
   const accounts: SalesAccount[] = (
     [
@@ -78,6 +82,7 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       summary: 'Ballroom and breakout rooms viewed with the event committee.',
       createdAt: now,
       createdByEmail: 'sales@example.com',
+      ...timing(addDays(today, -6), addDays(today, -6)),
     },
     {
       id: 'demo-activity-2',
@@ -89,6 +94,19 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
       summary: 'Proposal sent with room block and meeting package.',
       createdAt: now,
       createdByEmail: 'sales@example.com',
+      ...timing(addDays(today, -4), addDays(today, -3)),
+    },
+    {
+      id: 'demo-activity-3',
+      accountId: accounts[0].id,
+      dealId: null,
+      dealTitle: '',
+      type: 'visit',
+      occurredOn: addDays(today, -9),
+      summary: 'Courtesy visit to the HR office; met the new travel coordinator.',
+      createdAt: now,
+      createdByEmail: 'sales@example.com',
+      ...timing(addDays(today, -9), addDays(today, -2)),
     },
   ];
   const keys = new Set<string>();
@@ -301,6 +319,7 @@ export function createDemoSalesCrmApi(today = hotelToday()): SalesCrmApi {
         summary: input.summary.trim(),
         createdAt: new Date().toISOString(),
         createdByEmail: 'demo@example.com',
+        ...timing(input.occurredOn, today),
       });
     },
   };

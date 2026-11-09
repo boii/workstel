@@ -1,5 +1,5 @@
 import { accountTypes, activityTypes, segments, stages } from './types';
-import type { AccountInput, ActivityInput, DealInput } from './types';
+import type { AccountInput, ActivityInput, DealInput, EntryTiming } from './types';
 
 export type ValidationError =
   | 'required'
@@ -94,6 +94,22 @@ export function validateActivity(input: ActivityInput, today = hotelToday()) {
   if (input.nextFollowUp !== null && !isCalendarDate(input.nextFollowUp))
     errors.nextFollowUp = 'invalidDate';
   return errors;
+}
+
+/**
+ * Entry timing as the server computes it (migration 202611090001): 0 days on time,
+ * 1-2 days late, 3 or more backdated. Used by the demo API and the form hint only;
+ * live activity rows carry the server's own value.
+ */
+export function entryDelayDays(occurredOn: string, recordedOn: string) {
+  const days = Math.round(
+    (Date.parse(recordedOn + 'T00:00:00Z') - Date.parse(occurredOn + 'T00:00:00Z')) / 86_400_000,
+  );
+  return Math.max(days, 0);
+}
+export function entryTiming(delayDays: number): EntryTiming {
+  if (delayDays <= 0) return 'on-time';
+  return delayDays <= 2 ? 'late' : 'backdated';
 }
 
 export type FollowUpState = 'overdue' | 'today' | 'soon' | 'later' | 'none';

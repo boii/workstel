@@ -5,6 +5,8 @@ import { createDemoSalesCrmApi } from './demo-api';
 import { parseAccounts, parseActivities, parseDeals, parseSummary } from './live-api';
 import type { DealInput } from './types';
 import {
+  entryDelayDays,
+  entryTiming,
   followUpState,
   isCalendarDate,
   validateAccount,
@@ -129,6 +131,48 @@ test('responses are validated before they are shown', () => {
   assert.throws(() => parseSummary({ open_count: 1 }, { today: '2026-11-04' }), ModuleRequestError);
 });
 
+test('activity rows carry the server entry timing', () => {
+  const row = {
+    id: deal.id,
+    account_id: accountId,
+    deal_id: null,
+    deal_title: null,
+    activity_type: 'visit',
+    occurred_on: '2026-11-01',
+    summary: 'Office visit',
+    created_at: '2026-11-04T03:00:00Z',
+    created_by_email: 'sales@example.com',
+    recorded_on: '2026-11-04',
+    entry_delay_days: 3,
+    entry_timing: 'backdated',
+  };
+  const [activity] = parseActivities([row], accountId);
+  assert.equal(activity.recordedOn, '2026-11-04');
+  assert.equal(activity.entryDelayDays, 3);
+  assert.equal(activity.entryTiming, 'backdated');
+  for (const broken of [
+    { entry_timing: undefined },
+    { entry_timing: 'early' },
+    { entry_delay_days: -1 },
+    { entry_delay_days: 1.5 },
+    { recorded_on: '2026-02-30' },
+  ])
+    assert.throws(() => parseActivities([{ ...row, ...broken }], accountId), ModuleRequestError);
+});
+
+test('entry timing thresholds match the server', () => {
+  assert.equal(entryDelayDays('2026-11-04', '2026-11-04'), 0);
+  assert.equal(entryDelayDays('2026-10-30', '2026-11-04'), 5);
+  assert.equal(entryDelayDays('2026-11-05', '2026-11-04'), 0);
+  assert.deepEqual([0, 1, 2, 3, 30].map(entryTiming), [
+    'on-time',
+    'late',
+    'late',
+    'backdated',
+    'backdated',
+  ]);
+});
+
 test('follow-up states use the hotel calendar day', () => {
   assert.equal(followUpState('2026-11-03', '2026-11-04'), 'overdue');
   assert.equal(followUpState('2026-11-04', '2026-11-04'), 'today');
@@ -181,7 +225,10 @@ test('demo CRM keeps the pipeline, follow-ups and archiving consistent', async (
     'key-1',
   );
   const activities = await api.listActivities('demo-hotel', target.accountId, null, null);
-  assert.equal(activities.data.filter((a) => a.summary === 'Called').length, 1);
+  const called = activities.data.filter((a) => a.summary === 'Called');
+  assert.equal(called.length, 1);
+  assert.equal(called[0].entryTiming, 'on-time');
+  assert.ok(activities.data.some((a) => a.entryTiming === 'backdated'));
   assert.equal((await api.summary('demo-hotel', null)).overdue, 0);
   await assert.rejects(
     api.saveDeal('demo-hotel', { ...dealInput, accountId: target.accountId, stage: 'lost' }),

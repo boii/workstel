@@ -273,8 +273,30 @@ const telLink = (phone: string) => 'tel:' + phone.replace(/[^0-9+]/g, '');
                   <template v-if="activity.dealTitle"> · {{ activity.dealTitle }}</template></small
                 >
                 <p>{{ activity.summary }}</p>
-                <small v-if="activity.createdByEmail"
-                  >{{ messages.activityBy }} {{ activity.createdByEmail }}</small
+                <small
+                  ><template v-if="activity.createdByEmail"
+                    >{{ messages.activityBy }} {{ activity.createdByEmail }} · </template
+                  >{{ messages.entryRecorded }} {{ formatDay(activity.recordedOn) }}</small
+                ><span
+                  v-if="activity.entryTiming !== 'on-time'"
+                  class="sales-entry"
+                  :class="'sales-entry--' + activity.entryTiming"
+                  ><v-icon
+                    :icon="
+                      activity.entryTiming === 'backdated'
+                        ? 'mdi-calendar-alert-outline'
+                        : 'mdi-clock-alert-outline'
+                    "
+                    size="15"
+                  />{{
+                    activity.entryTiming === 'backdated'
+                      ? messages.entryBackdated
+                      : messages.entryLate
+                  }}
+                  · {{ activity.entryDelayDays }}
+                  {{
+                    activity.entryDelayDays === 1 ? messages.entryDayAfter : messages.entryDaysAfter
+                  }}</span
                 >
               </div>
             </li>

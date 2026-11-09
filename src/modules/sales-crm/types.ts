@@ -22,6 +22,9 @@ export const activityTypes = [
   'note',
 ] as const;
 export type ActivityType = (typeof activityTypes)[number];
+/** How long after the activity it was logged; the server decides it from its own clock. */
+export const entryTimings = ['on-time', 'late', 'backdated'] as const;
+export type EntryTiming = (typeof entryTimings)[number];
 export type RecordStatus = 'active' | 'archived';
 export type StageFilter = 'open' | 'all' | Stage;
 export type FollowUpFilter = 'any' | 'overdue' | 'week';
@@ -98,8 +101,14 @@ export interface Activity {
   type: ActivityType;
   occurredOn: string;
   summary: string;
+  /** Server time of logging, never sent by the client. */
   createdAt: string;
   createdByEmail: string;
+  /** Hotel calendar day of createdAt (YYYY-MM-DD). */
+  recordedOn: string;
+  /** Calendar days between occurredOn and recordedOn, never negative. */
+  entryDelayDays: number;
+  entryTiming: EntryTiming;
 }
 export interface ActivityInput {
   type: ActivityType;
