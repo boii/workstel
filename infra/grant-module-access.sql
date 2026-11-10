@@ -1,9 +1,11 @@
--- Grant Vehicle Checklist or Bin Card capabilities to one staff member.
+-- Grant capabilities in an operational module (module grants) to one staff member.
 -- Run as a named operator database account after apply-operations-modules.sh, for example:
 --   docker exec -i -u postgres workstel-db psql -X --set=ON_ERROR_STOP=1 --dbname=postgres \
 --     -v email=staff@hotel.example -v department=front-office -v module=vehicle \
 --     -v can_write=true -v can_manage=false < grant-module-access.sql
--- department: front-office | sales | engineering | it      module: vehicle | bin-card
+-- department: front-office | sales | engineering | it | accounting | human-resource |
+--   admin-general | housekeeping
+-- module: vehicle | bin-card | documents | sales-crm | room-turnaround | casual-attendance
 -- Read access is always granted; write records inspections or stock movements; manage edits
 -- vehicles or items. The staff member must already have enabled staff_access in that department.
 -- Every change is recorded as a staff.module-access.* audit event.

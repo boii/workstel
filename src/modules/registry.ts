@@ -4,12 +4,14 @@ import vehicleModule from './vehicle/manifest';
 import documentsModule from './documents/manifest';
 import salesCrmModule from './sales-crm/manifest';
 import roomTurnaroundModule from './room-turnaround/manifest';
+import casualAttendanceModule from './casual-attendance/manifest';
 import { defineModule } from '../core/module';
 export const modules = [
   vaultModule,
   binCardModule,
   vehicleModule,
   roomTurnaroundModule,
+  casualAttendanceModule,
   salesCrmModule,
   defineModule({
     id: 'checklist',

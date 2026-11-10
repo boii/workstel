@@ -1,0 +1,127 @@
+/* Tabs and the tab's own toolbar share one row; narrow pages put the tabs on their own line. */
+.ca-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--workstel-space-3);
+}
+.ca-tabs {
+  flex: none;
+}
+.ca-toolbar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--workstel-space-2);
+}
+.ca-toolbar > * {
+  min-width: 0;
+}
+/* Same filter column width as the other module toolbars. */
+.ca-toolbar > .v-input {
+  flex: 0 1 180px;
+}
+.ca-toolbar > .ca-search {
+  flex: 1 1 220px;
+}
+.ca-toolbar > .ca-date {
+  flex: 0 1 160px;
+}
+@container (max-width: 720px) {
+  .ca-controls {
+    flex-wrap: wrap;
+    row-gap: var(--workstel-space-2);
+  }
+  .ca-tabs {
+    flex-basis: 100%;
+    border-bottom: 1px solid var(--workstel-border);
+  }
+  /* Day, search and the Filters button share one line on a 390px phone. */
+  .ca-toolbar > .ca-date {
+    flex: 0 1 152px;
+  }
+  .ca-toolbar > .ca-search {
+    flex: 1 1 128px;
+  }
+}
+/* Status chips mapped to the shared status colours. */
+.ca-chip--neutral {
+  background: var(--workstel-neutral-bg);
+  color: var(--workstel-neutral-text);
+}
+.ca-chip--info {
+  background: var(--workstel-info-bg);
+  color: var(--workstel-info-text);
+}
+.ca-chip--success {
+  background: var(--workstel-success-bg);
+  color: var(--workstel-success-text);
+}
+.ca-chip--warning {
+  background: var(--workstel-warning-bg);
+  color: var(--workstel-warning-text);
+}
+.ca-chip--danger {
+  background: var(--workstel-danger-bg);
+  color: var(--workstel-danger-text);
+}
+/* Recap table: the same panel and cells as the Room Turnaround attendant table. */
+.ca-panel {
+  padding: var(--workstel-space-1) var(--workstel-space-4);
+  border: 1px solid var(--workstel-border);
+  border-radius: var(--workstel-radius-md);
+  background: rgb(var(--v-theme-surface));
+}
+.ca-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--workstel-font-sm);
+}
+.ca-table th {
+  padding: var(--workstel-space-1) var(--workstel-space-1_5);
+  font-size: var(--workstel-font-xs);
+  font-weight: var(--workstel-weight-regular);
+  text-align: left;
+  color: var(--workstel-text-secondary);
+}
+.ca-table td {
+  padding: var(--workstel-space-1_5);
+  border-top: 1px solid var(--workstel-border);
+  overflow-wrap: anywhere;
+}
+.ca-table td.stack-table-primary {
+  font-weight: var(--workstel-weight-semibold);
+}
+.ca-number {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ca-muted {
+  color: var(--workstel-text-secondary);
+}
+/* Form layout, as in the other module forms. */
+.ca-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--workstel-space-3);
+}
+.ca-first-label {
+  margin-top: 0 !important;
+}
+.ca-hint {
+  margin-top: var(--workstel-space-3);
+  font-size: var(--workstel-font-xs);
+  color: var(--workstel-text-secondary);
+}
+.ca-subtitle {
+  margin-bottom: var(--workstel-space-1);
+  font-size: var(--workstel-font-sm);
+  color: var(--workstel-text-secondary);
+}
+@media (max-width: 359px) {
+  .ca-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

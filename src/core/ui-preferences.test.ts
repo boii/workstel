@@ -35,7 +35,14 @@ test('modules have no page shortcuts and Vault keeps empty-state copy in both mo
   assert.ok(!vault.includes('useShortcuts'), 'vault registers no keyboard shortcuts');
   assert.ok(vault.includes('FilterGroup'), 'vault filters use the shared FilterGroup');
   assert.ok(vault.includes('activeFilters'), 'the empty state explains active filters');
-  for (const moduleId of ['bin-card', 'documents', 'room-turnaround', 'sales-crm', 'vehicle']) {
+  for (const moduleId of [
+    'bin-card',
+    'casual-attendance',
+    'documents',
+    'room-turnaround',
+    'sales-crm',
+    'vehicle',
+  ]) {
     const page = await readFile(`src/modules/${moduleId}/pages/ModuleListPage.vue`, 'utf8');
     assert.ok(!page.includes('useShortcuts'), `${moduleId} registers no page shortcuts`);
     assert.ok(!page.includes('KeyboardShortcuts'), `${moduleId} mounts no shortcut dialog`);
