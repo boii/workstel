@@ -6,13 +6,18 @@ import { computed, nextTick, ref, watch } from 'vue';
  * show on their own when they already hold a value (editing), and fold again whenever the
  * form is reopened for another record.
  */
-const props = defineProps<{
-  label: string;
-  /** True when any of the wrapped fields has a value. */
-  filled: boolean;
-  /** Changes whenever the form opens, so a new record starts folded. */
-  resetKey: unknown;
-}>();
+const props = withDefaults(
+  defineProps<{
+    label: string;
+    /** True when any of the wrapped fields has a value. */
+    filled: boolean;
+    /** Changes whenever the form opens, so a new record starts folded. */
+    resetKey: unknown;
+    /** MDI icon before the link; "Add …" links keep the plus. */
+    icon?: string;
+  }>(),
+  { icon: 'mdi-plus' },
+);
 const expanded = ref(false);
 const shown = computed(() => props.filled || expanded.value);
 const container = ref<HTMLElement | null>(null);
@@ -37,7 +42,7 @@ async function expand() {
     v-else
     variant="text"
     color="primary"
-    prepend-icon="mdi-plus"
+    :prepend-icon="icon"
     class="optional-fields-toggle"
     @click="expand"
     >{{ label }}</v-btn

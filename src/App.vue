@@ -35,6 +35,7 @@ import type { ModuleManifest } from './core/module';
 import { runtime } from './config/runtime';
 import { useAuth } from './auth/useAuth';
 import PasswordSignIn from './auth/PasswordSignIn.vue';
+import OptionalFields from './shared/optional-fields.vue';
 import { usePersistedRef } from './core/use-persisted-ref';
 import { useShortcuts } from './core/use-shortcuts';
 import { focusFieldInput } from './core/focus-field';
@@ -476,14 +477,7 @@ function logout() {
       </header>
       <main class="login-main">
         <v-card class="login-panel"
-          ><div class="login-symbol">
-            <v-icon
-              icon="mdi-office-building-outline"
-              size="var(--workstel-icon-2xl)"
-            />
-          </div>
-          <div class="eyebrow">{{ t('hotelUpper') }}</div>
-          <h1>{{ t('loginTitle') }}</h1>
+          ><h1>{{ t('loginTitle') }}</h1>
           <p>{{ runtime.demo ? t('loginDescription') : t('productionLogin') }}</p>
           <v-btn
             v-if="runtime.demo || auth.googleEnabled.value"
@@ -504,13 +498,6 @@ function logout() {
             class="sso-alert"
             >{{ t('ssoPending') }}</v-alert
           >
-          <div class="login-note">
-            <v-icon
-              icon="mdi-shield-check-outline"
-              size="var(--workstel-icon-sm)"
-            />
-            {{ t('authorized') }}
-          </div>
           <v-alert
             v-if="!runtime.demo && (auth.failure.value || !runtime.configured)"
             type="info"
@@ -518,12 +505,20 @@ function logout() {
             density="compact"
             class="mt-4"
             >{{ t(auth.failure.value || 'authUnavailable') }}</v-alert
-          ><PasswordSignIn
-            v-if="!runtime.demo"
-            :busy="auth.busy.value"
-            :disabled="!runtime.configured || !auth.emailEnabled.value"
-            @sign-in="auth.signIn"
-          />
+          >
+          <!-- Google comes first; email sign-in folds behind a link while Google is available,
+               and stays open after a failed attempt. -->
+          <OptionalFields
+            v-if="!runtime.demo && runtime.configured && auth.emailEnabled.value"
+            :label="t('passwordSignIn')"
+            icon="mdi-email-outline"
+            :filled="!auth.googleEnabled.value || auth.failure.value === 'authFailed'"
+            :reset-key="false"
+            ><PasswordSignIn
+              :busy="auth.busy.value"
+              :disabled="false"
+              @sign-in="auth.signIn"
+          /></OptionalFields>
           <div
             v-if="runtime.demo"
             class="demo-access"

@@ -562,14 +562,6 @@ footer small {
   font-size: var(--workstel-font-xs);
   color: var(--workstel-text-secondary);
 }
-.eyebrow {
-  display: block;
-  font-size: var(--workstel-font-xs);
-  font-weight: var(--workstel-weight-bold);
-  letter-spacing: var(--workstel-tracking-caps);
-  color: var(--workstel-text-secondary);
-  margin: var(--workstel-space-2_5) 0;
-}
 /* Labels sit close to their field and rows stay tight, so common forms fit without scrolling. */
 .field-label {
   display: block;
@@ -614,10 +606,6 @@ footer small {
   width: 100%;
   max-width: 450px;
 }
-.login-symbol {
-  color: rgb(var(--v-theme-primary));
-  margin-bottom: 22px;
-}
 .login-panel h1 {
   font-size: var(--workstel-font-xl);
   font-weight: var(--workstel-weight-medium);
@@ -636,14 +624,6 @@ footer small {
 .sso-alert {
   font-size: var(--workstel-font-sm);
   margin-top: 15px;
-}
-.login-note {
-  font-size: var(--workstel-font-xs);
-  color: var(--workstel-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 17px;
 }
 .demo-access {
   border-top: 1px solid var(--workstel-border);
@@ -781,7 +761,6 @@ footer small {
 }
 .login-panel p,
 .login-support,
-.login-note,
 .info-panel p {
   color: var(--workstel-text-secondary);
 }
@@ -909,9 +888,6 @@ footer small {
   .demo-access {
     margin-top: var(--workstel-space-5);
     padding-top: var(--workstel-space-4);
-  }
-  .login-note {
-    align-items: flex-start;
   }
   .header-actions .v-btn--icon {
     width: var(--workstel-touch-target);
