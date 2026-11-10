@@ -242,12 +242,7 @@ async function link() {
             >{{ messages.link }}</v-btn
           >
         </v-form>
-        <p class="ca-link-hint">
-          <v-icon
-            icon="mdi-information-outline"
-            size="var(--workstel-icon-sm)"
-          />{{ messages.linkStaffHint }}
-        </p>
+        <p class="ca-link-hint">{{ messages.linkStaffHint }}</p>
       </section>
 
       <template v-else-if="linked">

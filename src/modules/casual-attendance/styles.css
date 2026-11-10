@@ -186,18 +186,12 @@
 }
 /* Set apart like the sign-in page's demo section: a rule, then a quiet note. */
 .ca-link-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--workstel-space-1_5);
   margin-top: var(--workstel-space-6);
   padding-top: var(--workstel-space-4);
   border-top: 1px solid var(--workstel-border);
   font-size: var(--workstel-font-xs);
   line-height: var(--workstel-leading-tight);
   color: var(--workstel-text-secondary);
-}
-.ca-link-hint .v-icon {
-  flex: none;
 }
 @media (max-width: 680px) {
   .ca-link {
