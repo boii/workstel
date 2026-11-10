@@ -116,7 +116,7 @@ Today `src/auth/useAuth.ts` treats an account with no `staff_access` rows as **n
 
 - `useAuth` gains a third outcome next to signed in and signed out: **attendance only**. It is set when `workstel_session` returns no rows and `casual_attendance_self_status()` reports that the account may link or is linked.
 - In that state the shell shows the thin header with sign-out and language only. There is no dashboard, favorites, module switcher or Settings.
-- Not linked: the page shows **Link to attendance** with a short explanation, a 6-character code field and **Link**. Accounts that cannot link (module off) keep today's `accessDenied` message.
+- Not linked: most of these accounts are new hotel staff waiting for access, so the page is neutral. Its title is **Your account has no access yet**, with "Signed in as <email>" below it. The first section, **Hotel staff**, says to give that email to the administrator. Below a divider, **Casual worker or trainee?** offers **Enter code**, which opens the 6-character code field and **Link** (the shared `OptionalFields` fold, as for optional form fields). Changed on 10 November 2026: the first version showed the code form to every new account. Accounts that cannot link (module off) keep today's `accessDenied` message.
 - Linked: `/` and every other URL open `/casual-attendance/me`.
 - A staff member who also has a link keeps the normal workspace and reaches My attendance from the Casual Attendance page.
 

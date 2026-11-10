@@ -442,7 +442,11 @@ function logout() {
         </div>
       </header>
       <v-main id="workspace-main"
-        ><div class="workspace-content"><MyAttendancePage attendance-only /></div></v-main
+        ><div class="workspace-content">
+          <MyAttendancePage
+            attendance-only
+            :email="auth.email.value"
+          /></div></v-main
     ></template>
     <template v-else-if="!session"
       ><header class="login-header">

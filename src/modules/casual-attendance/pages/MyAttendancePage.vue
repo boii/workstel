@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import ListRow from '../../../shared/list-row.vue';
 import ModuleDialog from '../../../shared/module-dialog.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
+import OptionalFields from '../../../shared/optional-fields.vue';
 import UndoSnackbar from '../../../shared/undo-snackbar.vue';
 import { runtime } from '../../../config/runtime';
 import {
@@ -25,9 +26,11 @@ import { dayState, lateMinutes, workedMinutes } from '../validation';
 import '../styles.css';
 
 /** Linked workers check themselves in and out. `attendanceOnly` is the shell state for
- * accounts without workspace access: no breadcrumb, and an unlinked account sees the code form. */
-const props = withDefaults(defineProps<{ attendanceOnly?: boolean }>(), {
+ * accounts without workspace access: no breadcrumb, and an unlinked account first sees what
+ * hotel staff should do, with the casual worker's code form folded below it. */
+const props = withDefaults(defineProps<{ attendanceOnly?: boolean; email?: string }>(), {
   attendanceOnly: false,
+  email: '',
 });
 const messages = useCasualAttendanceMessages();
 const router = useRouter();
@@ -68,6 +71,9 @@ async function load() {
 onMounted(load);
 
 const linked = computed(() => (status.value?.linked ? status.value : null));
+/** An account without workspace access that is not linked: staff waiting for access, or a
+ * casual worker about to enter a code. */
+const noAccess = computed(() => props.attendanceOnly && status.value?.linked === false);
 const record = computed(() => linked.value?.record ?? null);
 const state = computed(() => dayState(record.value));
 // The shift label already carries its hours, such as "Morning 07:00–15:00".
@@ -180,13 +186,23 @@ async function link() {
       />{{ messages.title }}
     </button>
     <ModulePage
-      :title="status && !status.linked ? messages.linkTitle : messages.myAttendance"
+      :title="
+        noAccess
+          ? messages.noAccessTitle
+          : status && !status.linked
+            ? messages.linkTitle
+            : messages.myAttendance
+      "
       :description="
         linked
           ? linked.person.name + ' · ' + linked.person.departmentName
-          : status && !status.linked
-            ? messages.linkDescription
-            : messages.myAttendanceDescription
+          : noAccess
+            ? props.email
+              ? messages.signedInAs.replace('{email}', props.email)
+              : ''
+            : status && !status.linked
+              ? messages.linkDescription
+              : messages.myAttendanceDescription
       "
       empty-icon="mdi-account-clock-outline"
       :loading="loading"
@@ -213,36 +229,56 @@ async function link() {
         v-if="status && !status.linked"
         class="ca-panel ca-link"
       >
-        <v-form
-          id="ca-link-form"
-          @submit.prevent="link"
+        <!-- Most accounts here are new hotel staff, so their next step comes first. -->
+        <div
+          v-if="noAccess"
+          class="ca-link-section"
         >
-          <label
-            for="ca-link-code"
-            class="field-label ca-first-label"
-            >{{ messages.linkCode }}</label
-          ><v-text-field
-            id="ca-link-code"
-            v-model="code"
-            class="ca-code-field"
-            :placeholder="messages.linkCodePlaceholder"
-            :error-messages="codeError"
-            :disabled="linking"
-            maxlength="9"
-            autocomplete="one-time-code"
-            autocapitalize="characters"
-            spellcheck="false"
-          />
-          <v-btn
-            color="primary"
-            type="submit"
-            block
-            class="ca-link-submit"
-            :loading="linking"
-            >{{ messages.link }}</v-btn
+          <h2 class="ca-link-heading">{{ messages.staffHeading }}</h2>
+          <p class="ca-link-text">{{ messages.staffAccessHint }}</p>
+        </div>
+        <div class="ca-link-section">
+          <template v-if="noAccess">
+            <h2 class="ca-link-heading">{{ messages.casualHeading }}</h2>
+            <p class="ca-link-text">{{ messages.casualHint }}</p>
+          </template>
+          <OptionalFields
+            :label="messages.enterCode"
+            :filled="!noAccess || !!code || !!codeError"
+            :reset-key="noAccess"
           >
-        </v-form>
-        <p class="ca-link-hint">{{ messages.linkStaffHint }}</p>
+            <v-form
+              id="ca-link-form"
+              @submit.prevent="link"
+            >
+              <label
+                for="ca-link-code"
+                class="field-label"
+                :class="{ 'ca-first-label': !noAccess }"
+                >{{ messages.linkCode }}</label
+              ><v-text-field
+                id="ca-link-code"
+                v-model="code"
+                class="ca-code-field"
+                :placeholder="messages.linkCodePlaceholder"
+                :error-messages="codeError"
+                :disabled="linking"
+                maxlength="9"
+                autocomplete="one-time-code"
+                autocapitalize="characters"
+                spellcheck="false"
+              />
+              <v-btn
+                color="primary"
+                type="submit"
+                block
+                class="ca-link-submit"
+                :loading="linking"
+                >{{ messages.link }}</v-btn
+              >
+            </v-form>
+          </OptionalFields>
+        </div>
       </section>
 
       <template v-else-if="linked">

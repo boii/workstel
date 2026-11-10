@@ -184,12 +184,20 @@
   margin-top: var(--workstel-space-6);
   min-height: var(--workstel-touch-target);
 }
-/* Set apart like the sign-in page's demo section: a rule, then a quiet note. */
-.ca-link-hint {
-  margin-top: var(--workstel-space-6);
-  padding-top: var(--workstel-space-4);
+/* No-access screen: hotel staff first, then the casual worker's code, split by a rule like the
+   sign-in page's demo section. */
+.ca-link-section + .ca-link-section {
+  margin-top: var(--workstel-space-5);
+  padding-top: var(--workstel-space-5);
   border-top: 1px solid var(--workstel-border);
-  font-size: var(--workstel-font-xs);
+}
+.ca-link-heading {
+  margin-bottom: var(--workstel-space-1);
+  font-size: var(--workstel-font-sm);
+  font-weight: var(--workstel-weight-semibold);
+}
+.ca-link-text {
+  font-size: var(--workstel-font-sm);
   line-height: var(--workstel-leading-tight);
   color: var(--workstel-text-secondary);
 }

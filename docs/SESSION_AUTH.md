@@ -42,8 +42,10 @@ there is no separate approval state. Block accounts that should not be there.
 
 Decision, 10 November 2026 (approved by the product owner) — Casual Attendance
 self check-in: while the
-module is switched on, an account with no workspace access sees "Link to
-attendance" instead of the message above. A department manager's one-time code
+module is switched on, an account with no workspace access sees "Your account
+has no access yet" with its email, telling hotel staff to give that email to the
+administrator and offering casual workers an Enter code link, instead of the
+message above. A department manager's one-time code
 links it to one casual worker record, and the account can then only check that
 worker in and out. It gets no hotel membership, `staff_access` or module grant,
 and the code is the only activation step. Details: `src/modules/casual-attendance/SELF_CHECK_IN.md`.
