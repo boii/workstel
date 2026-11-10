@@ -36,7 +36,7 @@
 - [x] Product owner's approval that department managers may give an account self check-in through a link code, recorded in `docs/SESSION_AUTH.md` (approved 10 November 2026).
 - [ ] Google sign-in enabled and verified on the hotel server (`docs/SESSION_AUTH.md`).
 - [x] Operator applies `supabase/migrations/202611100002_casual_attendance_self.sql` after a backup, after `202611100001` (reported applied by the operator on 10 November 2026; not seen by Claude, see `docs/DEPLOYMENT.md`).
-- [ ] Operator applies `supabase/migrations/202611100003_casual_attendance_reopen_review.sql` after a backup, after `202611100002`. Until then the server keeps the Verified badge on a reopened day.
+- [x] Operator applies `supabase/migrations/202611100003_casual_attendance_reopen_review.sql` after a backup, after `202611100002` (reported applied successfully by the operator on 10 November 2026; not seen by Claude, see `docs/DEPLOYMENT.md`).
 - [ ] Signed-in check on the live server: a new Google account sees Link to attendance, links with a manager's code, checks in and out; the supervisor approves and rejects; unlinking signs the worker's page back to the link form.
 - [ ] 390px phone review of My attendance and the link form by the user, on a real phone.
 
