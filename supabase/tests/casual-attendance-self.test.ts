@@ -334,6 +334,44 @@ test('Casual Attendance self check-in links accounts and follows department sett
       assert.equal(after.data![0].needs_review, 0);
     });
 
+    await t.test(
+      'undoing a check-out ends the review, and the next check-out starts one',
+      async () => {
+        await as(supervisor);
+        const day = await rpc('casual_attendance_day', [hotel, housekeeping, workDate]);
+        const record = day.data![0].record as Row;
+        assert.equal(record.verification, 'verified');
+        const reopened = await rpc('casual_attendance_mark', [
+          hotel,
+          rina,
+          workDate,
+          'reopen',
+          record.version,
+          '',
+        ]);
+        assert.equal(reopened.data!.check_out, null);
+        assert.equal(reopened.data!.verification, null);
+        assert.equal(reopened.data!.review_note, '');
+        assert.equal(
+          (
+            await rpc('casual_attendance_mark', [
+              hotel,
+              rina,
+              workDate,
+              'approve',
+              reopened.data!.version,
+              '',
+            ])
+          ).error,
+          'NOT_REVIEWABLE',
+        );
+        // The check-in's own result (needs review, under "always") is the base again.
+        await as(worker);
+        const checkedOut = await rpc('casual_attendance_self_mark', ['check_out', null]);
+        assert.equal(checkedOut.data!.verification, 'needs_review');
+      },
+    );
+
     await t.test('unlinking ends self check-in', async () => {
       await as(manager);
       assert.equal(

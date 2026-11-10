@@ -265,6 +265,32 @@ test('demo self check-in follows department settings and supervisor review', asy
     );
     assert.equal(approved?.verification, 'verified');
   }
+  // Undoing a check-out ends the review of that day, as on the server.
+  const yesterday = addDays(hotelToday(), -1);
+  const rina = (
+    await api.listDay({ hotelId: 'demo-hotel', departmentId: null, day: yesterday })
+  ).find((row) => row.person.name === 'Rina Kartika')!;
+  const approvedDay = await api.mark(
+    'demo-hotel',
+    rina.person.id,
+    yesterday,
+    'approve',
+    rina.record!.version,
+  );
+  assert.equal(approvedDay?.verification, 'verified');
+  const reopened = await api.mark(
+    'demo-hotel',
+    rina.person.id,
+    yesterday,
+    'reopen',
+    approvedDay!.version,
+  );
+  assert.equal(reopened?.checkOut, null);
+  assert.equal(reopened?.verification, null);
+  await assert.rejects(
+    api.mark('demo-hotel', rina.person.id, yesterday, 'approve', reopened!.version),
+    (error) => error instanceof ModuleRequestError && error.code === 'NOT_REVIEWABLE',
+  );
   const people = await api.listPeople({
     hotelId: 'demo-hotel',
     departmentId: 'housekeeping',

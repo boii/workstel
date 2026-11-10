@@ -25,6 +25,7 @@
 - [x] Self check-in is off until a manager switches it on per department; settings saves use version checks.
 - [x] Self check-in and check-out use the server clock; `always` review gives `needs_review`; every self action is stored in an append-only events table.
 - [x] Supervisors approve and reject; rejected days leave the recap's present count and worked time.
+- [x] Undoing a check-out clears the review state, so a reopened day shows no Verified badge and cannot be approved until it is checked out again; the next self check-out reviews it again from the check-in's result (migration `202611100003`, added 10 November 2026 after the user saw Verified on a reopened day).
 - [x] Unlinking and switching the module off end self check-in at once.
 - [x] Parsers accept records from servers without the new fields and reject unknown sources, review states, codes and settings (`casual-attendance.test.ts`).
 - [x] Demo mode links the demo user to Rina and mirrors the same rules.
@@ -35,6 +36,7 @@
 - [x] Product owner's approval that department managers may give an account self check-in through a link code, recorded in `docs/SESSION_AUTH.md` (approved 10 November 2026).
 - [ ] Google sign-in enabled and verified on the hotel server (`docs/SESSION_AUTH.md`).
 - [x] Operator applies `supabase/migrations/202611100002_casual_attendance_self.sql` after a backup, after `202611100001` (reported applied by the operator on 10 November 2026; not seen by Claude, see `docs/DEPLOYMENT.md`).
+- [ ] Operator applies `supabase/migrations/202611100003_casual_attendance_reopen_review.sql` after a backup, after `202611100002`. Until then the server keeps the Verified badge on a reopened day.
 - [ ] Signed-in check on the live server: a new Google account sees Link to attendance, links with a manager's code, checks in and out; the supervisor approves and rejects; unlinking signs the worker's page back to the link form.
 - [ ] 390px phone review of My attendance and the link form by the user, on a real phone.
 

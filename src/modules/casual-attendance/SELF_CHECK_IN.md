@@ -80,7 +80,7 @@ Each self check-in and self check-out is evaluated on the server against the dep
 | Failed | `unverified` | `needs_review` | `needs_review` |
 
 3. A record's verification is the worst of its check-in and check-out results (`rejected` > `needs_review` > `unverified` > `verified`).
-4. A supervisor with `casual-attendance:write` can **Approve** (`verified`) or **Reject** (`rejected`) a `needs_review` or `unverified` record, with an optional note. A rejected record can be approved later; rejection is not deletion.
+4. A supervisor with `casual-attendance:write` can **Approve** (`verified`) or **Reject** (`rejected`) a `needs_review` or `unverified` record, with an optional note. A rejected record can be approved later; rejection is not deletion. Undoing a check-out (`reopen`) clears verification and the review fields, because the review judged the closed day; the next self check-out takes the self check-in's own result as its base (migration `202611100003`).
 5. Supervisor marks and corrections behave as today and carry no verification value.
 
 The value is named `needs_review`, not `pending`, because the Today list already uses `pending` for "not checked in yet".

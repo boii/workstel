@@ -69,6 +69,8 @@ export function createDemoCasualAttendanceApi(
   let linkedPersonId: string | null = people[0].id;
   people[0].linked = true;
   const codes = new Map<string, { personId: string; expiresAt: string }>();
+  /** Result of each self check-in, like the server's append-only self events. */
+  const selfCheckIns = new Map<string, Verification>();
   const settings: DepartmentSettings[] = demoDepartments.map((d) => ({
     departmentId: d.id,
     departmentName: d.name,
@@ -276,7 +278,13 @@ export function createDemoCasualAttendanceApi(
         Object.assign(record, { checkOut: instant, version: record.version + 1 });
       } else if (action === 'reopen') {
         if (!record.checkOut) throw error('NOT_CHECKED_IN');
-        Object.assign(record, { checkOut: null, version: record.version + 1 });
+        // The review belonged to the closed day; the next check-out starts a new one.
+        Object.assign(record, {
+          checkOut: null,
+          verification: null,
+          reviewNote: '',
+          version: record.version + 1,
+        });
       } else {
         if (record.checkOut) throw error('RECORD_CLOSED');
         records.splice(records.indexOf(record), 1);
@@ -436,13 +444,17 @@ export function createDemoCasualAttendanceApi(
           reviewNote: '',
         };
         records.push(created);
+        selfCheckIns.set(created.id, outcome);
         return { ...created };
       }
       const open = openRecord(person.id);
       if (!open) throw error('NOT_CHECKED_IN');
+      // After an undone check-out, the self check-in's own result is the base again.
+      const base = open.verification ?? selfCheckIns.get(open.id) ?? null;
       Object.assign(open, {
         checkOut: instant,
-        verification: worse(open.verification, outcome),
+        verification: worse(base, outcome),
+        reviewNote: '',
         version: open.version + 1,
       });
       return { ...open };
