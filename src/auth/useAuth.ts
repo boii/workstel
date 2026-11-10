@@ -25,7 +25,10 @@ export function useAuth() {
     googleEnabled = ref(false),
     emailEnabled = ref(false),
     assignments = ref<StaffAssignment[]>([]),
-    moduleAccess = ref<ModuleAccess>(noModuleAccess);
+    moduleAccess = ref<ModuleAccess>(noModuleAccess),
+    /** Signed in without workspace access, but allowed to use Casual Attendance self check-in.
+     * The account has no staff_access; every self check-in RPC checks its link on the server. */
+    attendanceOnly = ref(false);
   let generation = 0;
   let stop: (() => void) | undefined;
   async function synchronize(session: Session | null) {
@@ -33,6 +36,7 @@ export function useAuth() {
     if (!session) {
       vaultReady.value = false;
       moduleAccess.value = noModuleAccess;
+      attendanceOnly.value = false;
       authenticated.value = false;
       assignments.value = [];
       email.value = '';
@@ -55,10 +59,17 @@ export function useAuth() {
       if (!Array.isArray(data?.data) || !data.data.length) {
         authenticated.value = false;
         assignments.value = [];
-        email.value = '';
-        failure.value = 'accessDenied';
+        // Casual workers have no workspace; they may still link to or use self check-in.
+        // Servers without that migration answer with an error and keep access denied.
+        const self = await client.rpc('casual_attendance_self_status');
+        if (current !== generation) return;
+        const linked = self.error ? undefined : self.data?.data?.linked;
+        attendanceOnly.value = typeof linked === 'boolean';
+        email.value = attendanceOnly.value ? (user.user.email ?? '') : '';
+        failure.value = attendanceOnly.value ? null : 'accessDenied';
         return;
       }
+      attendanceOnly.value = false;
       const rows = data.data as unknown[];
       if (
         !rows.every((item) => {
@@ -85,6 +96,7 @@ export function useAuth() {
     } catch {
       if (current === generation) {
         authenticated.value = false;
+        attendanceOnly.value = false;
         assignments.value = [];
         moduleAccess.value = noModuleAccess;
         email.value = '';
@@ -197,6 +209,7 @@ export function useAuth() {
   async function signOut() {
     ++generation;
     authenticated.value = false;
+    attendanceOnly.value = false;
     assignments.value = [];
     email.value = '';
     vaultReady.value = false;
@@ -213,6 +226,7 @@ export function useAuth() {
   });
   return {
     authenticated,
+    attendanceOnly,
     restoring,
     busy,
     failure,

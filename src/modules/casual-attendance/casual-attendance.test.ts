@@ -1,8 +1,16 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ModuleRequestError } from '../../core/module-rpc';
-import { createDemoCasualAttendanceApi } from './demo-api';
-import { parseDay, parsePeople, parseRecap, parseRecord } from './live-api';
+import { createDemoCasualAttendanceApi, worse } from './demo-api';
+import {
+  parseDay,
+  parseLinkCode,
+  parsePeople,
+  parseRecap,
+  parseRecord,
+  parseSelfStatus,
+  parseSettings,
+} from './live-api';
 import {
   addDays,
   canCheckInOn,
@@ -159,5 +167,116 @@ test('demo API mirrors the server marking rules', async () => {
       'view',
     ),
     (error: unknown) => error instanceof ModuleRequestError && error.code === 'RANGE_TOO_LONG',
+  );
+});
+
+test('self check-in responses are validated, and older servers still parse', () => {
+  const base = {
+    id: recordId,
+    person_id: personId,
+    work_date: '2026-11-10',
+    status: 'present',
+    shift: 'morning',
+    check_in: '2026-11-10T00:02:00Z',
+    check_out: null,
+    note: '',
+    corrected: false,
+    version: 1,
+  };
+  // Before the self check-in migration the three fields are absent.
+  const legacy = parseRecord(base, personId);
+  assert.equal(legacy.source, 'supervisor');
+  assert.equal(legacy.verification, null);
+  const self = parseRecord(
+    { ...base, source: 'self', verification: 'needs_review', review_note: '' },
+    personId,
+  );
+  assert.equal(self.verification, 'needs_review');
+  assert.throws(() => parseRecord({ ...base, verification: 'maybe' }, personId));
+  assert.throws(() => parseRecord({ ...base, source: 'kiosk' }, personId));
+
+  assert.deepEqual(parseSelfStatus({ linked: false }), { linked: false });
+  const status = parseSelfStatus({
+    linked: true,
+    person: {
+      id: personId,
+      hotel_id: hotel,
+      name: 'Rina Kartika',
+      department_name: 'Housekeeping',
+      shift: 'morning',
+      active: true,
+    },
+    work_date: '2026-11-10',
+    scheduled: true,
+    self_enabled: true,
+    record: null,
+    history: [base],
+  });
+  assert.ok(status.linked && status.history.length === 1);
+  assert.throws(() => parseSelfStatus({ linked: true, person: {} }));
+
+  assert.deepEqual(parseLinkCode({ code: 'K7M2QX', expires_at: '2026-11-11T00:00:00Z' }), {
+    code: 'K7M2QX',
+    expiresAt: '2026-11-11T00:00:00Z',
+  });
+  assert.throws(() => parseLinkCode({ code: 'O0I1L', expires_at: '2026-11-11T00:00:00Z' }));
+  assert.throws(() =>
+    parseSettings([
+      {
+        department_id: hotel,
+        department_name: 'Housekeeping',
+        self_enabled: true,
+        confirmation: 'sometimes',
+        version: 0,
+      },
+    ]),
+  );
+  assert.equal(worse('verified', 'needs_review'), 'needs_review');
+  assert.equal(worse('rejected', 'unverified'), 'rejected');
+  assert.equal(worse(null, 'verified'), 'verified');
+});
+
+test('demo self check-in follows department settings and supervisor review', async () => {
+  const api = createDemoCasualAttendanceApi(() => new Date());
+  const before = await api.selfStatus();
+  assert.ok(before.linked);
+  const settings = await api.listSettings('demo-hotel', 'housekeeping');
+  await api.saveSettings(
+    'demo-hotel',
+    'housekeeping',
+    { selfEnabled: true, confirmation: 'always' },
+    settings[0].version,
+  );
+  await assert.rejects(
+    api.saveSettings('demo-hotel', 'housekeeping', { selfEnabled: false, confirmation: 'off' }, 0),
+    (error) => error instanceof ModuleRequestError && error.code === 'VERSION_CONFLICT',
+  );
+  const status = await api.selfStatus();
+  assert.ok(status.linked);
+  if (!status.record && status.scheduled) {
+    const record = await api.selfMark('check_in');
+    assert.equal(record.verification, 'needs_review');
+    const approved = await api.mark(
+      'demo-hotel',
+      record.personId,
+      record.workDate,
+      'approve',
+      record.version,
+    );
+    assert.equal(approved?.verification, 'verified');
+  }
+  const people = await api.listPeople({
+    hotelId: 'demo-hotel',
+    departmentId: 'housekeeping',
+    type: null,
+    period: 'current',
+    search: 'Siti',
+    after: null,
+  });
+  const code = await api.createLinkCode('demo-hotel', people.data[0].id);
+  assert.match(code.code, /^[A-HJKMNP-Z2-9]{6}$/);
+  await assert.rejects(
+    api.redeemLinkCode(code.code),
+    (error) => error instanceof ModuleRequestError && error.code === 'ALREADY_LINKED',
   );
 });

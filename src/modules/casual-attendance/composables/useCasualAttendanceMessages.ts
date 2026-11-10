@@ -3,7 +3,7 @@ import { locale } from '../../../i18n';
 import { ModuleRequestError } from '../../../core/module-rpc';
 import en from '../locales/en';
 import id from '../locales/id';
-import type { PersonType, Shift } from '../types';
+import type { ConfirmationMode, PersonType, Shift, Verification } from '../types';
 import type { DayState } from '../validation';
 import { hotelTimeZone } from '../validation';
 
@@ -55,7 +55,38 @@ const errorKeys: Record<string, keyof typeof en> = {
   RECORD_CLOSED: 'recordClosed',
   DEPARTMENT_LOCKED: 'departmentLocked',
   RANGE_TOO_LONG: 'rangeTooLong',
+  NOT_LINKED: 'notLinked',
+  ALREADY_LINKED: 'alreadyLinked',
+  CODE_INVALID: 'codeInvalid',
+  TOO_MANY_ATTEMPTS: 'tooManyAttempts',
+  SELF_DISABLED: 'selfDisabled',
+  NOT_REVIEWABLE: 'notReviewable',
 };
+export const verificationKeys: Record<Verification, keyof typeof en> = {
+  verified: 'verifyVerified',
+  needs_review: 'verifyNeedsReview',
+  unverified: 'verifyUnverified',
+  rejected: 'verifyRejected',
+};
+export const verificationTones: Record<Verification, 'success' | 'warning' | 'danger'> = {
+  verified: 'success',
+  needs_review: 'warning',
+  unverified: 'warning',
+  rejected: 'danger',
+};
+export const confirmationKeys: Record<ConfirmationMode, keyof typeof en> = {
+  off: 'confirmationOff',
+  on_fail: 'confirmationOnFail',
+  always: 'confirmationAlways',
+};
+export const confirmationHintKeys: Record<ConfirmationMode, keyof typeof en> = {
+  off: 'confirmationOffHint',
+  on_fail: 'confirmationOnFailHint',
+  always: 'confirmationAlwaysHint',
+};
+/** A self check-in day a supervisor can still approve or reject. */
+export const isReviewable = (verification: Verification | null) =>
+  verification === 'needs_review' || verification === 'unverified';
 /** Map a server error code to safe, localized copy; unknown failures stay generic. */
 export function errorMessage(messages: Messages, error: unknown) {
   const code = error instanceof ModuleRequestError ? error.code : '';

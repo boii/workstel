@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { computed, defineAsyncComponent, ref, watch, onMounted, onUnmounted } from 'vue';
 import { locale, t, translate } from './i18n';
 import type { MessageKey } from './i18n';
 import { useLocale } from 'vuetify';
@@ -51,6 +51,10 @@ import UsersPage from './users/users-page.vue';
 import AuditPage from './admin/audit-page.vue';
 import { initialsOf, useProfile } from './profile/use-profile';
 import ChangePassword from './users/change-password.vue';
+// Accounts without workspace access that may use Casual Attendance self check-in.
+const MyAttendancePage = defineAsyncComponent(
+  () => import('./modules/casual-attendance/pages/MyAttendancePage.vue'),
+);
 const appVersion = import.meta.env.VITE_APP_VERSION;
 const buildCommit = import.meta.env.VITE_BUILD_COMMIT;
 const copyrightYear = new Date().getFullYear();
@@ -72,6 +76,10 @@ const favorites = computed({
 });
 onMounted(() => {
   void auth.start();
+});
+// The attendance-only shell shows one page, so its URL is that page's.
+watch(auth.attendanceOnly, (value) => {
+  if (value) void router.replace({ name: 'casual-attendance-me' });
 });
 watch(auth.authenticated, (value) => {
   if (!runtime.demo) {
@@ -402,6 +410,40 @@ function logout() {
         :aria-label="t('loading')"
       />
     </v-main>
+    <template v-else-if="!runtime.demo && auth.attendanceOnly.value"
+      ><header class="login-header">
+        <span
+          class="wordmark"
+          aria-label="Workstel"
+        >
+          <v-icon icon="mdi-office-building-outline" />Workstel<span>.</span>
+        </span>
+        <div class="login-language">
+          <ActionMenu :min-width="180"
+            ><template #activator="{ props }"
+              ><v-btn
+                v-bind="props"
+                icon="mdi-translate"
+                variant="text"
+                :aria-label="t('language')" /></template
+            ><v-list-item
+              title="English"
+              :active="locale === 'en'"
+              @click="locale = 'en'" /><v-list-item
+              title="Bahasa Indonesia"
+              :active="locale === 'id'"
+              @click="locale = 'id'" /></ActionMenu
+          ><v-btn
+            variant="text"
+            prepend-icon="mdi-logout"
+            @click="logout"
+            >{{ t('signOut') }}</v-btn
+          >
+        </div>
+      </header>
+      <v-main id="workspace-main"
+        ><div class="workspace-content"><MyAttendancePage attendance-only /></div></v-main
+    ></template>
     <template v-else-if="!session"
       ><header class="login-header">
         <span

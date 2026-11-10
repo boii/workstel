@@ -18,6 +18,11 @@ source of truth for navigation; no browser storage or global state store is used
 | Documents & SOPs      | `/documents`                                |
 | Sales CRM             | `/sales-crm`                                |
 | Room Turnaround       | `/room-turnaround`                          |
+| Casual Attendance     | `/casual-attendance`                        |
+| My attendance         | `/casual-attendance/me`                     |
+
+Accounts without workspace access that may use Casual Attendance self check-in
+see only My attendance; the shell replaces their URL with `/casual-attendance/me`.
 
 `src/router.ts` installs browser history. `src/routes.ts` combines shell routes
 with module-owned routes. Shell content remains in App.vue to preserve the

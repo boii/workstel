@@ -1,7 +1,23 @@
 import { ModuleRequestError, moduleRpc, parseCursor, uuidPattern } from '../../core/module-rpc';
 import type { CasualAttendanceApi } from './api';
-import { attendanceStatuses, personTypes, shifts } from './types';
-import type { AttendanceRecord, DayRow, Person, RecapRow } from './types';
+import {
+  attendanceStatuses,
+  confirmationModes,
+  personTypes,
+  recordSources,
+  shifts,
+  verifications,
+} from './types';
+import type {
+  AttendanceRecord,
+  DayRow,
+  DepartmentSettings,
+  LinkCode,
+  Person,
+  RecapRow,
+  SelfPerson,
+  SelfStatus,
+} from './types';
 import { isDate } from './validation';
 
 type Rpc = typeof moduleRpc;
@@ -32,7 +48,8 @@ export function parsePeople(data: unknown, hotelId: string): Person[] {
       !(raw.end_date === null || isDay(raw.end_date)) ||
       !['active', 'archived'].includes(String(raw.status)) ||
       !Number.isInteger(raw.version) ||
-      !isTime(raw.updated_at)
+      !isTime(raw.updated_at) ||
+      !(raw.linked === undefined || typeof raw.linked === 'boolean')
     )
       throw invalid();
     return {
@@ -50,6 +67,7 @@ export function parsePeople(data: unknown, hotelId: string): Person[] {
       status: raw.status as Person['status'],
       version: Number(raw.version),
       updatedAt: raw.updated_at,
+      linked: raw.linked === true,
     };
   });
 }
@@ -68,7 +86,15 @@ export function parseRecord(raw: unknown, personId: string): AttendanceRecord {
     (raw.check_out !== null && raw.check_in === null) ||
     !isText(raw.note) ||
     typeof raw.corrected !== 'boolean' ||
-    !Number.isInteger(raw.version)
+    !Number.isInteger(raw.version) ||
+    // Servers before the self check-in migration omit these three fields.
+    !(raw.source === undefined || recordSources.includes(raw.source as never)) ||
+    !(
+      raw.verification === undefined ||
+      raw.verification === null ||
+      verifications.includes(raw.verification as never)
+    ) ||
+    !(raw.review_note === undefined || isText(raw.review_note))
   )
     throw invalid();
   return {
@@ -82,6 +108,79 @@ export function parseRecord(raw: unknown, personId: string): AttendanceRecord {
     note: raw.note,
     corrected: raw.corrected,
     version: Number(raw.version),
+    source: (raw.source as AttendanceRecord['source'] | undefined) ?? 'supervisor',
+    verification: (raw.verification as AttendanceRecord['verification'] | undefined) ?? null,
+    reviewNote: (raw.review_note as string | undefined) ?? '',
+  };
+}
+
+export function parseSettings(data: unknown): DepartmentSettings[] {
+  if (!Array.isArray(data) || data.length > 500) throw invalid();
+  return data.map((raw: unknown) => {
+    if (
+      !isObject(raw) ||
+      !isText(raw.department_id) ||
+      !uuidPattern.test(raw.department_id) ||
+      !isText(raw.department_name) ||
+      typeof raw.self_enabled !== 'boolean' ||
+      !confirmationModes.includes(raw.confirmation as never) ||
+      !isCount(raw.version)
+    )
+      throw invalid();
+    return {
+      departmentId: raw.department_id,
+      departmentName: raw.department_name,
+      selfEnabled: raw.self_enabled,
+      confirmation: raw.confirmation as DepartmentSettings['confirmation'],
+      version: Number(raw.version),
+    };
+  });
+}
+
+export function parseLinkCode(data: unknown): LinkCode {
+  if (!isObject(data) || !isText(data.code) || !/^[A-HJKMNP-Z2-9]{6}$/.test(data.code))
+    throw invalid();
+  if (!isTime(data.expires_at)) throw invalid();
+  return { code: data.code, expiresAt: data.expires_at };
+}
+
+export function parseSelfStatus(data: unknown): SelfStatus {
+  if (!isObject(data) || typeof data.linked !== 'boolean') throw invalid();
+  if (!data.linked) return { linked: false };
+  const person = data.person;
+  if (
+    !isObject(person) ||
+    !isText(person.id) ||
+    !uuidPattern.test(person.id) ||
+    !isText(person.hotel_id) ||
+    !uuidPattern.test(person.hotel_id) ||
+    !isText(person.name) ||
+    !isText(person.department_name) ||
+    !shifts.includes(person.shift as never) ||
+    typeof person.active !== 'boolean' ||
+    !isDay(data.work_date) ||
+    typeof data.scheduled !== 'boolean' ||
+    typeof data.self_enabled !== 'boolean' ||
+    !Array.isArray(data.history) ||
+    data.history.length > 14
+  )
+    throw invalid();
+  const personId = person.id;
+  return {
+    linked: true,
+    person: {
+      id: personId,
+      hotelId: person.hotel_id,
+      name: person.name,
+      departmentName: person.department_name,
+      shift: person.shift as SelfPerson['shift'],
+      active: person.active,
+    },
+    workDate: data.work_date,
+    scheduled: data.scheduled,
+    selfEnabled: data.self_enabled,
+    record: data.record === null ? null : parseRecord(data.record, personId),
+    history: data.history.map((raw: unknown) => parseRecord(raw, personId)),
   };
 }
 
@@ -121,7 +220,10 @@ export function parseRecap(data: unknown): RecapRow[] {
       !uuidPattern.test(raw.person_id) ||
       !['name', 'origin', 'department_name'].every((key) => isText(raw[key])) ||
       !personTypes.includes(raw.person_type as never) ||
-      !['present', 'late', 'leave', 'sick', 'absent', 'minutes'].every((key) => isCount(raw[key]))
+      !['present', 'late', 'leave', 'sick', 'absent', 'minutes'].every((key) =>
+        isCount(raw[key]),
+      ) ||
+      !['needs_review', 'rejected'].every((key) => raw[key] === undefined || isCount(raw[key]))
     )
       throw invalid();
     return {
@@ -135,6 +237,8 @@ export function parseRecap(data: unknown): RecapRow[] {
       leave: Number(raw.leave),
       sick: Number(raw.sick),
       absent: Number(raw.absent),
+      needsReview: Number(raw.needs_review ?? 0),
+      rejected: Number(raw.rejected ?? 0),
       minutes: Number(raw.minutes),
     };
   });
@@ -234,6 +338,60 @@ export function createLiveCasualAttendanceApi(rpc: Rpc = moduleRpc): CasualAtten
         signal,
       );
       return parseRecap(result.data);
+    },
+    async createLinkCode(hotelId, personId) {
+      const result = await rpc('casual_attendance_person_link', {
+        p_hotel_id: hotelId,
+        p_person_id: personId,
+        p_action: 'code',
+      });
+      return parseLinkCode(result.data);
+    },
+    async unlink(hotelId, personId) {
+      await rpc('casual_attendance_person_link', {
+        p_hotel_id: hotelId,
+        p_person_id: personId,
+        p_action: 'unlink',
+      });
+    },
+    async listSettings(hotelId, departmentId, signal) {
+      const result = await rpc(
+        'casual_attendance_settings',
+        { p_hotel_id: hotelId, p_department_id: departmentId },
+        signal,
+      );
+      return parseSettings(result.data);
+    },
+    async saveSettings(hotelId, departmentId, input, expectedVersion) {
+      await rpc('casual_attendance_save_settings', {
+        p_hotel_id: hotelId,
+        p_department_id: departmentId,
+        p_input: { selfEnabled: input.selfEnabled, confirmation: input.confirmation },
+        p_expected_version: expectedVersion,
+      });
+    },
+    async selfStatus(signal) {
+      const result = await rpc('casual_attendance_self_status', {}, signal);
+      return parseSelfStatus(result.data);
+    },
+    async redeemLinkCode(code) {
+      const result = await rpc('casual_attendance_redeem_link_code', {
+        p_code: code.trim().slice(0, 20),
+      });
+      return parseSelfStatus(result.data);
+    },
+    async selfMark(action) {
+      const result = await rpc('casual_attendance_self_mark', {
+        p_action: action,
+        p_location: null,
+      });
+      if (
+        !isObject(result.data) ||
+        !isText(result.data.person_id) ||
+        !uuidPattern.test(result.data.person_id)
+      )
+        throw invalid();
+      return parseRecord(result.data, result.data.person_id);
     },
   };
 }

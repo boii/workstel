@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import ModuleDialog from '../../../shared/module-dialog.vue';
 import ActionMenu from '../../../shared/action-menu.vue';
 import ModulePage from '../../../shared/ModulePage.vue';
 import EmptyFilterChips from '../../../shared/empty-filter-chips.vue';
@@ -12,25 +14,29 @@ import type { ModuleAssignment } from '../../../core/module-access';
 import CorrectionForm from '../components/CorrectionForm.vue';
 import LeaveForm from '../components/LeaveForm.vue';
 import PersonForm from '../components/PersonForm.vue';
+import SelfSettingsForm from '../components/SelfSettingsForm.vue';
 import {
   errorMessage,
   formatClock,
   formatDate,
   formatDuration,
   isConflict,
+  isReviewable,
+  verificationKeys,
   shiftShortKeys,
   stateKeys,
   stateTones,
   typeKeys,
   useCasualAttendanceMessages,
 } from '../composables/useCasualAttendanceMessages';
-import { createDemoCasualAttendanceApi, demoDepartments, demoHotelId } from '../demo-api';
+import { demoDepartments, demoHotelId, sharedDemoCasualAttendanceApi } from '../demo-api';
 import { createLiveCasualAttendanceApi } from '../live-api';
 import { personTypes } from '../types';
 import type {
   AttendanceRecord,
   CorrectionInput,
   DayRow,
+  LinkCode,
   MarkAction,
   PeriodFilter,
   Person,
@@ -54,7 +60,14 @@ import '../styles.css';
 const props = withDefaults(defineProps<{ access?: ModuleAssignment[] }>(), { access: () => [] });
 const emit = defineEmits<{ back: [] }>();
 const messages = useCasualAttendanceMessages();
-const api = runtime.demo ? createDemoCasualAttendanceApi() : createLiveCasualAttendanceApi();
+const api = runtime.demo ? sharedDemoCasualAttendanceApi() : createLiveCasualAttendanceApi();
+const router = useRouter();
+// Staff who are also linked to a person reach My attendance from here.
+const selfLinked = ref(false);
+api
+  .selfStatus()
+  .then((status) => (selfLinked.value = status.linked))
+  .catch(() => undefined);
 
 // Demo mode grants every capability on sample departments; production uses server grants.
 const scope = computed<ModuleAssignment[]>(() =>
@@ -99,7 +112,7 @@ const departmentId = ref<string | null>(null);
 const search = ref('');
 // Today
 const day = ref(today.value);
-type StatusFilter = 'all' | 'pending' | 'onDuty' | 'late' | 'done' | 'away' | 'absent';
+type StatusFilter = 'all' | 'pending' | 'onDuty' | 'late' | 'done' | 'away' | 'absent' | 'review';
 const statusFilter = ref<StatusFilter>('all');
 const dayRows = ref<DayRow[]>([]);
 // People
@@ -192,6 +205,8 @@ const matchesStatus = (row: ViewRow) => {
       return row.late > 0;
     case 'away':
       return row.state === 'leave' || row.state === 'sick';
+    case 'review':
+      return isReviewable(row.record?.verification ?? null);
     default:
       return row.state === statusFilter.value;
   }
@@ -225,7 +240,11 @@ function detail(row: ViewRow) {
     String(Math.floor(start / 60)).padStart(2, '0') + ':' + String(start % 60).padStart(2, '0');
   if (!record) return `${messages.value.expectedAt} ${expected}`;
   if (record.status !== 'present') return record.note;
-  const suffix = record.corrected ? ` · ${messages.value.corrected}` : '';
+  // Self check-ins say so, with their review state, in the same line as the times.
+  const suffix =
+    (record.corrected ? ` · ${messages.value.corrected}` : '') +
+    (record.source === 'self' ? ` · ${messages.value.source}` : '') +
+    (record.verification ? ` · ${messages.value[verificationKeys[record.verification]]}` : '');
   if (!record.checkOut) return `${messages.value.inAt} ${formatClock(record.checkIn!)}${suffix}`;
   const late = row.late
     ? ` · ${messages.value.stateLate.toLowerCase()} ${formatDuration(row.late, messages.value)}`
@@ -312,7 +331,27 @@ function announce(
       return showNotice(messages.value.reopened);
     case 'reset':
       return showNotice(messages.value.cleared);
+    case 'approve':
+      return showNotice(`${name}: ${messages.value.approved}`);
+    case 'reject':
+      return showNotice(`${name}: ${messages.value.rejected}`);
   }
+}
+/** Approve is the row's main action once the day is closed and only review is left. */
+const canApproveNow = (row: ViewRow) =>
+  row.state === 'done' &&
+  isReviewable(row.record?.verification ?? null) &&
+  can(row.person.departmentId, 'canWrite');
+const rejectOpen = ref(false);
+const rejecting = ref<ViewRow | null>(null);
+function openReject(row: ViewRow) {
+  rejecting.value = row;
+  rejectOpen.value = true;
+}
+async function confirmReject() {
+  const row = rejecting.value;
+  rejectOpen.value = false;
+  if (row) await act(row, 'reject');
 }
 const canCheckIn = computed(() => canCheckInOn(day.value, today.value));
 /** Leave, sick and absent can be marked a week back and a month ahead. */
@@ -326,6 +365,21 @@ function menuItems(row: ViewRow) {
   const write = can(row.person.departmentId, 'canWrite');
   const manage = can(row.person.departmentId, 'canManage');
   const items: { key: string; icon: string; title: string; run: () => void }[] = [];
+  const verification = row.record?.verification ?? null;
+  if (write && (isReviewable(verification) || verification === 'rejected') && !canApproveNow(row))
+    items.push({
+      key: 'approve',
+      icon: 'mdi-check-decagram-outline',
+      title: messages.value.approve,
+      run: () => void act(row, 'approve'),
+    });
+  if (write && isReviewable(verification))
+    items.push({
+      key: 'reject',
+      icon: 'mdi-close-octagon-outline',
+      title: messages.value.reject,
+      run: () => openReject(row),
+    });
   if (write && row.state === 'pending' && canMarkAway.value) {
     items.push({
       key: 'leave',
@@ -413,6 +467,57 @@ function personChip(person: Person) {
   }
   return { tone: 'info', label: messages.value.personActive };
 }
+// Self check-in links
+const linkCode = ref<(LinkCode & { name: string }) | null>(null);
+const linkCodeOpen = ref(false);
+const unlinkOpen = ref(false);
+const unlinking = ref<Person | null>(null);
+const linkBusy = ref(false);
+async function createLinkCode(person: Person) {
+  if (linkBusy.value) return;
+  linkBusy.value = true;
+  try {
+    linkCode.value = { ...(await api.createLinkCode(hotelId.value, person.id)), name: person.name };
+    linkCodeOpen.value = true;
+  } catch (error) {
+    showNotice(errorMessage(messages.value, error));
+  } finally {
+    linkBusy.value = false;
+  }
+}
+async function copyLinkCode() {
+  if (!linkCode.value) return;
+  try {
+    await navigator.clipboard.writeText(linkCode.value.code);
+    showNotice(messages.value.codeCopied);
+  } catch {
+    // The code stays on screen to read out or type.
+  }
+}
+function openUnlink(person: Person) {
+  unlinking.value = person;
+  unlinkOpen.value = true;
+}
+async function confirmUnlink() {
+  const person = unlinking.value;
+  if (!person || linkBusy.value) return;
+  linkBusy.value = true;
+  try {
+    await api.unlink(hotelId.value, person.id);
+    unlinkOpen.value = false;
+    showNotice(messages.value.unlinked);
+    await load();
+  } catch (error) {
+    unlinkOpen.value = false;
+    showNotice(errorMessage(messages.value, error));
+  } finally {
+    linkBusy.value = false;
+  }
+}
+const settingsOpen = ref(false);
+async function settingsSaved() {
+  showNotice(messages.value.settingsSaved);
+}
 const periodText = (person: Person) =>
   person.endDate
     ? `${formatDate(person.startDate)} – ${formatDate(person.endDate)}`
@@ -445,6 +550,10 @@ const { toggle: toggleArchive } = useOptimisticArchive({
 
 // ---- Recap ----
 const recapTotals = computed(() => recapRows.value.length);
+/** Review columns appear only when the range has self check-ins to review or rejected days. */
+const reviewColumns = computed(() =>
+  recapRows.value.some((row) => row.needsReview > 0 || row.rejected > 0),
+);
 const exporting = ref(false);
 /** Cells that start like a formula are prefixed so spreadsheets show them as text. */
 const csvCell = (value: string | number) => {
@@ -469,6 +578,8 @@ async function exportRecap() {
         m.leave,
         m.sick,
         m.absent,
+        m.needsReview,
+        m.rejectedDays,
         m.totalHours,
       ],
       ...rows.map((row) => [
@@ -481,6 +592,8 @@ async function exportRecap() {
         row.leave,
         row.sick,
         row.absent,
+        row.needsReview,
+        row.rejected,
         (row.minutes / 60).toFixed(2),
       ]),
     ].map((line) => line.map(csvCell).join(','));
@@ -611,6 +724,7 @@ const statusItems = computed(() => {
     { value: 'done', title: m.stateDone },
     { value: 'away', title: m.stateLeave + ' / ' + m.stateSick },
     { value: 'absent', title: m.stateAbsent },
+    { value: 'review', title: m.needsReviewFilter },
   ];
 });
 const typeItems = computed(() => [
@@ -658,6 +772,18 @@ const periodItems = computed(() => {
           :loading="exporting"
           @click="exportRecap"
           >{{ messages.export }}</v-btn
+        ><v-btn
+          v-if="selfLinked"
+          variant="text"
+          prepend-icon="mdi-account-clock-outline"
+          @click="router.push({ name: 'casual-attendance-me' })"
+          >{{ messages.myAttendance }}</v-btn
+        ><v-btn
+          v-if="manageableDepartments.length"
+          variant="text"
+          prepend-icon="mdi-cellphone-check"
+          @click="settingsOpen = true"
+          >{{ messages.selfSettings }}</v-btn
         ><v-btn
           v-if="manageableDepartments.length"
           color="primary"
@@ -867,6 +993,15 @@ const periodItems = computed(() => {
               :aria-label="messages.checkOut + ' — ' + row.person.name"
               @click="act(row, 'check_out')"
               >{{ messages.checkOut }}</v-btn
+            ><v-btn
+              v-else-if="canApproveNow(row)"
+              variant="tonal"
+              class="row-primary-action"
+              prepend-icon="mdi-check-decagram-outline"
+              :loading="busyRows.has(row.person.id)"
+              :aria-label="messages.approve + ' — ' + row.person.name"
+              @click="act(row, 'approve')"
+              >{{ messages.approve }}</v-btn
             ><ActionMenu
               v-if="menuItems(row).length"
               :label="messages.moreActions + ' — ' + row.person.name"
@@ -901,7 +1036,10 @@ const periodItems = computed(() => {
                 :class="'ca-chip--' + personChip(person).tone"
                 >{{ personChip(person).label }}</span
               >
-              <small>{{ periodText(person) }}</small>
+              <small
+                >{{ periodText(person) }} ·
+                {{ person.linked ? messages.linkedAccount : messages.notLinkedYet }}</small
+              >
             </template>
             <template #actions>
               <v-btn
@@ -922,7 +1060,16 @@ const periodItems = computed(() => {
                       : 'mdi-archive-arrow-up-outline'
                   "
                   :title="person.status === 'active' ? messages.archive : messages.restore"
-                  @click="toggleArchive(person)"
+                  @click="toggleArchive(person)" /><v-list-item
+                  v-if="person.status === 'active' && !person.linked"
+                  prepend-icon="mdi-link-variant"
+                  :title="messages.createLinkCode"
+                  :disabled="linkBusy"
+                  @click="createLinkCode(person)" /><v-list-item
+                  v-if="person.linked"
+                  prepend-icon="mdi-link-variant-off"
+                  :title="messages.unlink"
+                  @click="openUnlink(person)"
               /></ActionMenu>
             </template>
           </ListRow>
@@ -982,6 +1129,20 @@ const periodItems = computed(() => {
               >
                 {{ messages.absent }}
               </th>
+              <template v-if="reviewColumns">
+                <th
+                  scope="col"
+                  class="ca-number"
+                >
+                  {{ messages.needsReview }}
+                </th>
+                <th
+                  scope="col"
+                  class="ca-number"
+                >
+                  {{ messages.rejectedDays }}
+                </th>
+              </template>
               <th
                 scope="col"
                 class="ca-number"
@@ -1036,6 +1197,20 @@ const periodItems = computed(() => {
               >
                 {{ row.absent }}
               </td>
+              <template v-if="reviewColumns">
+                <td
+                  class="ca-number"
+                  :data-label="messages.needsReview"
+                >
+                  {{ row.needsReview }}
+                </td>
+                <td
+                  class="ca-number"
+                  :data-label="messages.rejectedDays"
+                >
+                  {{ row.rejected }}
+                </td>
+              </template>
               <td
                 class="ca-number"
                 :data-label="messages.totalHours"
@@ -1066,6 +1241,71 @@ const periodItems = computed(() => {
       :record="selectedRow?.record ?? null"
       :save="saveCorrection"
     />
+    <SelfSettingsForm
+      v-model="settingsOpen"
+      :api="api"
+      :hotel-id="hotelId"
+      :departments="manageableDepartments"
+      @saved="settingsSaved"
+    />
+    <ModuleDialog
+      v-model="linkCodeOpen"
+      :title="messages.linkCodeTitle"
+      :subtitle="linkCode?.name ?? ''"
+    >
+      <template v-if="linkCode">
+        <p
+          class="ca-link-code"
+          aria-live="polite"
+        >
+          {{ linkCode.code }}
+        </p>
+        <p class="ca-hint">
+          {{
+            messages.linkCodeHint
+              .replace('{name}', linkCode.name)
+              .replace(
+                '{expires}',
+                formatDate(hotelToday(new Date(linkCode.expiresAt))) +
+                  ' ' +
+                  formatClock(linkCode.expiresAt),
+              )
+          }}
+        </p>
+      </template>
+      <template #actions="{ close }">
+        <v-btn
+          variant="text"
+          prepend-icon="mdi-content-copy"
+          @click="copyLinkCode"
+          >{{ messages.copyCode }}</v-btn
+        ><v-btn
+          color="primary"
+          @click="close"
+          >{{ messages.done }}</v-btn
+        >
+      </template>
+    </ModuleDialog>
+    <ModuleDialog
+      v-model="unlinkOpen"
+      :title="messages.unlinkTitle"
+      :confirm-label="messages.unlink"
+      destructive
+      :busy="linkBusy"
+      @confirm="confirmUnlink"
+    >
+      <p>{{ messages.unlinkBody.replace('{name}', unlinking?.name ?? '') }}</p>
+    </ModuleDialog>
+    <ModuleDialog
+      v-model="rejectOpen"
+      :title="messages.rejectTitle"
+      :subtitle="rejecting?.person.name ?? ''"
+      :confirm-label="messages.reject"
+      destructive
+      @confirm="confirmReject"
+    >
+      <p>{{ messages.rejectBody }}</p>
+    </ModuleDialog>
     <UndoSnackbar
       :message="notice"
       :undo="undoAction"

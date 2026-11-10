@@ -125,3 +125,65 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* My attendance: the same status section as Room Turnaround's own running timer. */
+.ca-self {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--workstel-space-1);
+  padding: var(--workstel-space-4);
+  border: 1px solid rgb(var(--v-theme-primary));
+  border-radius: var(--workstel-radius-md);
+  background: var(--workstel-info-bg);
+  text-align: center;
+}
+.ca-self-shift {
+  font-size: var(--workstel-font-sm);
+  font-weight: var(--workstel-weight-semibold);
+}
+.ca-self-headline {
+  font-size: var(--workstel-font-xl);
+  font-weight: var(--workstel-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--workstel-primary-text);
+}
+.ca-self small {
+  font-size: var(--workstel-font-sm);
+  color: var(--workstel-text-secondary);
+}
+.ca-self-error {
+  width: 100%;
+  margin-top: var(--workstel-space-2);
+  text-align: start;
+}
+.ca-self-action {
+  margin-top: var(--workstel-space-2_5);
+  min-height: var(--workstel-control-xl);
+}
+.ca-section-title {
+  margin: var(--workstel-space-5) 0 var(--workstel-space-2);
+  font-size: var(--workstel-font-sm);
+  font-weight: var(--workstel-weight-semibold);
+}
+.ca-link {
+  max-width: 420px; /* token-exempt: single-field form width */
+  padding: var(--workstel-space-4);
+}
+.ca-code-field input {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--workstel-tracking-code);
+  text-transform: uppercase;
+}
+.ca-link-hint {
+  margin-top: var(--workstel-space-3);
+  font-size: var(--workstel-font-xs);
+}
+.ca-link-code {
+  margin: var(--workstel-space-2) 0;
+  font-size: var(--workstel-font-xl);
+  font-weight: var(--workstel-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--workstel-tracking-code);
+  text-align: center;
+  color: var(--workstel-primary-text);
+}

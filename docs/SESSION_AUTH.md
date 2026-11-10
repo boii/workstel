@@ -40,6 +40,17 @@ and sees "No workspace access yet. Contact your administrator." until a develope
 opens Users, checks who it is and grants access. Grants are the activation step;
 there is no separate approval state. Block accounts that should not be there.
 
+Decision, 10 November 2026 (approved by the product owner) — Casual Attendance
+self check-in: while the
+module is switched on, an account with no workspace access sees "Link to
+attendance" instead of the message above. A department manager's one-time code
+links it to one casual worker record, and the account can then only check that
+worker in and out. It gets no hotel membership, `staff_access` or module grant,
+and the code is the only activation step. Details: `src/modules/casual-attendance/SELF_CHECK_IN.md`.
+Developers no longer need to activate these accounts in Users; block an account
+there if it should not exist. Migration `202611100002_casual_attendance_self.sql`
+installs this on the hotel server; apply it only after Google sign-in is verified.
+
 Every other self-service sign-up stays refused. Migration
 `202611070003_google_signup.sql` replaces `workstel_private.before_user_created`,
 a Supabase Auth "Before User Created" hook. It admits a new user only when the

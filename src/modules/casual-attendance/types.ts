@@ -25,6 +25,8 @@ export interface Person {
   status: PersonStatus;
   version: number;
   updatedAt: string;
+  /** An account is linked to this person for self check-in. */
+  linked: boolean;
 }
 export interface PersonInput {
   name: string;
@@ -46,6 +48,12 @@ export interface PeopleQuery {
 }
 
 export const attendanceStatuses = ['present', 'leave', 'sick', 'absent'] as const;
+/** Who created the record: a supervisor, or the worker through self check-in. */
+export const recordSources = ['supervisor', 'self'] as const;
+export type RecordSource = (typeof recordSources)[number];
+/** Review state of self check-ins; null when only supervisors recorded the day. */
+export const verifications = ['verified', 'needs_review', 'unverified', 'rejected'] as const;
+export type Verification = (typeof verifications)[number];
 export type AttendanceStatus = (typeof attendanceStatuses)[number];
 /** One person's attendance on one hotel calendar day. */
 export interface AttendanceRecord {
@@ -61,6 +69,10 @@ export interface AttendanceRecord {
   /** A manager changed the recorded times; the original stays in the history. */
   corrected: boolean;
   version: number;
+  source: RecordSource;
+  verification: Verification | null;
+  /** Supervisor's note when approving or rejecting; entered by staff. */
+  reviewNote: string;
 }
 export interface DayRow {
   person: Pick<
@@ -82,6 +94,8 @@ export const markActions = [
   'absent',
   'reopen',
   'reset',
+  'approve',
+  'reject',
 ] as const;
 export type MarkAction = (typeof markActions)[number];
 export interface CorrectionInput {
@@ -101,6 +115,10 @@ export interface RecapRow {
   leave: number;
   sick: number;
   absent: number;
+  /** Days with a self check-in that needs review or was not verified. */
+  needsReview: number;
+  /** Rejected days; they are not counted as present and add no worked time. */
+  rejected: number;
   /** Worked minutes from completed check-in/check-out pairs. */
   minutes: number;
 }
@@ -115,3 +133,47 @@ export interface Page<T> {
   data: T[];
   nextCursor: string | null;
 }
+
+/** When a self check-in needs a supervisor: never, only when checks fail, or always. */
+export const confirmationModes = ['off', 'on_fail', 'always'] as const;
+export type ConfirmationMode = (typeof confirmationModes)[number];
+export interface DepartmentSettings {
+  departmentId: string;
+  departmentName: string;
+  selfEnabled: boolean;
+  confirmation: ConfirmationMode;
+  /** 0 until the department's settings are first saved. */
+  version: number;
+}
+export interface SettingsInput {
+  selfEnabled: boolean;
+  confirmation: ConfirmationMode;
+}
+/** A one-time code a worker enters to link their account; shown once. */
+export interface LinkCode {
+  code: string;
+  expiresAt: string;
+}
+export type SelfAction = 'check_in' | 'check_out';
+export interface SelfPerson {
+  id: string;
+  hotelId: string;
+  name: string;
+  departmentName: string;
+  shift: Shift;
+  active: boolean;
+}
+/** What the signed-in account sees on My attendance. */
+export type SelfStatus =
+  | { linked: false }
+  | {
+      linked: true;
+      person: SelfPerson;
+      /** The hotel day the next self action belongs to. */
+      workDate: string;
+      scheduled: boolean;
+      selfEnabled: boolean;
+      record: AttendanceRecord | null;
+      /** The last 14 days, newest first. */
+      history: AttendanceRecord[];
+    };

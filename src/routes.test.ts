@@ -41,6 +41,9 @@ test('URLs restore shell, module, detail and unknown pages with back/forward sup
   assert.equal(router.currentRoute.value.meta.view, 'Settings');
   await router.push('/admin/audit');
   assert.equal(router.currentRoute.value.meta.view, 'Audit log');
+  await router.push('/casual-attendance/me');
+  assert.equal(router.currentRoute.value.name, 'casual-attendance-me');
+  assert.equal(router.currentRoute.value.meta.moduleId, 'casual-attendance');
   await router.push('/unknown-module');
   assert.equal(router.currentRoute.value.name, 'not-found');
 });
