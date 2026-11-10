@@ -237,12 +237,17 @@ async function link() {
             color="primary"
             type="submit"
             block
-            size="large"
+            class="ca-link-submit"
             :loading="linking"
             >{{ messages.link }}</v-btn
           >
         </v-form>
-        <p class="ca-muted ca-link-hint">{{ messages.linkStaffHint }}</p>
+        <p class="ca-link-hint">
+          <v-icon
+            icon="mdi-information-outline"
+            size="var(--workstel-icon-sm)"
+          />{{ messages.linkStaffHint }}
+        </p>
       </section>
 
       <template v-else-if="linked">

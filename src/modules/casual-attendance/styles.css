@@ -165,18 +165,45 @@
   font-size: var(--workstel-font-sm);
   font-weight: var(--workstel-weight-semibold);
 }
+/* Link form: the same rhythm as the password sign-in form (src/styles.css .password-login). */
 .ca-link {
   max-width: 420px; /* token-exempt: single-field form width */
-  padding: var(--workstel-space-4);
+  padding: var(--workstel-space-6);
 }
 .ca-code-field input {
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--workstel-tracking-code);
   text-transform: uppercase;
 }
+/* The example stays in sentence case; only the typed code is shown in capitals. */
+.ca-code-field input::placeholder {
+  letter-spacing: normal;
+  text-transform: none;
+}
+.ca-link-submit {
+  margin-top: var(--workstel-space-6);
+  min-height: var(--workstel-touch-target);
+}
+/* Set apart like the sign-in page's demo section: a rule, then a quiet note. */
 .ca-link-hint {
-  margin-top: var(--workstel-space-3);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--workstel-space-1_5);
+  margin-top: var(--workstel-space-6);
+  padding-top: var(--workstel-space-4);
+  border-top: 1px solid var(--workstel-border);
   font-size: var(--workstel-font-xs);
+  line-height: var(--workstel-leading-tight);
+  color: var(--workstel-text-secondary);
+}
+.ca-link-hint .v-icon {
+  flex: none;
+}
+@media (max-width: 680px) {
+  .ca-link {
+    max-width: none;
+    padding: var(--workstel-space-5);
+  }
 }
 .ca-link-code {
   margin: var(--workstel-space-2) 0;
