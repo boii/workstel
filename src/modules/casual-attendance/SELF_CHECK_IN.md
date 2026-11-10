@@ -1,6 +1,6 @@
 # Casual Attendance — self check-in specification
 
-Status: **phase 1 implemented and verified locally on 10 November 2026; not yet on the hotel server.** Phase 1 is migration `202611100002_casual_attendance_self.sql`, `pages/MyAttendancePage.vue`, `components/SelfSettingsForm.vue` and the attendance-only state in `src/auth/useAuth.ts` and `src/App.vue`; see `ACCEPTANCE.md` for what remains before use. Phases 2 and 3 (location and Wi-Fi) are not implemented. Agreed in discussion with the product owner on 10 November 2026 and aligned with the existing module and app patterns the same day (see [Alignment with the existing module](#alignment-with-the-existing-module)).
+Status: **phase 1 implemented and verified locally on 10 November 2026; frontend published and migration reported applied on the hotel server the same day, not yet tried in production.** Phase 1 is migration `202611100002_casual_attendance_self.sql`, `pages/MyAttendancePage.vue`, `components/SelfSettingsForm.vue` and the attendance-only state in `src/auth/useAuth.ts` and `src/App.vue`; see `ACCEPTANCE.md` for what remains before use. Phases 2 and 3 (location and Wi-Fi) are not implemented. Agreed in discussion with the product owner on 10 November 2026 and aligned with the existing module and app patterns the same day (see [Alignment with the existing module](#alignment-with-the-existing-module)).
 
 ## Goal
 
