@@ -606,3 +606,11 @@ GitHub Actions remains blocked by the account billing lock, so CI did not run. `
 Commit d4cf74d adds migration `202611100003_casual_attendance_reopen_review.sql`: undoing a check-out (`casual_attendance_mark` action `reopen`) clears verification, reviewer and review note, because the review judged the closed day, and the next self check-out (`casual_attendance_self_mark`) starts a new review from the self check-in's own result. It sets the `casual-attendance` schema version to 3. The user had seen a reopened day keep its Verified badge. The frontend needs no new deployment; only the demo API and tests changed.
 
 `npm run check` (193 tests, including `supabase/tests/casual-attendance-self.test.ts`) passed locally. The operator reported on 10 November 2026 that the migration was applied successfully on the hotel server. Claude's SSH access was not used, so the backup, the run and a post-migration check were not seen here, and undoing a check-out has not been tried in production after the migration.
+
+## AC Care release — 25 November 2026
+
+Commit 77022f7 adds the AC Care module for Engineering (see `src/modules/ac-care/README.md`). Migration `202611250001_ac_care.sql` adds `ac-care` to the module and grant allowlists, the units, area members, work, services and complaints tables, and the `ac_care_*` RPCs, and installs the module at schema version 1 with no grants.
+
+The operator reported on 25 November 2026 that the migration is applied on the hotel server. Claude's SSH access was not used, so the backup, the migration run and a post-migration check were not seen here. Which staff were granted access is not recorded here.
+
+GitHub Actions remains blocked by the account billing lock, so CI did not run. Lint, tests (207) and `npm run build:production` passed locally; Prettier passed on the project files (the full `npm run check` stops on untracked local tool state under `.omc/`). The bundle was published from 77022f7 through Wrangler Direct Upload to https://5ec47ae5.workstel.pages.dev/ (production https://workstel.pages.dev/). `scripts/verify-pages-deployment.mjs` passed with production entry asset `index-DlO2OfL0.js`, and production serves the AC Care chunk `ModuleListPage-BpBtqi0-.js`. The signed-in production pages were not opened, so the module was not seen on screen in production.

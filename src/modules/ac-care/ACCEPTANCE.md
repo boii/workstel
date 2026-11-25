@@ -20,7 +20,7 @@
 
 ## Required before staff use
 
-- [ ] Operator applies `202611250001_ac_care.sql` on the hotel server after a backup.
+- [x] Operator applies `202611250001_ac_care.sql` on the hotel server after a backup (reported applied by the operator on 25 November 2026; not seen by Claude, see `docs/DEPLOYMENT.md`).
 - [ ] Operator grants access with `infra/grant-module-access.sql` (technicians: write; supervisors and Chief Engineer: manage).
 - [ ] Chief Engineer confirms the reading thresholds and default intervals.
 - [ ] Signed-in check on the live server: import units, give areas, take and record a task as two technicians, assign as a supervisor, and confirm a user without grants sees the card as unavailable.
