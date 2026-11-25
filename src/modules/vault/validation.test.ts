@@ -54,6 +54,7 @@ test('only implemented modules can be opened while the rest stay disabled', () =
       'vault',
       'bin-card',
       'vehicle',
+      'ac-care',
       'room-turnaround',
       'casual-attendance',
       'sales-crm',

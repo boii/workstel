@@ -36,6 +36,7 @@ test('modules have no page shortcuts and Vault keeps empty-state copy in both mo
   assert.ok(vault.includes('FilterGroup'), 'vault filters use the shared FilterGroup');
   assert.ok(vault.includes('activeFilters'), 'the empty state explains active filters');
   for (const moduleId of [
+    'ac-care',
     'bin-card',
     'casual-attendance',
     'documents',

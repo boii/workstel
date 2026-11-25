@@ -20,6 +20,7 @@ source of truth for navigation; no browser storage or global state store is used
 | Room Turnaround       | `/room-turnaround`                          |
 | Casual Attendance     | `/casual-attendance`                        |
 | My attendance         | `/casual-attendance/me`                     |
+| AC Care               | `/ac-care`                                  |
 
 Accounts without workspace access that may use Casual Attendance self check-in
 see only My attendance; the shell replaces their URL with `/casual-attendance/me`.

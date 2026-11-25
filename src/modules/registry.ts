@@ -1,6 +1,7 @@
 import vaultModule from './vault/manifest';
 import binCardModule from './bin-card/manifest';
 import vehicleModule from './vehicle/manifest';
+import acCareModule from './ac-care/manifest';
 import documentsModule from './documents/manifest';
 import salesCrmModule from './sales-crm/manifest';
 import roomTurnaroundModule from './room-turnaround/manifest';
@@ -10,6 +11,7 @@ export const modules = [
   vaultModule,
   binCardModule,
   vehicleModule,
+  acCareModule,
   roomTurnaroundModule,
   casualAttendanceModule,
   salesCrmModule,

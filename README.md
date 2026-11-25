@@ -27,6 +27,7 @@ Built with Vue 3, TypeScript, Vite and Vuetify. The frontend runs on Cloudflare 
 | Documents & SOPs  | Links to department documents and SOPs (https links only) | Available |
 | Sales CRM         | Accounts, deals, pipeline stages and logged activities    | Available |
 | Room Turnaround   | Per-room cleaning timer, attendants and daily summary     | Available |
+| AC Care           | AC register, service schedule, task claims and readings   | Available |
 | Password Vault    | Private-by-default work accounts with explicit sharing    | Preview   |
 
 **Available** modules use module-specific server grants. A module opens for a staff member only after its migration is installed on the hotel server and a developer grants access on the Users page. Developers can switch a module off from **Settings → Modules**; the data and grants are kept.

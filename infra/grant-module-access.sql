@@ -5,7 +5,7 @@
 --     -v can_write=true -v can_manage=false < grant-module-access.sql
 -- department: front-office | sales | engineering | it | accounting | human-resource |
 --   admin-general | housekeeping
--- module: vehicle | bin-card | documents | sales-crm | room-turnaround | casual-attendance
+-- module: vehicle | bin-card | documents | sales-crm | room-turnaround | casual-attendance | ac-care
 -- Read access is always granted; write records inspections or stock movements; manage edits
 -- vehicles or items. The staff member must already have enabled staff_access in that department.
 -- Every change is recorded as a staff.module-access.* audit event.

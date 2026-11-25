@@ -6,6 +6,7 @@ import { documentsRoutes } from './modules/documents/routes';
 import { salesCrmRoutes } from './modules/sales-crm/routes';
 import { roomTurnaroundRoutes } from './modules/room-turnaround/routes';
 import { casualAttendanceRoutes } from './modules/casual-attendance/routes';
+import { acCareRoutes } from './modules/ac-care/routes';
 
 export const shellPaths: Record<string, string> = {
   Dashboard: '/',
@@ -31,6 +32,7 @@ export const routes: RouteRecordRaw[] = [
   ...salesCrmRoutes,
   ...roomTurnaroundRoutes,
   ...casualAttendanceRoutes,
+  ...acCareRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
