@@ -44,7 +44,7 @@ import type {
   Technician,
   UnitInput,
 } from '../types';
-import { canTake, daysBetween, dueTasks, hotelToday } from '../validation';
+import { addDays, canTake, daysBetween, dueTasks, hotelToday } from '../validation';
 import type { Task, TaskBucket } from '../validation';
 import '../styles.css';
 
@@ -380,8 +380,17 @@ const submitWork = (value: string) =>
   );
 async function recordService(input: ServiceInput, key: string) {
   const saved = await api.recordService(hotelId.value, selected.value!, input, key);
+  const entry = selected.value!.schedule.find((e) => e.type === input.serviceType);
+  const next = entry
+    ? ' ' +
+      fill(messages.value.serviceNextDue, {
+        service: messages.value[serviceKeys[entry.type]],
+        date: formatDay(addDays(today.value, entry.intervalDays)),
+      })
+    : '';
   showNotice(
-    saved.result === 'normal' ? messages.value.serviceNormal : messages.value.serviceAttention,
+    (saved.result === 'normal' ? messages.value.serviceNormal : messages.value.serviceAttention) +
+      next,
   );
   await load(true);
   return saved;
@@ -824,6 +833,7 @@ const description = computed(
       v-model="serviceOpen"
       :unit="selected"
       :initial-type="selectedType"
+      :today="today"
       :record="recordService"
     />
     <ComplaintForm

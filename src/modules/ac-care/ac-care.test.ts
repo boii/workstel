@@ -7,6 +7,7 @@ import {
   canTake,
   defaultIntervals,
   dueTasks,
+  earlyService,
   parseNumber,
   parseUnitLines,
   previewReasons,
@@ -153,6 +154,19 @@ test('a task can be taken only when overdue or due within 7 days', () => {
   assert.equal(canTake(task), false);
   assert.equal(canTake({ bucket: 'week' }), true);
   assert.equal(canTake({ bucket: 'overdue' }), true);
+});
+
+test('recording a service that is not due yet needs a reason', () => {
+  const [unit] = parseUnits([row], hotel);
+  // Routine is due 2026-12-30 (35 days ahead); filter is overdue.
+  assert.equal(earlyService(unit, 'routine', '2026-11-25')?.dueOn, '2026-12-30');
+  assert.equal(earlyService(unit, 'filter', '2026-11-25'), null);
+  assert.equal(earlyService(unit, 'routine', '2026-12-23'), null);
+  assert.equal(earlyService(unit, 'major', '2026-11-25'), null);
+  const r22 = { refrigerant: 'r22' as const, ratedCurrent: 5 };
+  assert.equal(validateService(service(), r22, true).notes, 'earlyNotesRequired');
+  assert.deepEqual(validateService(service({ notes: 'Guest complaint' }), r22, true), {});
+  assert.deepEqual(validateService(service(), r22, false), {});
 });
 
 test('unit and history responses are validated before display', () => {

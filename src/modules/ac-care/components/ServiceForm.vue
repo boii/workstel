@@ -5,6 +5,7 @@ import ModuleDialog from '../../../shared/module-dialog.vue';
 import {
   errorMessage,
   fill,
+  formatDay,
   formatNumber,
   itemKeys,
   reasonKeys,
@@ -15,6 +16,9 @@ import {
 import { serviceTypes } from '../types';
 import type { AcUnit, ItemState, ServiceInput, ServiceOutcome, ServiceType } from '../types';
 import {
+  daysBetween,
+  earlyService,
+  hotelToday,
   needsPressureAndCurrent,
   needsTemperatures,
   parseNumber,
@@ -29,6 +33,7 @@ const open = defineModel<boolean>({ required: true });
 const props = defineProps<{
   unit: AcUnit | null;
   initialType: ServiceType;
+  today: string;
   record: (input: ServiceInput, idempotencyKey: string) => Promise<ServiceOutcome>;
 }>();
 const messages = useAcCareMessages();
@@ -101,13 +106,33 @@ const drop = computed(() =>
 );
 const reasons = computed(() => (props.unit ? previewReasons(props.unit, input.value) : []));
 const range = computed(() => (props.unit ? pressureRangeFor(props.unit.refrigerant) : undefined));
+// A service that is not due yet can still be recorded (a complaint, a leak), but needs a reason.
+const early = computed(() =>
+  props.unit ? earlyService(props.unit, type.value, props.today) : null,
+);
+const earlyText = computed(() => {
+  const entry = early.value;
+  if (!entry) return '';
+  const warning = fill(messages.value.earlyWarning, {
+    service: messages.value[serviceKeys[entry.type]],
+    date: formatDay(entry.dueOn),
+    days: daysBetween(props.today, entry.dueOn),
+  });
+  return entry.lastDoneAt
+    ? warning +
+        ' ' +
+        fill(messages.value.earlyLastDone, {
+          date: formatDay(hotelToday(new Date(entry.lastDoneAt))),
+        })
+    : warning;
+});
 function markAllOk() {
   items.value = Object.fromEntries(checklist.value.map((item) => [item, 'ok']));
   if (errors.value.items) errors.value = { ...errors.value, items: undefined };
 }
 async function submit() {
   if (saving.value || !props.unit) return;
-  errors.value = validateService(input.value, props.unit);
+  errors.value = validateService(input.value, props.unit, !!early.value);
   const numbers: [string, ServiceField][] = [
     [returnTemp.value, 'temperatures'],
     [supplyTemp.value, 'temperatures'],
@@ -160,6 +185,14 @@ const optionalHint = (required: boolean) => (required ? '' : messages.value.opti
         role="alert"
         class="mb-4"
         >{{ failure }}</v-alert
+      >
+      <v-alert
+        v-if="early"
+        type="info"
+        variant="tonal"
+        density="compact"
+        class="mb-4"
+        >{{ earlyText }} {{ messages.earlyHint }}</v-alert
       >
       <span
         id="ac-service-type-label"
@@ -355,7 +388,7 @@ const optionalHint = (required: boolean) => (required ? '' : messages.value.opti
         rows="2"
         auto-grow
         maxlength="1000"
-        :hint="reasons.length ? messages.notesHint : messages.optional"
+        :hint="reasons.length ? messages.notesHint : early ? messages.earlyHint : messages.optional"
         persistent-hint
         :error-messages="fieldError('notes')"
       />

@@ -33,6 +33,7 @@ Every call records `ac-care.*` audit events with actor, scope, resource and outc
 - Default intervals are 21, 90, 180 and 365 days, editable per unit; 0 turns a kind off.
 - A due day is the hotel day of the last service of that kind (or a larger one) plus the interval. A unit never serviced starts on the day it was registered, so importing 200 units does not make everything overdue at once.
 - The Tasks tab shows services due within 30 days. When a larger service is due no later than a smaller one, only the larger one is listed. Take task appears only for tasks that are overdue or due within 7 days; upcoming tasks are shown for planning (the server does not enforce this).
+- Recording a service that is due more than 7 days ahead shows when it is next due and when it was last recorded, and requires a reason in Notes (for example a guest complaint). After saving, the notice names the next due day. The server does not enforce this.
 - A claim lasts eight hours, then the task is free again. Another technician cannot take or record a claimed task; a supervisor can.
 
 ## Readings and results

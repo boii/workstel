@@ -21,7 +21,8 @@ export type ValidationError =
   | 'invalidInterval'
   | 'invalidNumber'
   | 'readingsRequired'
-  | 'notesRequired';
+  | 'notesRequired'
+  | 'earlyNotesRequired';
 
 export const defaultIntervals: Record<ServiceType, number> = {
   filter: 21,
@@ -182,6 +183,7 @@ export function previewReasons(
 export function validateService(
   input: ServiceInput,
   unit: Pick<AcUnit, 'refrigerant' | 'ratedCurrent'>,
+  early = false,
 ) {
   const errors: Partial<Record<ServiceField, ValidationError>> = {};
   if (serviceItems(input.serviceType).some((item) => !input.items[item])) errors.items = 'required';
@@ -205,7 +207,17 @@ export function validateService(
   if (input.notes.length > 1000) errors.notes = 'tooLong';
   else if (previewReasons(unit, input).length && !input.notes.trim())
     errors.notes = 'notesRequired';
+  else if (early && !input.notes.trim()) errors.notes = 'earlyNotesRequired';
   return errors;
+}
+
+/** Days ahead within which a service counts as due: it can be taken and recorded without a reason. */
+export const dueSoonDays = 7;
+
+/** The schedule entry of a service that is not due yet, or null when recording it now is on time. */
+export function earlyService(unit: Pick<AcUnit, 'schedule'>, type: ServiceType, today: string) {
+  const entry = unit.schedule.find((e) => e.type === type);
+  return entry && daysBetween(today, entry.dueOn) > dueSoonDays ? entry : null;
 }
 
 /** Whole days from a to b (both YYYY-MM-DD). */
@@ -241,7 +253,7 @@ export function dueTasks(units: AcUnit[], today: string, horizonDays = 30): Task
         unit,
         entry,
         daysLeft,
-        bucket: daysLeft < 0 ? 'overdue' : daysLeft <= 7 ? 'week' : 'upcoming',
+        bucket: daysLeft < 0 ? 'overdue' : daysLeft <= dueSoonDays ? 'week' : 'upcoming',
       });
     }
   }
