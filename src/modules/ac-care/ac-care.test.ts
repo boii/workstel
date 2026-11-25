@@ -4,6 +4,7 @@ import { ModuleRequestError } from '../../core/module-rpc';
 import { createLiveAcCareApi, parseHistory, parseUnits } from './live-api';
 import type { ServiceInput } from './types';
 import {
+  canTake,
   defaultIntervals,
   dueTasks,
   parseNumber,
@@ -138,6 +139,20 @@ test('due tasks keep the larger service and sort the most urgent first', () => {
     dueTasks([sameDay], '2026-11-25').map((task) => task.entry.type),
     ['routine'],
   );
+});
+
+test('a task can be taken only when overdue or due within 7 days', () => {
+  const [unit] = parseUnits([row], hotel);
+  // Filter cleaning recorded today comes back due in 21 days: listed, but not yet takeable.
+  const justDone = {
+    ...unit,
+    schedule: [{ ...unit.schedule[0], lastDoneAt: '2026-11-25T03:00:00Z', dueOn: '2026-12-16' }],
+  };
+  const [task] = dueTasks([justDone], '2026-11-25');
+  assert.equal(task.bucket, 'upcoming');
+  assert.equal(canTake(task), false);
+  assert.equal(canTake({ bucket: 'week' }), true);
+  assert.equal(canTake({ bucket: 'overdue' }), true);
 });
 
 test('unit and history responses are validated before display', () => {

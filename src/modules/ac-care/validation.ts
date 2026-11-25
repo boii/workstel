@@ -227,6 +227,9 @@ export interface Task {
   daysLeft: number;
 }
 /** Scheduled services due within 30 days, most urgent first. */
+// Upcoming tasks are shown for planning; a technician takes a task only once it is overdue or due within 7 days.
+export const canTake = (task: Pick<Task, 'bucket'>) => task.bucket !== 'upcoming';
+
 export function dueTasks(units: AcUnit[], today: string, horizonDays = 30): Task[] {
   const tasks: Task[] = [];
   for (const unit of units) {

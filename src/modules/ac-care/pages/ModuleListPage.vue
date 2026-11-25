@@ -44,7 +44,7 @@ import type {
   Technician,
   UnitInput,
 } from '../types';
-import { daysBetween, dueTasks, hotelToday } from '../validation';
+import { canTake, daysBetween, dueTasks, hotelToday } from '../validation';
 import type { Task, TaskBucket } from '../validation';
 import '../styles.css';
 
@@ -710,7 +710,9 @@ const description = computed(
                   @click="openService(task.unit, task.entry.type)"
                   >{{ messages.recordService }}</v-btn
                 ><v-btn
-                  v-else-if="!takenByOther(task) && can(task.unit.departmentId, 'canWrite')"
+                  v-else-if="
+                    canTake(task) && !takenByOther(task) && can(task.unit.departmentId, 'canWrite')
+                  "
                   variant="tonal"
                   class="row-primary-action"
                   prepend-icon="mdi-hand-back-right-outline"
